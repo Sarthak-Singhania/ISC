@@ -1,44 +1,61 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request
 from flask_cors import CORS, cross_origin
-import pymongo
-
-client=pymongo.MongoClient("mongodb+srv://sarthak_singhania:databaseforisc@isc.p6whh.mongodb.net/Games?retryWrites=true&w=majority")
-col_games=client['Games']['games']
+from flask_mysqldb import MySQL
+import MySQLdb.cursors as cur
+import pandas as pd
+from datetime import datetime
 
 app=Flask(__name__)
 cors=CORS(app)
 
 app.config['CORS_HEADERS']='Content-Type'
+app.config['MYSQL_HOST']='185.210.145.1'
+app.config['MYSQL_USER']='u724843278_ISC'
+app.config['MYSQL_PASSWORD']='ISCdatabase@1234'
+app.config['MYSQL_DB']='u724843278_ISC'
+app.config['JSON_SORT_KEYS'] = False
+
+mysql=MySQL(app)
 
 @app.route('/games',defaults={'game':None})
 @app.route('/games/<game>',methods=['GET'])
 def games(game):
-    x=col_games.find()
-    sports={}
-    for i in x:
-        sports[i['sports_name']]=i['image_url']
+    cursor=mysql.connection.cursor(cur.DictCursor)
+    cursor.execute('select * from `games` order by `Sports_Name`')
+    sports={i['Sports_Name']:i['URL'] for i in cursor.fetchall()}
     if game:
-        return sports[game.capitalize()]
+        return sports[game.title()]
     else:
         return sports
 
 @app.route('/max-person',methods=['GET'])
 def max_num():
-    x=col_games.find()
-    num={}
-    for i in x:
-        num[i['sports_name']]=i['max_person']
+    cursor=mysql.connection.cursor(cur.DictCursor)
+    cursor.execute('select * from games')
+    num={i['Sports_Name']:i['Max_Person'] for i in cursor.fetchall()}
     return num
 
 @app.route('/slots',defaults={'game':None})
 @app.route('/slots/<game>',methods=['GET'])
 def slots(game):
-    x=col_games.find()
+    cursor=mysql.connection.cursor(cur.DictCursor)
+    cursor.execute('select sports_name from games')
+    games=[i['sports_name'].replace(' ','_') for i in cursor.fetchall()]
     slots={}
-    for i in x:
-        slots[i['sports_name']]=list(i['slots'].keys())
+    for j in games:
+        aa={}
+        for x in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']:
+            cursor.execute(f'select * from {j}')
+            d={}
+            for i in cursor.fetchall():
+                if i[x]>0:
+                    d[i['Slots']]='active'
+                else:
+                    d[i['Slots']]='full'
+            aa[x]=d
+        slots[j.replace('_',' ')]=aa
     if game:
-        return {game:slots[game.capitalize()]}
+        return {game.title():slots[game.title()]}
     else:
         return slots
 
@@ -46,7 +63,27 @@ def slots(game):
 @cross_origin()
 def book():
     x=request.get_json()
+    cursor=mysql.connection.cursor(cur.DictCursor)
+    sports_name=x['sports_name'].title().replace(' ','_')
+    slot=x['slot']
+    day=pd.Timestamp(x['date']).day_name()
+    date=datetime.strptime(x['date'], "%d/%m/%Y").strftime("%Y-%m-%d")
+    for i in x['student_details']:
+        com='INSERT INTO bookings (Student_Name, Roll_No, Game, Date, Slot) VALUES (%s,%s,%s,%s,%s)'
+        val=(str(i),str(x['student_details'][i]),str(sports_name),str(date),str(slot))
+        cursor.execute(com,val)
+        mysql.connection.commit()
+    num=len(x['student_details'])
+    cursor.execute(f"update `{sports_name}` set {day}={day}-{num} where Slots='{slot}'")
+    mysql.connection.commit()
+    return 'Booking done'
+
+@app.route('/get_bookings/<roll_no>',methods=['GET'])
+def get_bookings(roll_no):
+    cursor=mysql.connection.cursor(cur.DictCursor)
+    date=datetime.today().strftime('%Y-%m-%d')
+    cursor.execute(f'select * from `bookings` where `Roll_No`=2222 and `Date`>{date}')
     
 
 if __name__=="__main__":
-    app.run()
+    app.run(debug=True)
