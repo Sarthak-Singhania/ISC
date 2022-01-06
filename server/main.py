@@ -86,7 +86,7 @@ def get_bookings(roll_no):
     if len(cursor.fetchall())>0:
         return ''
     else:
-        return make_response({'status':'success', message=cursor.fetchall()})
+        return make_response({'status':'success', message:cursor.fetchall()})
 
 if __name__=="__main__":
     app.run(debug=True)
