@@ -88,5 +88,7 @@ def get_bookings(roll_no):
     else:
         return make_response({'status':'success', message:cursor.fetchall()})
 
+@app.route('/cancel/<booking_id>',)
+
 if __name__=="__main__":
     app.run(debug=True)
