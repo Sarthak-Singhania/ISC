@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, make_response
 from flask_cors import CORS, cross_origin
 from flask_mysqldb import MySQL
 import MySQLdb.cursors as cur
@@ -82,8 +82,11 @@ def book():
 def get_bookings(roll_no):
     cursor=mysql.connection.cursor(cur.DictCursor)
     date=datetime.today().strftime('%Y-%m-%d')
-    cursor.execute(f'select * from `bookings` where `Roll_No`=2222 and `Date`>{date}')
-    
+    cursor.execute(f'select * from `bookings` where `Roll_No`={roll_no} and `Date`>{date}')
+    if len(cursor.fetchall())>0:
+        return ''
+    else:
+        return make_response({'status':'success', message=cursor.fetchall()})
 
 if __name__=="__main__":
     app.run(debug=True)

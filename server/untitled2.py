@@ -16,8 +16,10 @@ cur=db.cursor(dictionary=True)
 # slot='6am-7am'
 # cur.execute(f"update Badminton set Monday=Monday-{num} where Slots='{slot}'")
 # db.commit()
-date=datetime.today().strftime('%Y-%m-%d')
-cur.execute(f'select * from `bookings` where `Roll_No`=2222 and `Date`>{date}')
-bookings={}
-for i in cur.fetchall():
-    bookings[i['Student_Name']]=
+# date=datetime.today().strftime('%Y-%m-%d')
+# cur.execute(f'select * from `bookings` where `Roll_No`=2222 and `Date`>{date}')
+# bookings={}
+# for i in cur.fetchall():
+#     bookings[i['Student_Name']]=
+cur.execute("select * from games where `sports_name`='njjk'")
+print(cur.fetchall())
