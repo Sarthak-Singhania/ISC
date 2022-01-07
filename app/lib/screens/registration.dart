@@ -81,21 +81,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-    dynamic theme = Provider.of<ThemeProvider>(context).themeMode;
-    Color checkTheme(Color first, Color second) {
-      print(ThemeMode.system);
-      if (theme == ThemeMode.light) {
-        return first;
-      } else if (theme == ThemeMode.dark) {
-        return second;
-      } else {
-        if (MediaQuery.of(context).platformBrightness == Brightness.light) {
-          return first;
-        } else {
-          return second;
-        }
-      }
-    }
+    dynamic theme = Provider.of<ThemeProvider>(context);
+
 
     return Scaffold(
       body: Container(
@@ -111,7 +98,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   width: size.width * 0.8,
                   decoration: BoxDecoration(
                     color:
-                        checkTheme(kPrimaryLightColor, Colors.purple.shade300),
+                        theme.checkTheme(kPrimaryLightColor, Colors.purple.shade300,context),
                     borderRadius: BorderRadius.circular(30),
                   ),
                   child: TextFormField(
@@ -145,7 +132,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   width: size.width * 0.8,
                   decoration: BoxDecoration(
                     color:
-                        checkTheme(kPrimaryLightColor, Colors.purple.shade300),
+                        theme.checkTheme(kPrimaryLightColor, Colors.purple.shade300,context),
                     borderRadius: BorderRadius.circular(30),
                   ),
                   child: TextFormField(
@@ -178,7 +165,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   width: size.width * 0.8,
                   decoration: BoxDecoration(
                     color:
-                        checkTheme(kPrimaryLightColor, Colors.purple.shade300),
+                        theme.checkTheme(kPrimaryLightColor, Colors.purple.shade300,context),
                     borderRadius: BorderRadius.circular(30),
                   ),
                   child: TextFormField(
@@ -212,7 +199,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   width: size.width * 0.8,
                   decoration: BoxDecoration(
                     color:
-                        checkTheme(kPrimaryLightColor, Colors.purple.shade300),
+                        theme.checkTheme(kPrimaryLightColor, Colors.purple.shade300,context),
                     borderRadius: BorderRadius.circular(30),
                   ),
                   child: TextFormField(

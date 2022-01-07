@@ -11,26 +11,11 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    dynamic theme = Provider.of<ThemeProvider>(context).themeMode;
-    Color checkTheme(Color first, Color second) {
-      print(ThemeMode.system);
-      if (theme == ThemeMode.light) {
-        return first;
-      } else if (theme == ThemeMode.dark) {
-        return second;
-      } else {
-        if (MediaQuery.of(context).platformBrightness == Brightness.light) {
-          return first;
-        } else {
-          return second;
-        }
-      }
-    }
-
+    dynamic theme = Provider.of<ThemeProvider>(context);
     Size size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: checkTheme(Colors.white, Colors.black),
+        backgroundColor: theme.checkTheme(Colors.white, Colors.black, context),
         leading: BackButton(color: kPrimaryColor),
         centerTitle: true,
         title: Text("Profile", style: TextStyle(color: kPrimaryColor)),
@@ -101,22 +86,7 @@ class ProfileCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    dynamic theme = Provider.of<ThemeProvider>(context).themeMode;
-    Color checkTheme(Color first, Color second) {
-      print(ThemeMode.system);
-      if (theme == ThemeMode.light) {
-        return first;
-      } else if (theme == ThemeMode.dark) {
-        return second;
-      } else {
-        if (MediaQuery.of(context).platformBrightness == Brightness.light) {
-          return first;
-        } else {
-          return second;
-        }
-      }
-    }
-
+    dynamic theme = Provider.of<ThemeProvider>(context);
     return GestureDetector(
       onTap: () {
         func();
@@ -129,11 +99,13 @@ class ProfileCard extends StatelessWidget {
         height: size.height * 0.07,
         decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(15),
-            color: checkTheme(Colors.grey.shade100, Colors.purple.shade700)),
+            color: theme.checkTheme(
+                Colors.grey.shade100, Colors.purple.shade700,context)),
         child: Row(children: [
           Icon(
             icon,
-            color: checkTheme(kPrimaryColor, Colors.purple.shade100),
+            color: theme.checkTheme(
+                kPrimaryColor, Colors.purple.shade100, context),
             size: size.width * 0.08,
           ),
           Expanded(
@@ -143,12 +115,14 @@ class ProfileCard extends StatelessWidget {
                   text,
                   style: TextStyle(
                       fontSize: 20,
-                      color: checkTheme(Colors.black, Colors.white)),
+                      color: theme.checkTheme(
+                          Colors.black, Colors.white, context)),
                 )),
           ),
           Icon(
             Icons.navigate_next_outlined,
-            color: checkTheme(kPrimaryColor, Colors.purple.shade100),
+            color: theme.checkTheme(
+                kPrimaryColor, Colors.purple.shade100, context),
             size: size.width * 0.09,
           ),
         ]),
