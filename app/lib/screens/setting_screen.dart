@@ -18,15 +18,16 @@ class _SettingScreenState extends State<SettingScreen> {
     if (provider.themeMode == null) {
       provider.initalTheme();
     }
-    bool systemDefault = provider.themeMode == ThemeMode.system ? true : false;
-    bool light = provider.themeMode == ThemeMode.light ? true : false;
-    bool dark = provider.themeMode == ThemeMode.dark ? true : false;
-    dynamic theme = provider.themeMode;
+
+    int systemDefault = provider.themeMode == ThemeMode.system ? 1 : 0;
+    int light = provider.themeMode == ThemeMode.light ? 1 : 0;
+    int dark = provider.themeMode == ThemeMode.dark ? 1 : 0;
 
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        backgroundColor: theme == ThemeMode.light ? Colors.white : Colors.black,
+        backgroundColor:
+            provider.checkTheme(Colors.white, Colors.black, context),
         leading: BackButton(color: kPrimaryColor),
         title: Text(
           'Settings',
@@ -45,18 +46,17 @@ class _SettingScreenState extends State<SettingScreen> {
                       'System Default',
                       style: TextStyle(fontSize: 20),
                     )),
-                Switch(
-                  value: systemDefault,
-                  onChanged: (value) {
-                    if (systemDefault == false) {
-                      setState(() {
-                        systemDefault = true;
-                        light = false;
-                        dark = false;
-                        provider.toggleSystemTheme();
-                        //MyApp.theme = ThemeMode.system;
-                      });
-                    }
+                Radio<int>(
+                  value: 1,
+                  groupValue: systemDefault,
+                  onChanged: (val) {
+                    setState(() {
+                      systemDefault = 1;
+                      light = 0;
+                      dark = 0;
+                      provider.toggleSystemTheme();
+                      //MyApp.theme = ThemeMode.system;
+                    });
                   },
                 )
               ],
@@ -70,18 +70,17 @@ class _SettingScreenState extends State<SettingScreen> {
                       'Light',
                       style: TextStyle(fontSize: 20),
                     )),
-                Switch(
-                  value: light,
-                  onChanged: (value) {
-                    if (light == false) {
-                      setState(() {
-                        systemDefault = false;
-                        light = true;
-                        dark = false;
-                        provider.toggleLightTheme();
-                        //MyApp.theme = ThemeMode.light;
-                      });
-                    }
+                Radio<int>(
+                  value: 1,
+                  groupValue: light,
+                  onChanged: (val) {
+                    setState(() {
+                      systemDefault = 0;
+                      light = 1;
+                      dark = 0;
+                      provider.toggleLightTheme();
+                      //MyApp.theme = ThemeMode.system;
+                    });
                   },
                 )
               ],
@@ -95,18 +94,17 @@ class _SettingScreenState extends State<SettingScreen> {
                       'Dark',
                       style: TextStyle(fontSize: 20),
                     )),
-                Switch(
-                  value: dark,
-                  onChanged: (value) {
-                    if (dark == false) {
-                      setState(() {
-                        systemDefault = false;
-                        light = false;
-                        dark = true;
-                        provider.toggleDarkTheme();
-                        //MyApp.theme = ThemeMode.dark;
-                      });
-                    }
+                Radio<int>(
+                  value: 1,
+                  groupValue: dark,
+                  onChanged: (val) {
+                    setState(() {
+                      systemDefault = 0;
+                      light = 0;
+                      dark = 1;
+                      provider.toggleDarkTheme();
+                      //MyApp.theme = ThemeMode.system;
+                    });
                   },
                 )
               ],

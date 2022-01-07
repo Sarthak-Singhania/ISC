@@ -2,6 +2,20 @@ import 'package:flutter/material.dart';
 
 class ThemeProvider extends ChangeNotifier {
   ThemeMode? themeMode;
+  Color checkTheme(Color first, Color second,BuildContext context) {
+      print(ThemeMode.system);
+      if (themeMode == ThemeMode.light) {
+        return first;
+      } else if (themeMode == ThemeMode.dark) {
+        return second;
+      } else {
+        if (MediaQuery.of(context).platformBrightness == Brightness.light) {
+          return first;
+        } else {
+          return second;
+        }
+      }
+    }
 
   void initalTheme() {
     themeMode = ThemeMode.system;
