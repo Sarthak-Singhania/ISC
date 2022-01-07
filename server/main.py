@@ -1,9 +1,11 @@
 from flask import Flask, request, make_response
 from flask_cors import CORS, cross_origin
 from flask_mysqldb import MySQL
+from datetime import datetime
 import MySQLdb.cursors as cur
 import pandas as pd
-from datetime import datetime
+import secrets
+import string
 
 app=Flask(__name__)
 cors=CORS(app)
@@ -88,7 +90,9 @@ def get_bookings(roll_no):
     else:
         return make_response({'status':'success', message:cursor.fetchall()})
 
-@app.route('/cancel/<booking_id>',)
+@app.route('/cancel',methods=['POST'])
+def cancel(booking_id):
+    
 
 if __name__=="__main__":
     app.run(debug=True)
