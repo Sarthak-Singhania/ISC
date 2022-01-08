@@ -50,10 +50,7 @@ def slots(game):
             cursor.execute(f'select * from {j}')
             d={}
             for i in cursor.fetchall():
-                if i[x]>0:
-                    d[i['Slots']]='active'
-                else:
-                    d[i['Slots']]='full'
+                d[i['Slots']]=i[x]
             aa[x]=d
         slots[j.replace('_',' ')]=aa
     if game:
@@ -69,29 +66,35 @@ def book():
     sports_name=x['sports_name'].title().replace(' ','_')
     slot=x['slot']
     day=pd.Timestamp(x['date']).day_name()
+    cursor.execute('select Booking_ID from bookings')
+    ids=[i['Booking_ID'] for i in cursor.fetchall()]
+    booking_id=''.join(secrets.choice(string.ascii_uppercase + string.digits) for i in range(9))
+    if booking_id in ids:
+        booking_id=''.join(secrets.choice(string.ascii_uppercase + string.digits) for i in range(9))
     date=datetime.strptime(x['date'], "%d/%m/%Y").strftime("%Y-%m-%d")
     for i in x['student_details']:
-        com='INSERT INTO bookings (Student_Name, Roll_No, Game, Date, Slot) VALUES (%s,%s,%s,%s,%s)'
-        val=(str(i),str(x['student_details'][i]),str(sports_name),str(date),str(slot))
+        com='INSERT INTO bookings (Student_Name, SNU_ID, Game, Date, Slot, Booking_ID) VALUES (%s,%s,%s,%s,%s,%s)'
+        val=(str(i),str(x['student_details'][i]),str(sports_name),str(date),str(slot),str(booking_id))
         cursor.execute(com,val)
         mysql.connection.commit()
     num=len(x['student_details'])
     cursor.execute(f"update `{sports_name}` set {day}={day}-{num} where Slots='{slot}'")
     mysql.connection.commit()
-    return 'Booking done'
+    return str(booking_id)
 
-@app.route('/get_bookings/<roll_no>',methods=['GET'])
-def get_bookings(roll_no):
+@app.route('/get_bookings/<snu_id>',methods=['GET'])
+def get_bookings(snu_id):
     cursor=mysql.connection.cursor(cur.DictCursor)
     date=datetime.today().strftime('%Y-%m-%d')
-    cursor.execute(f'select * from `bookings` where `Roll_No`={roll_no} and `Date`>{date}')
-    if len(cursor.fetchall())>0:
+    cursor.execute(f"select * from `bookings` where `SNU_ID`='{snu_id}' and `Date`>={date}")
+    bookings=[i for i in cursor.fetchall()]
+    if len(cursor.fetchall())<0:
         return ''
     else:
-        return make_response({'status':'success', message:cursor.fetchall()})
+        return make_response({'status':'success', 'message':bookings})
 
-@app.route('/cancel',methods=['POST'])
-def cancel(booking_id):
+# @app.route('/cancel',methods=['POST'])
+# def cancel(booking_id):
     
 
 if __name__=="__main__":
