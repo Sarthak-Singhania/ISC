@@ -80,7 +80,7 @@ def book():
     num=len(x['student_details'])
     cursor.execute(f"update `{sports_name}` set {day}={day}-{num} where Slots='{slot}'")
     mysql.connection.commit()
-    return 'Booking done'
+    return str(booking_id)
 
 @app.route('/get_bookings/<snu_id>',methods=['GET'])
 def get_bookings(snu_id):
