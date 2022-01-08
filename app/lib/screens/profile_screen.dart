@@ -6,6 +6,8 @@ import 'package:isc/screens/setting_screen.dart';
 import 'package:isc/screens/welcome_screen.dart';
 import 'package:provider/provider.dart';
 
+import 'booking_screen.dart';
+
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({Key? key}) : super(key: key);
 
@@ -40,7 +42,10 @@ class ProfileScreen extends StatelessWidget {
                 size: size,
                 text: 'Bookings',
                 icon: Icons.my_library_books_sharp,
-                func: () {}),
+                func: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => BookingScreen()));
+                }),
             ProfileCard(
                 size: size,
                 text: 'Settings',
@@ -100,7 +105,7 @@ class ProfileCard extends StatelessWidget {
         decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(15),
             color: theme.checkTheme(
-                Colors.grey.shade100, Colors.purple.shade700,context)),
+                Colors.grey.shade100, Colors.purple.shade700, context)),
         child: Row(children: [
           Icon(
             icon,

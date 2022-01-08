@@ -26,8 +26,8 @@ class _TimeSlotState extends State<TimeSlot> {
   String slotDetail = '';
   final slotAvailable = [];
   Map<String, dynamic> sport = {};
-  Map<String, dynamic> jsonData={};
-   Response? response;
+  Map<String, dynamic> jsonData = {};
+  Response? response;
   final weekDays = [
     'Monday',
     'Tuesday',
@@ -37,20 +37,18 @@ class _TimeSlotState extends State<TimeSlot> {
     'Saturday',
   ];
 
-
   @override
   void initState() {
     super.initState();
     getData();
   }
-  
-  void getData() async{
-     response = await http.get(Uri.parse('http://65.0.232.165/slots'));
-     jsonData= await jsonDecode(response!.body);
+
+  void getData() async {
+    response = await http.get(Uri.parse('http://65.0.232.165/slots'));
+    jsonData = await jsonDecode(response!.body);
   }
 
   void getSlot(String day) async {
-  
     sport = jsonData[EventCard.game][day];
     print(response!.statusCode);
     print(sport);
@@ -79,9 +77,7 @@ class _TimeSlotState extends State<TimeSlot> {
       getSlot(weekDays[selectedDate!.weekday - 1]);
       SlotCard.dateChoosen =
           '${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}';
-          setState(() {
-            
-          });
+      setState(() {});
     }
   }
 
@@ -125,9 +121,10 @@ class _TimeSlotState extends State<TimeSlot> {
                       itemBuilder: (context, index) {
                         return SlotCard(
                             slotAvailable[index],
-                            sport[slotAvailable[index]] == 'active'
+                            sport[slotAvailable[index]] > 0
                                 ? Colors.green
-                                : Colors.grey);
+                                : Colors.grey,
+                            sport[slotAvailable[index]]);
                       })
                 ],
               ),

@@ -23,11 +23,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
   String? errorMessage;
   final emailController = new TextEditingController();
-  final rollNoController = new TextEditingController();
+  final nameController = new TextEditingController();
   final passwordController = new TextEditingController();
   final confirmPasswordController = new TextEditingController();
 
-  void signUp(String email, String password, String rollNo) async {
+  void signUp(String email, String password, String name) async {
     if (_formKey.currentState!.validate()) {
       try {
         await _auth
@@ -38,7 +38,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
         final docUser =
             FirebaseFirestore.instance.collection('users').doc(email);
-        final emailData = {'rollNo': rollNo};
+        final emailData = {'Name': name};
 
         await docUser.set(emailData);
 
@@ -137,14 +137,14 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   ),
                   child: TextFormField(
                       autofocus: false,
-                      controller: rollNoController,
-                      keyboardType: TextInputType.number,
+                      controller: nameController,
+                      keyboardType: TextInputType.name,
                       validator: (value) {
                         if (value!.isEmpty) {
                           return ("Please Enter Your Roll No.");
                         }
-                        if (!RegExp('[0-9]+').hasMatch(value)) {
-                          return ("Please Enter a valid email");
+                        if (!RegExp('[a-zA-Z]'+' ').hasMatch(value)) {
+                          return ("Please Enter a valid name");
                         }
                         return null;
                       },
@@ -156,7 +156,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         border: InputBorder.none,
                         prefixIcon: Icon(Icons.perm_identity_outlined),
                         contentPadding: EdgeInsets.fromLTRB(20, 15, 20, 15),
-                        hintText: "Roll No",
+                        hintText: "Name",
                       )),
                 ),
                 Container(
@@ -244,7 +244,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       onPressed: () {
                         print("HELLO FIRST");
                         signUp(emailController.text, passwordController.text,
-                            rollNoController.text);
+                            nameController.text);
                       }),
                 )
               ],
