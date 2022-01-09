@@ -87,11 +87,15 @@ def book():
     mysql.connection.commit()
     return str(booking_id)
 
-@app.route('/get_bookings/<snu_id>',methods=['GET'])
-def get_bookings(snu_id):
+@app.route('/get_bookings/<snu_id>',defaults={'booking_id':None})
+@app.route('/get_bookings/<snu_id>/<booking_id>',methods=['GET'])
+def get_bookings(snu_id,booking_id):
     cursor=mysql.connection.cursor(cur.DictCursor)
     date=datetime.today().strftime('%Y-%m-%d')
-    cursor.execute(f"select * from `bookings` where `SNU_ID`='{snu_id}' and `Date`>={date}")
+    if booking_id:
+        cursor.execute(f"select * from `bookings` where `SNU_ID`='{snu_id}' and `Booking_ID`='{booking_id}'")
+    else:
+        cursor.execute(f"select * from `bookings` where `SNU_ID`='{snu_id}' and `Date`>={date}")
     bookings=[i for i in cursor.fetchall()]
     if len(cursor.fetchall())<0:
         return ''
@@ -151,6 +155,7 @@ def pending(snu_id):
     return make_response({'status':'success','message':l1})
 
 @app.route('/show_booking/<is_admin>/')
+
 
 if __name__=="__main__":
     app.run(debug=True)
