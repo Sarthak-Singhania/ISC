@@ -65,20 +65,25 @@ def book():
     cursor=mysql.connection.cursor(cur.DictCursor)
     sports_name=x['sports_name'].title().replace(' ','_')
     slot=x['slot']
-    day=pd.Timestamp(x['date']).day_name()
+    day=pd.to_datetime(x['date'],dayfirst=True).day_name()
     cursor.execute('select Booking_ID from bookings')
     ids=[i['Booking_ID'] for i in cursor.fetchall()]
     booking_id=''.join(secrets.choice(string.ascii_uppercase + string.digits) for i in range(9))
     if booking_id in ids:
         booking_id=''.join(secrets.choice(string.ascii_uppercase + string.digits) for i in range(9))
     date=datetime.strptime(x['date'], "%d/%m/%Y").strftime("%Y-%m-%d")
+    cnt=0
     for i in x['student_details']:
-        com='INSERT INTO bookings (Student_Name, SNU_ID, Game, Date, Slot, Booking_ID) VALUES (%s,%s,%s,%s,%s,%s)'
-        val=(str(i),str(x['student_details'][i]),str(sports_name),str(date),str(slot),str(booking_id))
+        if cnt==0:
+            confirm=1
+        else:
+            confirm=0
+        com='INSERT INTO bookings (Student_Name, SNU_ID, Game, Date, Slot, Booking_ID, Confirm) VALUES (%s,%s,%s,%s,%s,%s,%s)'
+        val=(str(i),str(x['student_details'][i]),str(sports_name),str(date),str(slot),str(booking_id),str(confirm))
         cursor.execute(com,val)
         mysql.connection.commit()
-    num=len(x['student_details'])
-    cursor.execute(f"update `{sports_name}` set {day}={day}-{num} where Slots='{slot}'")
+        cnt+=1
+    cursor.execute(f"update `{sports_name}` set {day}={day}-1 where Slots='{slot}'")
     mysql.connection.commit()
     return str(booking_id)
 
@@ -93,9 +98,59 @@ def get_bookings(snu_id):
     else:
         return make_response({'status':'success', 'message':bookings})
 
-# @app.route('/cancel',methods=['POST'])
-# def cancel(booking_id):
-    
+@app.route('/confirm',methods=['POST'])
+def confirm():
+    x=request.get_json()
+    snu_id=x['snu_id']
+    booking_id=x['booking_id']
+    cursor=mysql.connection.cursor(cur.DictCursor)
+    cursor.execute(f"select * from bookings where `SNU_ID`='{snu_id}' and `Booking_ID`='{booking_id}'")
+    det=cursor.fetchone()
+    sports_name=det['Game']
+    slot=det['Slot']
+    day=pd.to_datetime(det['Date'],dayfirst=True).day_name()
+    cursor.execute(f"update bookings set `Confirm`='1' where `SNU_ID`='{snu_id}' and `Booking_ID`='{booking_id}'")
+    mysql.connection.commit()
+    cursor.execute(f"update `{sports_name}` set {day}={day}-1 where Slots='{slot}'")
+    mysql.connection.commit()
+    return 'Booking confirmed'
+
+@app.route('/reject',methods=['POST'])
+def reject():
+    x=request.get_json()
+    snu_id=x['snu_id']
+    booking_id=x['booking_id']
+    cursor=mysql.connection.cursor(cur.DictCursor)
+    cursor.execute(f"update bookings set `Confirm`='0' where `SNU_ID`='{snu_id}' and `Booking_ID`='{booking_id}'")
+    mysql.connection.commit()
+    return 'Booking cancelled'
+
+@app.route('/cancel',methods=['POST'])
+def cancel():
+    x=request.get_json()
+    snu_id=x['snu_id']
+    booking_id=x['booking_id']
+    cursor=mysql.connection.cursor(cur.DictCursor)
+    cursor.execute(f"select * from bookings where `SNU_ID`='{snu_id}' and `Booking_ID`='{booking_id}'")
+    det=cursor.fetchone()
+    sports_name=det['Game']
+    slot=det['Slot']
+    day=pd.to_datetime(det['Date'],dayfirst=True).day_name()
+    cursor.execute(f"update bookings set `Confirm`='0' where `SNU_ID`='{snu_id}' and `Booking_ID`='{booking_id}'")
+    mysql.connection.commit()
+    cursor.execute(f"update `{sports_name}` set {day}={day}+1 where Slots='{slot}'")
+    mysql.connection.commit()
+    return 'Booking cancelled'
+
+@app.route('/pending/<snu_id>',methods=['GET'])
+def pending(snu_id):
+    cursor=mysql.connection.cursor(cur.DictCursor)
+    date=datetime.today().strftime('%Y-%m-%d')
+    cursor.execute(f"select * from `bookings` where `SNU_ID`='{snu_id}' and `Date`>={date} and `Confirm`='0'")
+    l1=cursor.fetchall()
+    return make_response({'status':'success','message':l1})
+
+@app.route('/show_booking/<is_admin>/')
 
 if __name__=="__main__":
     app.run(debug=True)

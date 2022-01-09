@@ -1,5 +1,6 @@
 import mysql.connector as sql
 from datetime import datetime
+import pandas as pd
 db=sql.connect(host='185.210.145.1',user='u724843278_ISC',password='ISCdatabase@1234',database='u724843278_ISC')
 cur=db.cursor(dictionary=True)
 # cur.execute('select sports_name from games')
@@ -28,3 +29,8 @@ cur=db.cursor(dictionary=True)
 # roll_no='tm217'
 # cur.execute(f"select * from `bookings` where `SNU_ID`='{roll_no}' and `Date`>={date}")
 # print(cur.fetchall())
+snu_id='ll656@snu.edu.in'
+booking_id='RUBK79LXG'
+date=datetime.today().strftime('%Y-%m-%d')
+cur.execute(f"select * from `bookings` where `SNU_ID`='{snu_id}' and `Date`>={date} and `Confirm`='0'")
+print(cur.fetchall())
