@@ -154,8 +154,5 @@ def pending(snu_id):
     l1=cursor.fetchall()
     return make_response({'status':'success','message':l1})
 
-@app.route('/show_booking/<is_admin>/')
-
-
 if __name__=="__main__":
     app.run(debug=True)
