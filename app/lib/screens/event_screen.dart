@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:isc/components/bottom_navi_bar.dart';
 import 'package:isc/components/event_card.dart';
-import 'package:isc/constants.dart';
+
 
 class EventScreen extends StatefulWidget {
   @override

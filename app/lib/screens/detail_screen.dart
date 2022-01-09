@@ -1,10 +1,13 @@
 import 'dart:convert';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:isc/components/event_card.dart';
 import 'package:isc/components/roundedbutton.dart';
 import 'package:isc/components/slot.dart';
+import 'package:isc/screens/profile_screen.dart';
 import 'event_screen.dart';
 import 'welcome_screen.dart';
 import 'package:http/http.dart' as http;
@@ -19,6 +22,7 @@ class DetailScreen extends StatefulWidget {
 class _DetailScreenState extends State<DetailScreen> {
   int length = 1;
   int? maxLength;
+  dynamic rollNo;
   String date = '';
   List<TextEditingController> _controller =
       List.generate(8, (i) => TextEditingController());
@@ -28,6 +32,7 @@ class _DetailScreenState extends State<DetailScreen> {
     // TODO: implement initState
     super.initState();
     getData();
+    print(SlotCard.maxSlot);
   }
 
   void postData() async {
@@ -35,13 +40,13 @@ class _DetailScreenState extends State<DetailScreen> {
     for (var i = 0; i < length * 2; i = i + 2) {
       mp.putIfAbsent(_controller[i].text, () => _controller[i + 1].text);
     }
-    TimeSlot date=TimeSlot();
-    
+    TimeSlot date = TimeSlot();
+
     var body = jsonEncode({
       "sports_name": EventCard.game,
       "date": SlotCard.dateChoosen,
       "slot": SlotCard.sltChoosen,
-      "student_details": mp
+      "student_details": mp,
     });
 
     print(body);
@@ -60,7 +65,7 @@ class _DetailScreenState extends State<DetailScreen> {
       print(response.body);
       Fluttertoast.showToast(msg: "YOUR DETAILS HAS BEEN SUBMITTED ");
       Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => WelcomeScreen()));
+          MaterialPageRoute(builder: (context) => ProfileScreen()));
     } catch (e) {
       print(e);
     }
@@ -71,17 +76,29 @@ class _DetailScreenState extends State<DetailScreen> {
     Map<String, dynamic> jsonData = await jsonDecode(response.body);
     print(response.statusCode);
     maxLength = jsonData[EventCard.game];
+    // String currEmail =  FirebaseAuth.instance.currentUser!.email!;
+    // var docSnapshot = await FirebaseFirestore.instance
+    //     .collection('users')
+    //     .doc(currEmail)
+    //     .get();
+    // if (docSnapshot.exists) {
+    //   Map<String, dynamic>? data = docSnapshot.data();
+    //   rollNo = data!['Name']; // <-- The value you want to retrieve.
+    //   // Call setState if needed.
+    // }
+    // print("EMAIL IS ="+currEmail);
+    // print("ROLL NO = "+rollNo);
   }
 
   final sNames = [
-    'First Student',
-    'Roll No.',
-    'Second Student',
-    'Roll No.',
-    'Third Student',
-    'Roll No.',
-    'Fourth Student',
-    'Roll No.'
+    'First Student Name',
+    'SNU ID',
+    'Second Student Name',
+    'SNU ID',
+    'Third Student Name',
+    'SNU ID',
+    'Fourth Student Name',
+    'SNU ID'
   ];
 
   String? valueChoose;
@@ -113,7 +130,11 @@ class _DetailScreenState extends State<DetailScreen> {
           title: Text('Please fill in your details'),
           leading: GestureDetector(
               onTap: () {
-                if (length == maxLength) {
+                if(length==SlotCard.maxSlot){
+                  Fluttertoast.showToast(
+                      msg: "No more slots available");
+                }
+                else if (length == maxLength) {
                   Fluttertoast.showToast(
                       msg: "You have reached maximum no. of people");
                 } else {

@@ -4,9 +4,11 @@ import 'package:isc/screens/detail_screen.dart';
 class SlotCard extends StatelessWidget {
   String slt_time;
   Color? color;
-  SlotCard(this.slt_time,this.color);
+  var slotAvailable;
+  SlotCard(this.slt_time, this.color, this.slotAvailable);
   static String sltChoosen = '';
   static String dateChoosen = '';
+  static int maxSlot = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -14,6 +16,7 @@ class SlotCard extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         sltChoosen = slt_time;
+        maxSlot = slotAvailable;
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) {
