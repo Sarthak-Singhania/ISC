@@ -9,6 +9,8 @@ import 'package:isc/screens/event_screen.dart';
 import 'package:isc/screens/welcome_screen.dart';
 import 'package:provider/provider.dart';
 
+import 'login_screen.dart';
+
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({Key? key}) : super(key: key);
 
@@ -246,6 +248,27 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         signUp(emailController.text, passwordController.text,
                             nameController.text);
                       }),
+                ),
+                 Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Text("Already have an account? "),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => LoginScreen()));
+                      },
+                      child: Text(
+                        "Sign In",
+                        style: TextStyle(
+                            color: Colors.redAccent,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15),
+                      ),
+                    )
+                  ],
                 )
               ],
             ),

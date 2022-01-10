@@ -76,18 +76,7 @@ class _DetailScreenState extends State<DetailScreen> {
     Map<String, dynamic> jsonData = await jsonDecode(response.body);
     print(response.statusCode);
     maxLength = jsonData[EventCard.game];
-    // String currEmail =  FirebaseAuth.instance.currentUser!.email!;
-    // var docSnapshot = await FirebaseFirestore.instance
-    //     .collection('users')
-    //     .doc(currEmail)
-    //     .get();
-    // if (docSnapshot.exists) {
-    //   Map<String, dynamic>? data = docSnapshot.data();
-    //   rollNo = data!['Name']; // <-- The value you want to retrieve.
-    //   // Call setState if needed.
-    // }
-    // print("EMAIL IS ="+currEmail);
-    // print("ROLL NO = "+rollNo);
+   
   }
 
   final sNames = [
