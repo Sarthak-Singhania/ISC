@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:isc/components/confirmed_booking.dart';
-import 'package:isc/components/pending_booking.dart';
+
 import 'package:isc/constants.dart';
 import 'package:http/http.dart' as http;
 import 'package:isc/screens/confirmed_screen.dart';
@@ -16,13 +16,14 @@ class BookingScreen extends StatefulWidget {
 class _BookingScreenState extends State<BookingScreen> {
   dynamic bookingList = [];
   bool circP = true;
+  bool emptyList = false;
   @override
   void initState() {
     super.initState();
     getData();
   }
 
-  void getData() async {
+  Future<void> getData() async {
     String currEmail = FirebaseAuth.instance.currentUser!.email!;
     print(currEmail);
     var response = await http
@@ -30,12 +31,16 @@ class _BookingScreenState extends State<BookingScreen> {
     var jsonData = await jsonDecode(response.body);
     print(jsonData);
     bookingList = jsonData["message"];
-    print('yeh');
-    print(bookingList[0]);
-    circP = false;
-    setState(() {
-      
-    });
+    if (bookingList.length == 0) {
+      circP = false;
+      emptyList = true;
+      setState(() {});
+    } else {
+      print('yeh');
+      print(bookingList[0]);
+      circP = false;
+      setState(() {});
+    }
   }
 
   @override
@@ -46,37 +51,43 @@ class _BookingScreenState extends State<BookingScreen> {
         title: Text('BOOKINGS'),
         centerTitle: true,
       ),
-      body: circP
+      body: emptyList == true
           ? Center(
-              child: CircularProgressIndicator(
-              color: Colors.blue,
+              child: Text(
+              'No Booking found',
+              style: TextStyle(fontSize: 20),
             ))
-          : ListView(
-              children: [
-                ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: bookingList.length,
-                    itemBuilder: (context, index) {
-                      return bookingList[index]['Confirm'] == 1
-                          ? ConfirmBooking(
-                              size: size,
-                              date: bookingList[index]['Date'],
-                              sportName: bookingList[index]['Game'],
-                              bookingId: bookingList[index]['Booking_ID'],
-                              studentName: bookingList[index]['Student_Name'],
-                            )
-                          : PendingBooking(
-                              size: size,
-                              date: bookingList[index]['Date'],
-                              sportName: bookingList[index]['Game'],
-                              bookingId: bookingList[index]['Booking_ID'],
-                              studentName: bookingList[index]['Student_Name'],
-                            );
-                    })
+          : circP
+              ? Center(
+                  child: CircularProgressIndicator(
+                  color: Colors.blue,
+                ))
+              : RefreshIndicator(
+                  onRefresh: getData,
+                  child: ListView(
+                    children: [
+                      ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: bookingList.length,
+                          itemBuilder: (context, index) {
+                            return 
+                                 ConfirmBooking(
+                                    isConfirm:bookingList[index]['Confirm'],
+                                    size: size,
+                                    date: bookingList[index]['Date'],
+                                    sportName: bookingList[index]['Game'],
+                                    bookingId: bookingList[index]['Booking_ID'],
+                                    studentName: bookingList[index]
+                                        ['Student_Name'],
+                                    totalCount: bookingList[index]['Count'],
+                                  )
+                              ;
+                          })
 
-                //PendingBooking(size: size),
-              ],
-            ),
+                      //PendingBooking(size: size),
+                    ],
+                  ),
+                ),
     );
   }
 }

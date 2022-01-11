@@ -6,28 +6,33 @@ import '../constants.dart';
 class ConfirmBooking extends StatelessWidget {
   const ConfirmBooking({
     Key? key,
+    required this.isConfirm,
     required this.size,
     required this.bookingId,
     required this.sportName,
     required this.studentName,
     required this.date,
+    required this.totalCount,
   }) : super(key: key);
 
   final Size size;
   final bookingId;
+  final isConfirm;
 
   final sportName;
 
   final studentName;
-
+  final totalCount;
   final date;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Navigator.push(context,
-            MaterialPageRoute(builder: (context) => ConfirmedScreen()));
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => ConfirmedScreen(bookingId)));
       },
       child: Container(
         margin: EdgeInsets.all(20),
@@ -37,11 +42,17 @@ class ConfirmBooking extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            Text(
-              "CONFIRMED",
-              style:
-                  TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
-            ),
+            isConfirm == 1
+                ? Text(
+                    "CONFIRMED",
+                    style: TextStyle(
+                        color: Colors.green, fontWeight: FontWeight.bold),
+                  )
+                : Text(
+                    "PENDING",
+                    style: TextStyle(
+                        color: Colors.orange, fontWeight: FontWeight.bold),
+                  ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -66,7 +77,11 @@ class ConfirmBooking extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  "$studentName + 69 others",
+                  totalCount == 1
+                      ? "$studentName"
+                      : totalCount == 2
+                          ? "$studentName +1 other"
+                          : "$studentName +${int.parse(totalCount) - 1} others",
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: kPrimaryColor,

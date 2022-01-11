@@ -8,6 +8,7 @@ import 'package:isc/components/event_card.dart';
 import 'package:isc/components/roundedbutton.dart';
 import 'package:isc/components/slot.dart';
 import 'package:isc/screens/profile_screen.dart';
+import 'booking_screen.dart';
 import 'event_screen.dart';
 import 'welcome_screen.dart';
 import 'package:http/http.dart' as http;
@@ -65,7 +66,7 @@ class _DetailScreenState extends State<DetailScreen> {
       print(response.body);
       Fluttertoast.showToast(msg: "YOUR DETAILS HAS BEEN SUBMITTED ");
       Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => ProfileScreen()));
+          MaterialPageRoute(builder: (context) => BookingScreen()));
     } catch (e) {
       print(e);
     }

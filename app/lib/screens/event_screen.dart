@@ -2,9 +2,9 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:isc/components/bottom_navi_bar.dart';
 import 'package:isc/components/event_card.dart';
-
 
 class EventScreen extends StatefulWidget {
   @override
@@ -14,10 +14,21 @@ class EventScreen extends StatefulWidget {
 class _EventScreenState extends State<EventScreen> {
   List Sports = [];
   List ImgUri = [];
+  bool isInternet = true;
   bool circP = true;
   @override
   void initState() {
     super.initState();
+    InternetConnectionChecker().onStatusChange.listen((status) {
+      isInternet = status == InternetConnectionStatus.connected;
+      if (!isInternet) {
+        setState(() {
+          print('Internet gone');
+        });
+      } else {
+        print('Internet connected');
+      }
+    });
     getData();
   }
 
@@ -29,8 +40,7 @@ class _EventScreenState extends State<EventScreen> {
       Sports.add(k);
       ImgUri.add(v);
     });
-
-    print(Sports[3]);
+    print(Sports);
     circP = false;
 
     print(ImgUri[2]);
@@ -70,6 +80,7 @@ class _EventScreenState extends State<EventScreen> {
                         height: size.height * 0.05,
                       ),
                       GridView.builder(
+                        physics: ScrollPhysics(),
                         shrinkWrap: true,
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: 2),

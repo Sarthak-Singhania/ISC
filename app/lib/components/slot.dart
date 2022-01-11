@@ -44,7 +44,7 @@ class SlotCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                slt_time,
+                slt_time.toUpperCase(),
                 style: TextStyle(color: Colors.white, fontSize: 25),
               ),
               Icon(
