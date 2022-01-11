@@ -15,7 +15,7 @@ class TimeSlot extends StatefulWidget {
 class _TimeSlotState extends State<TimeSlot> {
   @override
   bool _decideWhichDayToEnable(DateTime day) {
-    if ((day.isAfter(DateTime.now()) &&
+    if ((day.isAfter(DateTime.now().subtract(Duration(days: 1))) &&
         day.isBefore(DateTime.now().add(Duration(days: 6))))) {
       return true;
     }
@@ -52,6 +52,7 @@ class _TimeSlotState extends State<TimeSlot> {
     sport = jsonData[EventCard.game][day];
     print(response!.statusCode);
     print(sport);
+    slotAvailable.clear();
     sport.forEach((k, v) {
       slotAvailable.add(k);
     });
@@ -116,6 +117,7 @@ class _TimeSlotState extends State<TimeSlot> {
               child: ListView(
                 children: [
                   ListView.builder(
+                      physics: ScrollPhysics(),
                       shrinkWrap: true,
                       itemCount: slotAvailable.length,
                       itemBuilder: (context, index) {

@@ -65,8 +65,33 @@ class _DetailScreenState extends State<DetailScreen> {
 
       print(response.body);
       Fluttertoast.showToast(msg: "YOUR DETAILS HAS BEEN SUBMITTED ");
-      Navigator.of(context).pushReplacement(
+      showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        content: Text(
+                            'Do you want to book more slots this sport?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                               Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => BookingScreen()));
+                            },
+                            child: Text('No'),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                               Navigator.of(context).pop();
+                               Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => TimeSlot()));
+                            },
+                            child: Text('Yes'),
+                          ),
+                        ],
+                      );
+                    });
+     
     } catch (e) {
       print(e);
     }
