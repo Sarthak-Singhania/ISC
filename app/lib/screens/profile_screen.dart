@@ -1,3 +1,8 @@
+import 'dart:async';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:isc/components/bottom_navi_bar.dart';
 import 'package:isc/constants.dart';
@@ -8,8 +13,42 @@ import 'package:provider/provider.dart';
 
 import 'booking_screen.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
+
+  @override
+  _ProfileScreenState createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  bool hasInternet = true;
+  StreamSubscription? subscription;
+  @override
+  void initState() {
+    super.initState();
+
+    subscription = Connectivity()
+        .onConnectivityChanged
+        .listen((ConnectivityResult result) {
+      hasInternet = result != ConnectivityResult.none;
+      if (hasInternet) {
+        print("internet hai");
+      } else {
+        print('nO internet');
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    subscription!.cancel();
+    super.dispose();
+  }
+
+  Future<void> logout() async {
+    print("signed out");
+    await FirebaseAuth.instance.signOut();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,6 +103,7 @@ class ProfileScreen extends StatelessWidget {
               text: 'Log Out',
               icon: Icons.login_outlined,
               func: () {
+                logout();
                 Navigator.pushReplacement(context,
                     MaterialPageRoute(builder: (context) => WelcomeScreen()));
               },

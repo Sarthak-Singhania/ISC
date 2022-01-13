@@ -16,7 +16,7 @@ class EventCard extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) {
-            return TimeSlot();
+            return TimeSlot(game:title);
           }),
         );
       },

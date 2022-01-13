@@ -7,6 +7,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:isc/components/event_card.dart';
 import 'package:isc/components/roundedbutton.dart';
 import 'package:isc/components/slot.dart';
+import 'package:isc/constants.dart';
 import 'package:isc/screens/profile_screen.dart';
 import 'booking_screen.dart';
 import 'event_screen.dart';
@@ -53,7 +54,7 @@ class _DetailScreenState extends State<DetailScreen> {
     print(body);
     try {
       final response = await http.post(
-        Uri.parse('http://65.0.232.165/book'),
+        Uri.parse(kIpAddress+'/book'),
         headers: {
           'Content-Type': 'application/json',
           'Accept': '*/*',
@@ -98,7 +99,7 @@ class _DetailScreenState extends State<DetailScreen> {
   }
 
   void getData() async {
-    var response = await http.get(Uri.parse('http://65.0.232.165/max-person'));
+    var response = await http.get(Uri.parse(kIpAddress+'/max-person'));
     Map<String, dynamic> jsonData = await jsonDecode(response.body);
     print(response.statusCode);
     maxLength = jsonData[EventCard.game];

@@ -2,9 +2,12 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:internet_connection_checker/internet_connection_checker.dart';
+
 import 'package:isc/components/bottom_navi_bar.dart';
 import 'package:isc/components/event_card.dart';
+import 'package:isc/constants.dart';
+
+import 'notification_screen.dart';
 
 class EventScreen extends StatefulWidget {
   @override
@@ -19,21 +22,12 @@ class _EventScreenState extends State<EventScreen> {
   @override
   void initState() {
     super.initState();
-    InternetConnectionChecker().onStatusChange.listen((status) {
-      isInternet = status == InternetConnectionStatus.connected;
-      if (!isInternet) {
-        setState(() {
-          print('Internet gone');
-        });
-      } else {
-        print('Internet connected');
-      }
-    });
+
     getData();
   }
 
   void getData() async {
-    var response = await http.get(Uri.parse('http://65.0.232.165/games'));
+    var response = await http.get(Uri.parse(kIpAddress + '/games'));
     Map<String, dynamic> jsonData = await jsonDecode(response.body);
     print(response.statusCode);
     jsonData.forEach((k, v) {
@@ -64,35 +58,52 @@ class _EventScreenState extends State<EventScreen> {
                     width: size.width,
                     height: size.height * 0.3,
                   ),
-                  Column(
-                    children: [
-                      SizedBox(
-                        height: size.height * 0.07,
-                      ),
-                      Text(
-                        "SELECT YOUR SPORT",
-                        style: TextStyle(
+                  SafeArea(
+                    child: Column(
+                      children: [
+                        Align(
+                          alignment: Alignment.topRight,
+                          child: IconButton(
                             color: Colors.white,
-                            fontSize: 30,
-                            fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(
-                        height: size.height * 0.05,
-                      ),
-                      GridView.builder(
-                        physics: ScrollPhysics(),
-                        shrinkWrap: true,
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2),
-                        itemCount: Sports.length,
-                        itemBuilder: (context, index) {
-                          return EventCard(
-                            title: Sports[index],
-                            uri: ImgUri[index],
-                          );
-                        },
-                      )
-                    ],
+                            onPressed: () {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) => NotificationScreen()));
+                            },
+                            icon: Icon(
+                              Icons.notifications,
+                              size: 25,
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          height: size.height * 0.04,
+                        ),
+                        Text(
+                          "SELECT YOUR SPORT",
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 25,
+                              fontWeight: FontWeight.bold),
+                        ),
+                        SizedBox(
+                          height: size.height * 0.05,
+                        ),
+                        GridView.builder(
+                          physics: ScrollPhysics(),
+                          shrinkWrap: true,
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 2),
+                          itemCount: Sports.length,
+                          itemBuilder: (context, index) {
+                            return EventCard(
+                              title: Sports[index],
+                              uri: ImgUri[index],
+                            );
+                          },
+                        )
+                      ],
+                    ),
                   )
                 ],
               ),

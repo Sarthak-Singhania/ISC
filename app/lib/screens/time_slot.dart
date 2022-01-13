@@ -8,6 +8,9 @@ import 'package:isc/components/slot.dart';
 import 'package:http/http.dart' as http;
 
 class TimeSlot extends StatefulWidget {
+  var game;
+  TimeSlot({this.game});
+
   @override
   _TimeSlotState createState() => _TimeSlotState();
 }
@@ -44,7 +47,8 @@ class _TimeSlotState extends State<TimeSlot> {
   }
 
   void getData() async {
-    response = await http.get(Uri.parse('http://65.0.232.165/slots'));
+    response =
+        await http.get(Uri.parse(kIpAddress + '/slots' + '/' + widget.game));
     jsonData = await jsonDecode(response!.body);
   }
 
@@ -108,7 +112,7 @@ class _TimeSlotState extends State<TimeSlot> {
                 child: Text(
                   selectedDate == null
                       ? "CHOOSE YOUR DATE"
-                      : '${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}',
+                      : '${selectedDate!.day}-${selectedDate!.month}-${selectedDate!.year}',
                   style: TextStyle(color: Colors.white, fontSize: 17),
                 ),
               ),

@@ -6,19 +6,20 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'dart:ui';
 import 'package:flutter_custom_clippers/flutter_custom_clippers.dart';
+import 'package:isc/constants.dart';
 import 'package:transparent_image/transparent_image.dart';
 
-import 'package:simple_shadow/simple_shadow.dart';
 
-class ConfirmedScreen extends StatefulWidget {
-  ConfirmedScreen(this.bookingId);
+
+class TicketScreen extends StatefulWidget {
+  TicketScreen(this.bookingId);
   final bookingId;
 
   @override
-  _ConfirmedScreenState createState() => _ConfirmedScreenState();
+  _TicketScreenState createState() => _TicketScreenState();
 }
 
-class _ConfirmedScreenState extends State<ConfirmedScreen> {
+class _TicketScreenState extends State<TicketScreen> {
   String currEmail = '';
   bool circP = true;
   var response;
@@ -36,7 +37,7 @@ class _ConfirmedScreenState extends State<ConfirmedScreen> {
     currEmail = FirebaseAuth.instance.currentUser!.email!;
     print(currEmail);
     var json = await http.get(Uri.parse(
-        'http://65.0.232.165/get_bookings/${currEmail}/${widget.bookingId}'));
+        kIpAddress+'/get_bookings/${currEmail}/${widget.bookingId}'));
     response = jsonDecode(json.body);
     var list = response['name'];
     for (var i = 0; i < list.length; i++) {
@@ -53,7 +54,7 @@ class _ConfirmedScreenState extends State<ConfirmedScreen> {
         jsonEncode({"snu_id": currEmail, "booking_id": widget.bookingId});
     try {
       final acceptResponse = await http.post(
-        Uri.parse('http://65.0.232.165/confirm'),
+        Uri.parse(kIpAddress+'/confirm'),
         headers: {
           'Content-Type': 'application/json',
           'Accept': '*/*',
@@ -78,7 +79,7 @@ class _ConfirmedScreenState extends State<ConfirmedScreen> {
         jsonEncode({"snu_id": currEmail, "booking_id": widget.bookingId});
     try {
       final acceptResponse = await http.post(
-        Uri.parse('http://65.0.232.165/cancel'),
+        Uri.parse(kIpAddress+'/cancel'),
         headers: {
           'Content-Type': 'application/json',
           'Accept': '*/*',
@@ -101,7 +102,7 @@ class _ConfirmedScreenState extends State<ConfirmedScreen> {
         jsonEncode({"snu_id": currEmail, "booking_id": widget.bookingId});
     try {
       final acceptResponse = await http.post(
-        Uri.parse('http://65.0.232.165/reject'),
+        Uri.parse(kIpAddress+'/reject'),
         headers: {
           'Content-Type': 'application/json',
           'Accept': '*/*',
@@ -171,7 +172,7 @@ class _ConfirmedScreenState extends State<ConfirmedScreen> {
                           BorderRadius.all(Radius.elliptical(10, 10))),
                   child: Center(
                     child: Text(
-                      'Sarthak Singhania has added you to the booking',
+                      '${nameList[0]} has added you to the booking',
                       style: TextStyle(
                           color: Colors.white,
                           fontSize: 15,

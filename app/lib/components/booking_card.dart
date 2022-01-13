@@ -1,23 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:isc/screens/confirmed_screen.dart';
+import 'package:isc/screens/ticket_screen.dart';
 
 import '../constants.dart';
 
-class ConfirmBooking extends StatelessWidget {
-  const ConfirmBooking({
-    Key? key,
-    required this.isConfirm,
-    required this.size,
-    required this.bookingId,
-    required this.sportName,
-    required this.studentName,
-    required this.date,
-    required this.totalCount,
-  }) : super(key: key);
+class BookingCard extends StatelessWidget {
+  const BookingCard(
+      {Key? key,
+      required this.isConfirm,
+      required this.size,
+      required this.bookingId,
+      required this.sportName,
+      required this.studentName,
+      required this.date,
+      required this.totalCount,
+      required this.slotTime})
+      : super(key: key);
 
   final Size size;
   final bookingId;
   final isConfirm;
+  final slotTime;
 
   final sportName;
 
@@ -29,10 +31,8 @@ class ConfirmBooking extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => ConfirmedScreen(bookingId)));
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context) => TicketScreen(bookingId)));
       },
       child: Container(
         margin: EdgeInsets.all(20),
@@ -66,12 +66,24 @@ class ConfirmBooking extends StatelessWidget {
                 ),
               ],
             ),
-            Text(
-              sportName,
-              style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: kPrimaryColor,
-                  fontSize: 17),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  sportName,
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: kPrimaryColor,
+                      fontSize: 17),
+                ),
+                Text(
+                  slotTime,
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: kPrimaryColor,
+                      fontSize: 16),
+                ),
+              ],
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,

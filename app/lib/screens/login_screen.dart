@@ -11,6 +11,7 @@ import 'package:isc/screens/time_slot.dart';
 import 'package:provider/provider.dart';
 
 import 'event_screen.dart';
+import 'notification_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -23,6 +24,7 @@ class _LoginScreenState extends State<LoginScreen> {
   // editing controller
   final TextEditingController emailController = new TextEditingController();
   final TextEditingController passwordController = new TextEditingController();
+  bool passwordVisible = false;
 
   final _auth = FirebaseAuth.instance;
 
@@ -116,6 +118,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         hintText: "Email",
                       )),
                 ),
+
                 Container(
                   margin: EdgeInsets.all(10),
                   padding: EdgeInsets.all(10),
@@ -128,7 +131,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: TextFormField(
                     autofocus: false,
                     controller: passwordController,
-                    obscureText: true,
+                    obscureText: !passwordVisible,
                     validator: (value) {
                       RegExp regex = new RegExp(r'^.{6,}$');
                       if (value!.isEmpty) {
@@ -147,6 +150,18 @@ class _LoginScreenState extends State<LoginScreen> {
                       prefixIcon: Icon(Icons.lock),
                       contentPadding: EdgeInsets.fromLTRB(20, 15, 20, 15),
                       hintText: "Password",
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          passwordVisible
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            passwordVisible = !passwordVisible;
+                          });
+                        },
+                      ),
                     ),
                   ),
                 ),
