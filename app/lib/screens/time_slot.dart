@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:isc/components/event_card.dart';
@@ -38,6 +39,7 @@ class _TimeSlotState extends State<TimeSlot> {
     'Thursday',
     'Friday',
     'Saturday',
+    'Sunday',
   ];
 
   @override
@@ -47,13 +49,17 @@ class _TimeSlotState extends State<TimeSlot> {
   }
 
   void getData() async {
-    response =
-        await http.get(Uri.parse(kIpAddress + '/slots' + '/' + widget.game));
+    String JWTtoken = await FirebaseAuth.instance.currentUser!.getIdToken();
+    //print(JWTtoken);
+    response = await http.get(
+        Uri.parse(kIpAddress + '/slots' + '/' + widget.game),
+        headers: {"x-access-token": JWTtoken});
     jsonData = await jsonDecode(response!.body);
   }
 
-  void getSlot(String day) async {
-    sport = jsonData[EventCard.game][day];
+  Future<void> getSlot(String day) async {
+    print("game name=" + widget.game);
+    sport = jsonData[widget.game][day];
     print(response!.statusCode);
     print(sport);
     slotAvailable.clear();
@@ -79,9 +85,9 @@ class _TimeSlotState extends State<TimeSlot> {
     if (newDate != null) {
       selectedDate = newDate;
       print(weekDays[selectedDate!.weekday - 1]);
-      getSlot(weekDays[selectedDate!.weekday - 1]);
+      await getSlot(weekDays[selectedDate!.weekday - 1]);
       SlotCard.dateChoosen =
-          '${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}';
+          '${selectedDate!.day}-${selectedDate!.month}-${selectedDate!.year}';
       setState(() {});
     }
   }
