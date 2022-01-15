@@ -24,14 +24,15 @@ class DetailScreen extends StatefulWidget {
 class _DetailScreenState extends State<DetailScreen> {
   TextEditingController? firstNameController;
   String firstName = '';
-  TextEditingController firstEmail = TextEditingController();
+  bool circP = true;
+  TextEditingController? firstEmailController;
   String currEmail = '';
   int length = 1;
   int? maxLength;
   dynamic rollNo;
   String date = '';
   List<TextEditingController> _controller =
-      List.generate(8, (i) => TextEditingController());
+      List.generate(6, (i) => TextEditingController());
 
   @override
   void initState() {
@@ -44,8 +45,8 @@ class _DetailScreenState extends State<DetailScreen> {
   void postData() async {
     String JWTtoken = await FirebaseAuth.instance.currentUser!.getIdToken();
     Map<String, dynamic> mp = {};
-
-    for (var i = 0; i < length * 2; i = i + 2) {
+    mp.putIfAbsent(firstNameController!.text, () => currEmail);
+    for (var i = 0; i < (length * 2)-2; i = i + 2) {
       mp.putIfAbsent(_controller[i].text, () => _controller[i + 1].text);
     }
     TimeSlot date = TimeSlot();
@@ -115,10 +116,12 @@ class _DetailScreenState extends State<DetailScreen> {
     }
 
     firstNameController = TextEditingController(text: firstName);
-
+    firstEmailController = TextEditingController(text: currEmail);
+    circP = false;
     Map<String, dynamic> jsonData = await jsonDecode(response.body);
     print(response.statusCode);
     maxLength = jsonData[EventCard.game];
+    setState(() {});
   }
 
   final sNames = [
@@ -177,64 +180,73 @@ class _DetailScreenState extends State<DetailScreen> {
           centerTitle: true,
           backgroundColor: Colors.purple,
         ),
-        body: ListView(
-          children: [
-            Container(
-              margin: EdgeInsets.all(10),
-              child: TextFormField(
-                controller: firstNameController,
-                decoration: InputDecoration(
-                  labelText: 'First Student Name',
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15),
-                    borderSide:
-                        BorderSide(color: Colors.greenAccent, width: 5.0),
+        body: circP == true
+            ? Center(
+                child: CircularProgressIndicator(
+                color: Colors.blue,
+              ))
+            : ListView(
+                children: [
+                  Container(
+                    margin: EdgeInsets.all(10),
+                    child: TextFormField(
+                      controller: firstNameController,
+                      decoration: InputDecoration(
+                        labelText: 'First Student Name',
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(15),
+                          borderSide:
+                              BorderSide(color: Colors.greenAccent, width: 5.0),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide:
+                              BorderSide(color: Colors.blue, width: 3.0),
+                        ),
+                      ),
+                      onSaved: (value) {
+                        firstNameController!.text = value!;
+                      },
+                    ),
                   ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(color: Colors.blue, width: 3.0),
+                  Container(
+                    margin: EdgeInsets.all(10),
+                    child: TextFormField(
+                      //  focusNode: FocusNode(canRequestFocus: false),
+                      // enableInteractiveSelection: false,
+                      readOnly: true,
+                      controller: firstEmailController,
+                      // initialValue: currEmail.toString(),
+                      decoration: InputDecoration(
+                        labelText: 'SNU ID',
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(15),
+                          borderSide:
+                              BorderSide(color: Colors.greenAccent, width: 5.0),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide:
+                              BorderSide(color: Colors.blue, width: 3.0),
+                        ),
+                      ),
+                      // onSaved: (value) {
+                      //   firstName.text = value!;
+                      // },
+                    ),
                   ),
-                ),
-                onSaved: (value) {
-                  firstNameController!.text = value!;
-                },
-              ),
-            ),
-            Container(
-              margin: EdgeInsets.all(10),
-              child: TextFormField(
-                focusNode: FocusNode(),
-                enableInteractiveSelection: false,
-                // controller: firstEmail,
-                initialValue: currEmail.toString(),
-                decoration: InputDecoration(
-                  labelText: 'Student EmailID',
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15),
-                    borderSide:
-                        BorderSide(color: Colors.greenAccent, width: 5.0),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(color: Colors.blue, width: 3.0),
-                  ),
-                ),
-                // onSaved: (value) {
-                //   firstName.text = value!;
-                // },
-              ),
-            ),
-            ListView.builder(
-                shrinkWrap: true,
-                itemCount: length * 2,
-                itemBuilder: (context, index) {
-                  return StudentDetail(sNames[index], _controller[index]);
-                }),
-            RoundedButton('SUBMIT', Colors.green, Colors.white, size * 0.7, () {
-              postData();
-            }, context)
-          ],
-        ));
+                  ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: (length * 2) - 2,
+                      itemBuilder: (context, index) {
+                        return StudentDetail(sNames[index], _controller[index]);
+                      }),
+                  RoundedButton(
+                      'SUBMIT', Colors.green, Colors.white, size * 0.7, () {
+                    postData();
+                  }, context)
+                ],
+              ));
   }
 }
 
