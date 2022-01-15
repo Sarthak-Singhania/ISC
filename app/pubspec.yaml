@@ -36,6 +36,7 @@ dependencies:
   intl: ^0.17.0
   provider: ^6.0.2
   transparent_image: ^2.0.0
+  switcher: ^1.0.0
 
 dev_dependencies:
   flutter_test:

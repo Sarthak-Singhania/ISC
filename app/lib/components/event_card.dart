@@ -2,13 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:focused_menu/focused_menu.dart';
 import 'package:focused_menu/modals.dart';
 import 'package:isc/screens/time_slot.dart';
+
+import 'package:switcher/core/switcher_size.dart';
+import 'package:switcher/switcher.dart';
 import 'package:transparent_image/transparent_image.dart';
 
 class EventCard extends StatefulWidget {
   String title;
   String uri;
   bool checkAdmin;
-  
+
   EventCard({required this.checkAdmin, required this.title, required this.uri});
 
   @override
@@ -20,48 +23,28 @@ class _EventCardState extends State<EventCard> {
   //String game = '';
 
   double spreadRadius = 5;
+  bool value = true;
 
   double blurRadius = 7;
 
   @override
   Widget build(BuildContext context) {
     return widget.checkAdmin == true
-        ? FocusedMenuHolder(
-            blurSize: 0,
-            menuWidth: MediaQuery.of(context).size.width * 0.50,
-            blurBackgroundColor: Colors.black12,
-            onPressed: () {},
-            menuItems: <FocusedMenuItem>[
-              FocusedMenuItem(
-                  title: Text(
-                    "Enable",
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  backgroundColor: Colors.green,
-                  trailingIcon: Icon(
-                    Icons.add,
-                    color: Colors.white,
-                  ),
-                  onPressed: () {}),
-              FocusedMenuItem(
-                  title: Text(
-                    "Disable",
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  backgroundColor: Colors.redAccent,
-                  trailingIcon: Icon(
-                    Icons.delete,
-                    color: Colors.white,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      opacity = 0.9;
-                      spreadRadius = 0;
-                      blurRadius = 0;
-                    });
-                  }),
-            ],
+        ? GestureDetector(
+            onLongPress: () {},
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) {
+                  return TimeSlot(
+                    game: widget.title,
+                    adminCheck: widget.checkAdmin,
+                  );
+                }),
+              );
+            },
             child: Container(
+              height: MediaQuery.of(context).size.height * 0.7,
               padding: EdgeInsets.all(10),
               margin: EdgeInsets.all(10),
               decoration: BoxDecoration(
@@ -69,38 +52,58 @@ class _EventCardState extends State<EventCard> {
                 color: Colors.white,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withOpacity(opacity),
-                    spreadRadius: spreadRadius,
-                    blurRadius: blurRadius,
-                    offset: Offset(0, 0), // changes position of shadow
+                    color: Colors.grey.withOpacity(0.5),
+                    spreadRadius: 5,
+                    blurRadius: 7,
+                    offset: Offset(0, 17), // changes position of shadow
                   ),
                 ],
               ),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
+                  Switcher(
+                    value: false,
+                    size: SwitcherSize.medium,
+                    switcherButtonRadius: 70,
+                    enabledSwitcherButtonRotate: true,
+                    iconOff: Icons.lock_open,
+                    iconOn: Icons.lock,
+                    colorOff: Colors.green,
+                    colorOn: Colors.red,
+                    onChanged: (bool state) {
+                      //
+                    },
+                  ),
                   Expanded(
-                    child: FadeInImage.memoryNetwork(
-                      image: widget.uri,
-                      placeholder: kTransparentImage,
+                    child: Center(
+                      child: FadeInImage.memoryNetwork(
+                        image: widget.uri,
+                        placeholder: kTransparentImage,
+                      ),
                     ),
                   ),
-                  Text(
-                    widget.title,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                  Center(
+                    child: Text(
+                      widget.title,
+                      textAlign: TextAlign.left,
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                    ),
                   )
                 ],
               ),
             ),
           )
-        :
-         GestureDetector(
+        : GestureDetector(
             onTap: () {
-             
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) {
-                  return TimeSlot(game: widget.title);
+                  return TimeSlot(
+                    game: widget.title,
+                    adminCheck: widget.checkAdmin,
+                  );
                 }),
               );
             },

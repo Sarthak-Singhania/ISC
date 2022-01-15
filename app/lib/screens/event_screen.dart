@@ -108,11 +108,11 @@ class _EventScreenState extends State<EventScreen> {
                           shrinkWrap: true,
                           gridDelegate:
                               SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 2),
+                                  childAspectRatio: 0.79, crossAxisCount: 2),
                           itemCount: Sports.length,
                           itemBuilder: (context, index) {
                             return EventCard(
-                              checkAdmin:widget.adminCheck,
+                              checkAdmin: widget.adminCheck,
                               title: Sports[index],
                               uri: ImgUri[index],
                             );

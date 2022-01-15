@@ -10,7 +10,8 @@ import 'package:http/http.dart' as http;
 
 class TimeSlot extends StatefulWidget {
   var game;
-  TimeSlot({this.game});
+  var adminCheck;
+  TimeSlot({this.game,this.adminCheck});
 
   @override
   _TimeSlotState createState() => _TimeSlotState();
@@ -132,12 +133,13 @@ class _TimeSlotState extends State<TimeSlot> {
                       itemCount: slotAvailable.length,
                       itemBuilder: (context, index) {
                         return SlotCard(
-                            game:widget.game,
-                            slt_time:slotAvailable[index],
-                            color:sport[slotAvailable[index]] > 0
+                            adminCheck:widget.adminCheck,
+                            game: widget.game,
+                            slt_time: slotAvailable[index],
+                            color: sport[slotAvailable[index]] > 0
                                 ? Colors.green
                                 : Colors.grey,
-                           slotAvailable: sport[slotAvailable[index]]);
+                            slotAvailable: sport[slotAvailable[index]]);
                       })
                 ],
               ),

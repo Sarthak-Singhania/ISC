@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:isc/screens/admin_slot_screen.dart';
 import 'package:isc/screens/detail_screen.dart';
 
 class SlotCard extends StatelessWidget {
@@ -6,7 +7,8 @@ class SlotCard extends StatelessWidget {
   Color? color;
   var slotAvailable;
   var game;
-  SlotCard({this.game, required this.slt_time, this.color, this.slotAvailable});
+  var adminCheck;
+  SlotCard({this.adminCheck,this.game, required this.slt_time, this.color, this.slotAvailable});
   static String sltChoosen = '';
   static String dateChoosen = '';
   static int maxSlot = 0;
@@ -20,12 +22,22 @@ class SlotCard extends StatelessWidget {
         sltChoosen = slt_time;
         maxSlot = slotAvailable;
         gameChoosen = game;
-        Navigator.push(
+       if(adminCheck){
+          Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) {
+            return AdminSlotScreen();
+          }),
+        );
+       }
+       else{
+          Navigator.push(
           context,
           MaterialPageRoute(builder: (context) {
             return DetailScreen();
           }),
         );
+       }
       },
       child: Container(
           margin: EdgeInsets.all(size.width * 0.05),
