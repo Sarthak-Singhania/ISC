@@ -12,6 +12,9 @@ import 'package:isc/constants.dart';
 import 'notification_screen.dart';
 
 class EventScreen extends StatefulWidget {
+  bool adminCheck;
+  EventScreen({required this.adminCheck});
+
   @override
   _EventScreenState createState() => _EventScreenState();
 }
@@ -27,12 +30,18 @@ class _EventScreenState extends State<EventScreen> {
     super.initState();
 
     getData();
+    if (widget.adminCheck) {
+      print("admin hai");
+    } else {
+      print("ADMIN NHI HAI");
+    }
   }
 
   void getData() async {
-     String JWTtoken = await FirebaseAuth.instance.currentUser!.getIdToken();
-    var response = await http.get(Uri.parse(kIpAddress + '/games'),
-       );
+    String JWTtoken = await FirebaseAuth.instance.currentUser!.getIdToken();
+    var response = await http.get(
+      Uri.parse(kIpAddress + '/games'),
+    );
     Map<String, dynamic> jsonData = await jsonDecode(response.body);
     print(response.statusCode);
     jsonData.forEach((k, v) {
@@ -103,6 +112,7 @@ class _EventScreenState extends State<EventScreen> {
                           itemCount: Sports.length,
                           itemBuilder: (context, index) {
                             return EventCard(
+                              checkAdmin:widget.adminCheck,
                               title: Sports[index],
                               uri: ImgUri[index],
                             );

@@ -52,7 +52,7 @@ class _DetailScreenState extends State<DetailScreen> {
     TimeSlot date = TimeSlot();
 
     var body = jsonEncode({
-      "sports_name": EventCard.game,
+      "sports_name": 'Badminton',
       "date": SlotCard.dateChoosen,
       "slot": SlotCard.sltChoosen,
       "student_details": mp,
@@ -120,7 +120,7 @@ class _DetailScreenState extends State<DetailScreen> {
     circP = false;
     Map<String, dynamic> jsonData = await jsonDecode(response.body);
     print(response.statusCode);
-    maxLength = jsonData[EventCard.game];
+    maxLength = jsonData['Badminton'];
     setState(() {});
   }
 

@@ -19,7 +19,7 @@ class BottomNaviBar extends StatelessWidget {
             IconButton(
               onPressed: () {
                 Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => EventScreen()));
+                    MaterialPageRoute(builder: (context) => EventScreen(adminCheck: true,)));
               },
               icon: Icon(
                 Icons.home,

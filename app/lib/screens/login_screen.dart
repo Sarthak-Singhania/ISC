@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -30,16 +31,33 @@ class _LoginScreenState extends State<LoginScreen> {
 
   // string for displaying the error Message
   String? errorMessage;
+  
 
   void signIn(String email, String password) async {
     if (_formKey.currentState!.validate()) {
       try {
+        bool adminCheck=true;
+        final snapShot = await FirebaseFirestore.instance.collection('admin-users').doc(email).get();
+
+   if (snapShot.exists){
+        adminCheck=true;
+   }
+   else{
+        adminCheck=false;
+   }
         await _auth
             .signInWithEmailAndPassword(email: email, password: password)
             .then((uid) => {
                   Fluttertoast.showToast(msg: "Login Successful"),
-                  Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (context) => EventScreen())),
+                  if(adminCheck){
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (context) => EventScreen(adminCheck: true,))),
+                  }
+                  else{
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (context) => EventScreen(adminCheck: false,))),
+                  }
+                  
                 });
       } on FirebaseAuthException catch (error) {
         switch (error.code) {
