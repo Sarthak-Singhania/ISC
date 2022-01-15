@@ -138,6 +138,7 @@ class _DetailScreenState extends State<DetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    print(currEmail);
     Size size = MediaQuery.of(context).size;
     return Scaffold(
         appBar: AppBar(
@@ -205,9 +206,9 @@ class _DetailScreenState extends State<DetailScreen> {
                 focusNode: FocusNode(),
                 enableInteractiveSelection: false,
                 // controller: firstEmail,
-                initialValue: currEmail,
+                initialValue: currEmail.toString(),
                 decoration: InputDecoration(
-                  labelText: 'Student Name',
+                  labelText: 'Student EmailID',
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(15),
                     borderSide:
