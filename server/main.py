@@ -2,10 +2,11 @@ from flask import Flask, request, make_response
 from flask_cors import CORS, cross_origin
 from flask_mysqldb import MySQL
 from datetime import datetime
-from firebase_admin import auth
+from firebase_admin import auth, credentials
 from functools import wraps
 import MySQLdb.cursors as cur
 import pandas as pd
+import firebase_admin
 import secrets
 import string
 
@@ -31,7 +32,12 @@ def token_required(f):
         if not token:
             return make_response({'message': 'token is missing'}), 403
         try:
-            data = auth.verify_id_token(token)
+            if firebase_admin._apps:
+                data=auth.verify_id_token(token)
+            else:
+                cred=credentials.Certificate("cred_singhania.json")
+                firebase_admin.initialize_app(cred)
+                data=auth.verify_id_token(token)
         except:
             return make_response({'message': 'token in invalid'}), 403
         return f(*args, **kwargs)
@@ -41,7 +47,6 @@ def token_required(f):
 
 @app.route('/games', defaults={'game': None})
 @app.route('/games/<game>', methods=['GET'])
-@token_required
 def games(game):
     cursor = mysql.connection.cursor(cur.DictCursor)
     cursor.execute('select `Sports_Name`,`URL` from `games` order by `Sports_Name`')
@@ -65,13 +70,13 @@ def max_num():
 def slots(game):
     cursor = mysql.connection.cursor(cur.DictCursor)
     game = game.title().replace(' ', '_')
-    cursor.execute('select * from `Badminton`')
+    cursor.execute('select * from `{game}`')
     a = cursor.fetchall()
     d = {i: {} for i in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']}
     for i in d:
         for x in a:
             d[i][x['Slots']] = x[i]
-    return make_response({game: d})
+    return make_response({game.replace('_',' '): d})
 
 
 @app.route('/book', methods=['POST'])
@@ -228,7 +233,7 @@ def admin_bookings(game, date, slot):
         bookings = cursor.fetchall()
         return make_response({'message': bookings})
     else:
-        return make_response({'massage': 'You cannot access since you are not an admin'})
+        return make_response({'massage': 'You cannot access since you are not an admin'}), 403
 
 
 if __name__ == "__main__":
