@@ -46,13 +46,13 @@ class _DetailScreenState extends State<DetailScreen> {
     String JWTtoken = await FirebaseAuth.instance.currentUser!.getIdToken();
     Map<String, dynamic> mp = {};
     mp.putIfAbsent(firstNameController!.text, () => currEmail);
-    for (var i = 0; i < (length * 2)-2; i = i + 2) {
+    for (var i = 0; i < (length * 2) - 2; i = i + 2) {
       mp.putIfAbsent(_controller[i].text, () => _controller[i + 1].text);
     }
     TimeSlot date = TimeSlot();
 
     var body = jsonEncode({
-      "sports_name": 'Badminton',
+      "sports_name": SlotCard.gameChoosen,
       "date": SlotCard.dateChoosen,
       "slot": SlotCard.sltChoosen,
       "student_details": mp,
@@ -120,7 +120,7 @@ class _DetailScreenState extends State<DetailScreen> {
     circP = false;
     Map<String, dynamic> jsonData = await jsonDecode(response.body);
     print(response.statusCode);
-    maxLength = jsonData['Badminton'];
+    maxLength = jsonData[SlotCard.gameChoosen];
     setState(() {});
   }
 

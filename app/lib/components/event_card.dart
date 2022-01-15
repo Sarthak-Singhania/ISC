@@ -8,7 +8,7 @@ class EventCard extends StatefulWidget {
   String title;
   String uri;
   bool checkAdmin;
-  String game = '';
+  
   EventCard({required this.checkAdmin, required this.title, required this.uri});
 
   @override
@@ -17,6 +17,7 @@ class EventCard extends StatefulWidget {
 
 class _EventCardState extends State<EventCard> {
   double opacity = 0.5;
+  //String game = '';
 
   double spreadRadius = 5;
 
@@ -92,9 +93,10 @@ class _EventCardState extends State<EventCard> {
               ),
             ),
           )
-        : GestureDetector(
+        :
+         GestureDetector(
             onTap: () {
-              widget.game = widget.title;
+             
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) {

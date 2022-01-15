@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:isc/screens/detail_screen.dart';
 
 class SlotCard extends StatelessWidget {
-  String slt_time;
+  String slt_time = '';
   Color? color;
   var slotAvailable;
-  SlotCard(this.slt_time, this.color, this.slotAvailable);
+  var game;
+  SlotCard({this.game, required this.slt_time, this.color, this.slotAvailable});
   static String sltChoosen = '';
   static String dateChoosen = '';
   static int maxSlot = 0;
+  static String gameChoosen = '';
 
   @override
   Widget build(BuildContext context) {
@@ -17,6 +19,7 @@ class SlotCard extends StatelessWidget {
       onTap: () {
         sltChoosen = slt_time;
         maxSlot = slotAvailable;
+        gameChoosen = game;
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) {

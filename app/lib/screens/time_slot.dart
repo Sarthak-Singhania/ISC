@@ -132,11 +132,12 @@ class _TimeSlotState extends State<TimeSlot> {
                       itemCount: slotAvailable.length,
                       itemBuilder: (context, index) {
                         return SlotCard(
-                            slotAvailable[index],
-                            sport[slotAvailable[index]] > 0
+                            game:widget.game,
+                            slt_time:slotAvailable[index],
+                            color:sport[slotAvailable[index]] > 0
                                 ? Colors.green
                                 : Colors.grey,
-                            sport[slotAvailable[index]]);
+                           slotAvailable: sport[slotAvailable[index]]);
                       })
                 ],
               ),
