@@ -9,8 +9,6 @@ import 'package:flutter_custom_clippers/flutter_custom_clippers.dart';
 import 'package:isc/constants.dart';
 import 'package:transparent_image/transparent_image.dart';
 
-
-
 class TicketScreen extends StatefulWidget {
   TicketScreen(this.bookingId);
   final bookingId;
@@ -21,6 +19,7 @@ class TicketScreen extends StatefulWidget {
 
 class _TicketScreenState extends State<TicketScreen> {
   String currEmail = '';
+  String JWTtoken = '';
   bool circP = true;
   var response;
   var sNo;
@@ -35,9 +34,12 @@ class _TicketScreenState extends State<TicketScreen> {
 
   void getData() async {
     currEmail = FirebaseAuth.instance.currentUser!.email!;
+    JWTtoken = await FirebaseAuth.instance.currentUser!.getIdToken();
     print(currEmail);
-    var json = await http.get(Uri.parse(
-        kIpAddress+'/get_bookings/${currEmail}/${widget.bookingId}'));
+    var json = await http.get(
+        Uri.parse(
+            kIpAddress + '/get_bookings/${currEmail}/${widget.bookingId}'),
+        headers: {"x-access-token": JWTtoken});
     response = jsonDecode(json.body);
     var list = response['name'];
     for (var i = 0; i < list.length; i++) {
@@ -54,12 +56,13 @@ class _TicketScreenState extends State<TicketScreen> {
         jsonEncode({"snu_id": currEmail, "booking_id": widget.bookingId});
     try {
       final acceptResponse = await http.post(
-        Uri.parse(kIpAddress+'/confirm'),
+        Uri.parse(kIpAddress + '/confirm'),
         headers: {
           'Content-Type': 'application/json',
           'Accept': '*/*',
           'Accept-Encoding': 'gzip, deflate, br',
-          'Access-Control-Allow-Origin': ' *'
+          'Access-Control-Allow-Origin': ' *',
+          "x-access-token": JWTtoken
         },
         body: body,
       );
@@ -79,12 +82,13 @@ class _TicketScreenState extends State<TicketScreen> {
         jsonEncode({"snu_id": currEmail, "booking_id": widget.bookingId});
     try {
       final acceptResponse = await http.post(
-        Uri.parse(kIpAddress+'/cancel'),
+        Uri.parse(kIpAddress + '/cancel'),
         headers: {
           'Content-Type': 'application/json',
           'Accept': '*/*',
           'Accept-Encoding': 'gzip, deflate, br',
-          'Access-Control-Allow-Origin': ' *'
+          'Access-Control-Allow-Origin': ' *',
+          "x-access-token": JWTtoken
         },
         body: body,
       );
@@ -102,12 +106,13 @@ class _TicketScreenState extends State<TicketScreen> {
         jsonEncode({"snu_id": currEmail, "booking_id": widget.bookingId});
     try {
       final acceptResponse = await http.post(
-        Uri.parse(kIpAddress+'/reject'),
+        Uri.parse(kIpAddress + '/reject'),
         headers: {
           'Content-Type': 'application/json',
           'Accept': '*/*',
           'Accept-Encoding': 'gzip, deflate, br',
-          'Access-Control-Allow-Origin': ' *'
+          'Access-Control-Allow-Origin': ' *',
+          "x-access-token": JWTtoken
         },
         body: body,
       );
@@ -225,7 +230,7 @@ class _TicketScreenState extends State<TicketScreen> {
                           ),
                           TextButton(
                             onPressed: () {
-                               Navigator.of(context).pop();
+                              Navigator.of(context).pop();
                               cancelResponse();
                             },
                             child: Text('Yes'),

@@ -26,9 +26,12 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
   Future<void> getData() async {
     String currEmail = FirebaseAuth.instance.currentUser!.email!;
+    String JWTtoken = await FirebaseAuth.instance.currentUser!.getIdToken();
     print(currEmail);
     var response =
-        await http.get(Uri.parse(kIpAddress + '/pending/${currEmail}'));
+        await http.get(Uri.parse(kIpAddress + '/pending/${currEmail}'),headers: {
+        "x-access-token":JWTtoken
+      });
     var jsonData = await jsonDecode(response.body);
     print(jsonData);
     pendingList = jsonData["message"];

@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+//import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -17,6 +19,7 @@ class EventScreen extends StatefulWidget {
 class _EventScreenState extends State<EventScreen> {
   List Sports = [];
   List ImgUri = [];
+  // String JWTtoken='';
   bool isInternet = true;
   bool circP = true;
   @override
@@ -27,22 +30,25 @@ class _EventScreenState extends State<EventScreen> {
   }
 
   void getData() async {
-    var response = await http.get(Uri.parse(kIpAddress + '/games'));
+     String JWTtoken = await FirebaseAuth.instance.currentUser!.getIdToken();
+    var response = await http.get(Uri.parse(kIpAddress + '/games'),
+       );
     Map<String, dynamic> jsonData = await jsonDecode(response.body);
     print(response.statusCode);
     jsonData.forEach((k, v) {
       Sports.add(k);
       ImgUri.add(v);
     });
-    print(Sports);
+    // print(Sports);
     circP = false;
-
-    print(ImgUri[2]);
+    print(JWTtoken);
+    //print(ImgUri[2]);
     setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
+    //getData();
     Size size = MediaQuery.of(context).size;
     return Scaffold(
       body: circP

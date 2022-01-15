@@ -22,6 +22,10 @@ class DetailScreen extends StatefulWidget {
 }
 
 class _DetailScreenState extends State<DetailScreen> {
+  TextEditingController? firstNameController;
+  String firstName = '';
+  TextEditingController firstEmail = TextEditingController();
+  String currEmail = '';
   int length = 1;
   int? maxLength;
   dynamic rollNo;
@@ -38,7 +42,9 @@ class _DetailScreenState extends State<DetailScreen> {
   }
 
   void postData() async {
+    String JWTtoken = await FirebaseAuth.instance.currentUser!.getIdToken();
     Map<String, dynamic> mp = {};
+
     for (var i = 0; i < length * 2; i = i + 2) {
       mp.putIfAbsent(_controller[i].text, () => _controller[i + 1].text);
     }
@@ -54,12 +60,13 @@ class _DetailScreenState extends State<DetailScreen> {
     print(body);
     try {
       final response = await http.post(
-        Uri.parse(kIpAddress+'/book'),
+        Uri.parse(kIpAddress + '/book'),
         headers: {
           'Content-Type': 'application/json',
           'Accept': '*/*',
           'Accept-Encoding': 'gzip, deflate, br',
-          'Access-Control-Allow-Origin': ' *'
+          'Access-Control-Allow-Origin': ' *',
+          "x-access-token": JWTtoken,
         },
         body: body,
       );
@@ -67,48 +74,56 @@ class _DetailScreenState extends State<DetailScreen> {
       print(response.body);
       Fluttertoast.showToast(msg: "YOUR DETAILS HAS BEEN SUBMITTED ");
       showDialog(
-                    context: context,
-                    builder: (context) {
-                      return AlertDialog(
-                        content: Text(
-                            'Do you want to book more slots this sport?'),
-                        actions: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                               Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => BookingScreen()));
-                            },
-                            child: Text('No'),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                               Navigator.of(context).pop();
-                               Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => TimeSlot()));
-                            },
-                            child: Text('Yes'),
-                          ),
-                        ],
-                      );
-                    });
-     
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              content: Text('Do you want to book more slots this sport?'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    Navigator.of(context).pushReplacement(MaterialPageRoute(
+                        builder: (context) => BookingScreen()));
+                  },
+                  child: Text('No'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(builder: (context) => TimeSlot()));
+                  },
+                  child: Text('Yes'),
+                ),
+              ],
+            );
+          });
     } catch (e) {
       print(e);
     }
   }
 
   void getData() async {
-    var response = await http.get(Uri.parse(kIpAddress+'/max-person'));
+    currEmail = await FirebaseAuth.instance.currentUser!.email!;
+    var response = await http.get(Uri.parse(kIpAddress + '/max-person'));
+    var collection = FirebaseFirestore.instance.collection('users');
+    var docSnapshot = await collection.doc(currEmail).get();
+    if (docSnapshot.exists) {
+      Map<String, dynamic>? data = docSnapshot.data();
+      firstName = data?['Name']; // <-- The value you want to retrieve.
+      // Call setState if needed.
+    }
+
+    firstNameController = TextEditingController(text: firstName);
+
     Map<String, dynamic> jsonData = await jsonDecode(response.body);
     print(response.statusCode);
     maxLength = jsonData[EventCard.game];
-   
   }
 
   final sNames = [
-    'First Student Name',
-    'SNU ID',
+    // 'First Student Name',
+    // 'SNU ID',
     'Second Student Name',
     'SNU ID',
     'Third Student Name',
@@ -146,11 +161,9 @@ class _DetailScreenState extends State<DetailScreen> {
           title: Text('Please fill in your details'),
           leading: GestureDetector(
               onTap: () {
-                if(length==SlotCard.maxSlot){
-                  Fluttertoast.showToast(
-                      msg: "No more slots available");
-                }
-                else if (length == maxLength) {
+                if (length == SlotCard.maxSlot) {
+                  Fluttertoast.showToast(msg: "No more slots available");
+                } else if (length == maxLength) {
                   Fluttertoast.showToast(
                       msg: "You have reached maximum no. of people");
                 } else {
@@ -165,6 +178,51 @@ class _DetailScreenState extends State<DetailScreen> {
         ),
         body: ListView(
           children: [
+            Container(
+              margin: EdgeInsets.all(10),
+              child: TextFormField(
+                controller: firstNameController,
+                decoration: InputDecoration(
+                  labelText: 'First Student Name',
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide:
+                        BorderSide(color: Colors.greenAccent, width: 5.0),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: Colors.blue, width: 3.0),
+                  ),
+                ),
+                onSaved: (value) {
+                  firstNameController!.text = value!;
+                },
+              ),
+            ),
+            Container(
+              margin: EdgeInsets.all(10),
+              child: TextFormField(
+                focusNode: FocusNode(),
+                enableInteractiveSelection: false,
+                // controller: firstEmail,
+                initialValue: currEmail,
+                decoration: InputDecoration(
+                  labelText: 'Student Name',
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide:
+                        BorderSide(color: Colors.greenAccent, width: 5.0),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: Colors.blue, width: 3.0),
+                  ),
+                ),
+                // onSaved: (value) {
+                //   firstName.text = value!;
+                // },
+              ),
+            ),
             ListView.builder(
                 shrinkWrap: true,
                 itemCount: length * 2,

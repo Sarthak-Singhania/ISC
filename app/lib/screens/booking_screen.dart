@@ -26,9 +26,10 @@ class _BookingScreenState extends State<BookingScreen> {
 
   Future<void> getData() async {
     String currEmail = FirebaseAuth.instance.currentUser!.email!;
+    String JWTtoken = await FirebaseAuth.instance.currentUser!.getIdToken();
     print(currEmail);
     var response = await http
-        .get(Uri.parse(kIpAddress+'/get_bookings/${currEmail}'));
+        .get(Uri.parse(kIpAddress+'/get_bookings/${currEmail}'), headers: {"x-access-token": JWTtoken});
     var jsonData = await jsonDecode(response.body);
     print(jsonData);
     bookingList = jsonData["message"];
@@ -68,6 +69,7 @@ class _BookingScreenState extends State<BookingScreen> {
                   child: ListView(
                     children: [
                       ListView.builder(
+                      physics: ScrollPhysics(),
                           shrinkWrap: true,
                           itemCount: bookingList.length,
                           itemBuilder: (context, index) {
