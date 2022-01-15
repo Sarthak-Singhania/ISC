@@ -13,8 +13,14 @@ cur=db.cursor(dictionary=True)
 #         cur.execute(com,val)
 #         db.commit()
 
-game='Tennis'
-slot='7:00am-8:30am'
-date=datetime.strptime('13/01/2022', "%d/%m/%Y").strftime("%Y-%m-%d")
-cur.execute(f"select Student_Name,SNU_ID from `bookings` where `Game`='{game}' and `Slot`='{slot}' and `Date`='{date}' and `Confirm`='1'")
-print(cur.fetchall())
+# game='Tennis'
+# slot='7:00am-8:30am'
+# date=datetime.strptime('13/01/2022', "%d/%m/%Y").strftime("%Y-%m-%d")
+# cur.execute(f"select Student_Name,SNU_ID from `bookings` where `Game`='{game}' and `Slot`='{slot}' and `Date`='{date}' and `Confirm`='1'")
+# print(cur.fetchall())
+cur.execute('select * from `Badminton`')
+a=cur.fetchall()
+d={i:{} for i in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']}
+for i in d:
+    for x in a:
+        d[i][x['Slots']]=x[i]
