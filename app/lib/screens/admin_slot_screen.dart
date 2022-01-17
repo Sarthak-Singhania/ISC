@@ -19,6 +19,8 @@ class _AdminSlotScreenState extends State<AdminSlotScreen> {
   dynamic pendingList = [];
   bool emptyList = false;
   bool circP = true;
+  TextEditingController slotNumberController =
+      TextEditingController(text: '20');
   @override
   void initState() {
     super.initState();
@@ -57,21 +59,6 @@ class _AdminSlotScreenState extends State<AdminSlotScreen> {
         appBar: AppBar(
           centerTitle: true,
           title: Text('BOOKINGS'),
-          actions: [
-            Switcher(
-              value: false,
-              size: SwitcherSize.small,
-              switcherButtonRadius: 70,
-              enabledSwitcherButtonRotate: true,
-              iconOff: Icons.lock_open,
-              iconOn: Icons.lock,
-              colorOff: Colors.green,
-              colorOn: Colors.red,
-              onChanged: (bool state) {
-                //
-              },
-            ),
-          ],
         ),
         body: SafeArea(
           child: Center(
@@ -88,23 +75,68 @@ class _AdminSlotScreenState extends State<AdminSlotScreen> {
                       ))
                     : Column(
                         children: [
+                          SizedBox(height: size.height * 0.03),
+                          Row(
+                            children: [
+                              Spacer(),
+                              Container(
+                                width: size.width * 0.25,
+                                height: size.width * 0.15,
+                                child: TextFormField(
+                                    controller: slotNumberController,
+                                    decoration: InputDecoration(
+                                      focusedBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(15),
+                                        borderSide: BorderSide(
+                                            color: Colors.purple, width: 1.5),
+                                      ),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                        borderSide: BorderSide(
+                                            color: Colors.purple, width: 1.5),
+                                      ),
+                                      contentPadding: EdgeInsets.only(
+                                          left:
+                                              20), // add padding to adjust text
+                                      suffixIcon: Icon(
+                                        Icons.edit,
+                                        color: Colors.black,
+                                      ),
+                                    )),
+                              ),
+                              Spacer(
+                                flex: 5,
+                              ),
+                              Switcher(
+                                value: false,
+                                size: SwitcherSize.medium,
+                                switcherButtonRadius: 70,
+                                enabledSwitcherButtonRotate: true,
+                                iconOff: Icons.lock_open,
+                                iconOn: Icons.lock,
+                                colorOff: Colors.green,
+                                colorOn: Colors.red,
+                                onChanged: (bool state) {
+                                  //
+                                },
+                              ),
+                              Spacer(),
+                            ],
+                          ),
+                          SizedBox(height: size.height * 0.03),
                           Expanded(
-                            child: ListView(
-                              children: [
-                                ListView.builder(
-                                    physics: ScrollPhysics(),
-                                    shrinkWrap: true,
-                                    itemCount: pendingList.length,
-                                    itemBuilder: (context, index) {
-                                      return AdminSlotCard(
-                                        size: size,
-                                        studentName: pendingList[index]
-                                            ['Student_Name'],
-                                        snuId: pendingList[index]['SNU_ID'],
-                                      );
-                                    })
-                              ],
-                            ),
+                            child: ListView.builder(
+                                physics: ScrollPhysics(),
+                                shrinkWrap: true,
+                                itemCount: pendingList.length,
+                                itemBuilder: (context, index) {
+                                  return AdminSlotCard(
+                                    size: size,
+                                    studentName: pendingList[index]
+                                        ['Student_Name'],
+                                    snuId: pendingList[index]['SNU_ID'],
+                                  );
+                                }),
                           ),
                         ],
                       ),
@@ -129,10 +161,10 @@ class AdminSlotCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: EdgeInsets.all(10),
+      padding: EdgeInsets.only(left: 10),
       width: size.width * 0.9,
       height: size.height * 0.1,
-      child: Center(
-          child: Column(
+      child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -151,7 +183,7 @@ class AdminSlotCard extends StatelessWidget {
             ),
           ),
         ],
-      )),
+      ),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(10),

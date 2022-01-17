@@ -11,17 +11,17 @@ import 'package:http/http.dart' as http;
 class TimeSlot extends StatefulWidget {
   var game;
   var adminCheck;
-  TimeSlot({this.game,this.adminCheck});
+  TimeSlot({this.game, this.adminCheck});
 
   @override
   _TimeSlotState createState() => _TimeSlotState();
 }
 
 class _TimeSlotState extends State<TimeSlot> {
-  @override
+  int calendarRange = 0;
   bool _decideWhichDayToEnable(DateTime day) {
     if ((day.isAfter(DateTime.now().subtract(Duration(days: 1))) &&
-        day.isBefore(DateTime.now().add(Duration(days: 6))))) {
+        day.isBefore(DateTime.now().add(Duration(days: 7-calendarRange-1))))) {
       return true;
     }
     return false;
@@ -76,7 +76,8 @@ class _TimeSlotState extends State<TimeSlot> {
   }
 
   selectDate(context) async {
-    final initialDate = DateTime.now().add(Duration(days: 1));
+    final initialDate = DateTime.now();
+    calendarRange = initialDate.weekday;
     final newDate = await showDatePicker(
         context: context,
         initialDate: initialDate,
@@ -133,7 +134,7 @@ class _TimeSlotState extends State<TimeSlot> {
                       itemCount: slotAvailable.length,
                       itemBuilder: (context, index) {
                         return SlotCard(
-                            adminCheck:widget.adminCheck,
+                            adminCheck: widget.adminCheck,
                             game: widget.game,
                             slt_time: slotAvailable[index],
                             color: sport[slotAvailable[index]] > 0
