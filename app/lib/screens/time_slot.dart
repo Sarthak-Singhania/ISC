@@ -7,6 +7,8 @@ import 'package:isc/components/event_card.dart';
 import 'package:isc/constants.dart';
 import 'package:isc/components/slot.dart';
 import 'package:http/http.dart' as http;
+import 'package:switcher/core/switcher_size.dart';
+import 'package:switcher/switcher.dart';
 
 class TimeSlot extends StatefulWidget {
   var game;
@@ -21,7 +23,8 @@ class _TimeSlotState extends State<TimeSlot> {
   int calendarRange = 0;
   bool _decideWhichDayToEnable(DateTime day) {
     if ((day.isAfter(DateTime.now().subtract(Duration(days: 1))) &&
-        day.isBefore(DateTime.now().add(Duration(days: 7-calendarRange-1))))) {
+        day.isBefore(
+            DateTime.now().add(Duration(days: 7 - calendarRange - 1))))) {
       return true;
     }
     return false;
@@ -99,6 +102,7 @@ class _TimeSlotState extends State<TimeSlot> {
     return Scaffold(
         appBar: AppBar(
           backgroundColor: kPrimaryColor,
+          centerTitle: true,
           title: Text(
             "Select your timeslot",
             style: TextStyle(
@@ -107,24 +111,66 @@ class _TimeSlotState extends State<TimeSlot> {
         ),
         body: Column(
           children: [
-            GestureDetector(
-              onTap: () {
-                selectDate(context);
-              },
-              child: Container(
-                alignment: Alignment.center,
-                width: size.width * 0.85,
-                margin: EdgeInsets.only(top: 5),
-                padding: EdgeInsets.all(15),
-                decoration: BoxDecoration(color: kPrimaryColor),
-                child: Text(
-                  selectedDate == null
-                      ? "CHOOSE YOUR DATE"
-                      : '${selectedDate!.day}-${selectedDate!.month}-${selectedDate!.year}',
-                  style: TextStyle(color: Colors.white, fontSize: 17),
-                ),
-              ),
-            ),
+            widget.adminCheck == false
+                ? GestureDetector(
+                    onTap: () {
+                      selectDate(context);
+                    },
+                    child: Container(
+                      alignment: Alignment.center,
+                      width: size.width * 0.85,
+                      margin: EdgeInsets.only(top: 5),
+                      padding: EdgeInsets.all(15),
+                      decoration: BoxDecoration(color: kPrimaryColor),
+                      child: Text(
+                        selectedDate == null
+                            ? "CHOOSE YOUR DATE"
+                            : '${selectedDate!.day}-${selectedDate!.month}-${selectedDate!.year}',
+                        style: TextStyle(color: Colors.white, fontSize: 17),
+                      ),
+                    ),
+                  )
+                : Row(
+                    children: [
+                      Spacer(),
+                      GestureDetector(
+                        onTap: () {
+                          selectDate(context);
+                        },
+                        child: Container(
+                          alignment: Alignment.center,
+                          width: size.width * 0.4,
+                          margin: EdgeInsets.only(top: 5),
+                          padding: EdgeInsets.all(15),
+                          decoration: BoxDecoration(color: kPrimaryColor),
+                          child: Text(
+                            selectedDate == null
+                                ? "CHOOSE YOUR DATE"
+                                : '${selectedDate!.day}-${selectedDate!.month}-${selectedDate!.year}',
+                            style: TextStyle(color: Colors.white, fontSize: 13),
+                          ),
+                        ),
+                      ),
+                      Spacer(flex: 4),
+                      GestureDetector(
+                        onTap: () {
+                          selectDate(context);
+                        },
+                        child: Container(
+                          alignment: Alignment.center,
+                          width: size.width * 0.4,
+                          margin: EdgeInsets.only(top: 5),
+                          padding: EdgeInsets.all(15),
+                          decoration: BoxDecoration(color: Colors.red),
+                          child: Text(
+                            'Disable',
+                            style: TextStyle(color: Colors.white, fontSize: 14),
+                          ),
+                        ),
+                      ),
+                      Spacer(),
+                    ],
+                  ),
             Expanded(
               child: ListView(
                 children: [
