@@ -22,8 +22,11 @@ class TimeSlot extends StatefulWidget {
 
 class _TimeSlotState extends State<TimeSlot> {
   bool isDisabled = true;
+  String JWTtoken = '';
   int calendarRange = 0;
+  bool isLoading = false;
   bool isDateChoosen = false;
+  Response? oldResponse;
   bool _decideWhichDayToEnable(DateTime day) {
     if ((day.isAfter(DateTime.now().subtract(Duration(days: 1))) &&
         day.isBefore(
@@ -56,9 +59,9 @@ class _TimeSlotState extends State<TimeSlot> {
   }
 
   void disbaleSlot() async {
-    String JWTtoken = await FirebaseAuth.instance.currentUser!.getIdToken();
+    JWTtoken = await FirebaseAuth.instance.currentUser!.getIdToken();
 
-    TimeSlot date = TimeSlot();
+   
 
     var body = jsonEncode({
       "category": "date",
@@ -86,7 +89,7 @@ class _TimeSlotState extends State<TimeSlot> {
   }
 
   void enableSlot() async {
-    String JWTtoken = await FirebaseAuth.instance.currentUser!.getIdToken();
+    JWTtoken = await FirebaseAuth.instance.currentUser!.getIdToken();
 
     TimeSlot date = TimeSlot();
 
@@ -116,12 +119,13 @@ class _TimeSlotState extends State<TimeSlot> {
   }
 
   void getData() async {
-    String JWTtoken = await FirebaseAuth.instance.currentUser!.getIdToken();
+    JWTtoken = await FirebaseAuth.instance.currentUser!.getIdToken();
     //print(JWTtoken);
     response = await http.get(
         Uri.parse(kIpAddress + '/slots' + '/' + widget.game),
         headers: {"x-access-token": JWTtoken});
     jsonData = await jsonDecode(response!.body);
+    oldResponse = response;
   }
 
   Future<void> getSlot(String day) async {
@@ -144,11 +148,6 @@ class _TimeSlotState extends State<TimeSlot> {
     } else {
       isDisabled = true;
     }
-
-    // print(Sports[3]);
-    // circP = false;
-
-    // print(ImgUri[2]);
     setState(() {});
   }
 
@@ -237,12 +236,34 @@ class _TimeSlotState extends State<TimeSlot> {
                               enableSlot();
                               isDisabled = true;
                             }
-                            await Future.delayed(const Duration(seconds: 5),
-                                () {
-                              print("Printing first");
-                            });
-                            print("Printing baad me");
-                            getData();
+                            // await Future.delayed(const Duration(seconds: 2),
+                            //     () {
+                            //   print("Printing first");
+                            // });
+                            // print("Printing baad me");
+
+                            //getData();
+
+                            //print(JWTtoken);
+
+                            response = await http.get(
+                                Uri.parse(
+                                    kIpAddress + '/slots' + '/' + widget.game),
+                                headers: {"x-access-token": JWTtoken});
+                            jsonData = await jsonDecode(response!.body);
+                            int counter = 1;
+                            while (response == oldResponse) {
+                              print(counter);
+                              counter++;
+                              response = await http.get(
+                                  Uri.parse(kIpAddress +
+                                      '/slots' +
+                                      '/' +
+                                      widget.game),
+                                  headers: {"x-access-token": JWTtoken});
+                              jsonData = await jsonDecode(response!.body);
+                            }
+
                             getSlot(weekDays[selectedDate!.weekday - 1]);
                           }
                         },

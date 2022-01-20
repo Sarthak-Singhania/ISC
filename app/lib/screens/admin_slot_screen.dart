@@ -19,6 +19,7 @@ class _AdminSlotScreenState extends State<AdminSlotScreen> {
   dynamic pendingList = [];
   bool emptyList = false;
   bool circP = true;
+  String JWTtoken = " ";
   TextEditingController slotNumberController =
       TextEditingController(text: '20');
   @override
@@ -27,9 +28,67 @@ class _AdminSlotScreenState extends State<AdminSlotScreen> {
     getData();
   }
 
+  void disbaleSlot() async {
+    JWTtoken = await FirebaseAuth.instance.currentUser!.getIdToken();
+
+    var body = jsonEncode({
+      "category": "slot",
+      "game": SlotCard.gameChoosen,
+      "date": SlotCard.dateChoosen,
+      "slot": SlotCard.sltChoosen,
+    });
+
+    print(body);
+    try {
+      final response = await http.post(
+        Uri.parse(kIpAddress + '/stop'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': '*/*',
+          'Accept-Encoding': 'gzip, deflate, br',
+          'Access-Control-Allow-Origin': ' *',
+          "x-access-token": JWTtoken,
+          "admin-header": "YES"
+        },
+        body: body,
+      );
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  void enableSlot() async {
+    JWTtoken = await FirebaseAuth.instance.currentUser!.getIdToken();
+
+    var body = jsonEncode({
+      "category": "slot",
+      "game": SlotCard.gameChoosen,
+      "date": SlotCard.dateChoosen,
+      "slot": SlotCard.sltChoosen,
+    });
+
+    print(body);
+    try {
+      final response = await http.post(
+        Uri.parse(kIpAddress + '/unstop'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': '*/*',
+          'Accept-Encoding': 'gzip, deflate, br',
+          'Access-Control-Allow-Origin': ' *',
+          "x-access-token": JWTtoken,
+          "admin-header": "YES"
+        },
+        body: body,
+      );
+    } catch (e) {
+      print(e);
+    }
+  }
+
   Future<void> getData() async {
     String currEmail = FirebaseAuth.instance.currentUser!.email!;
-    String JWTtoken = await FirebaseAuth.instance.currentUser!.getIdToken();
+    JWTtoken = await FirebaseAuth.instance.currentUser!.getIdToken();
     print(currEmail);
     print(SlotCard.dateChoosen);
     print(SlotCard.gameChoosen);
@@ -62,84 +121,89 @@ class _AdminSlotScreenState extends State<AdminSlotScreen> {
         ),
         body: SafeArea(
           child: Center(
-            child: emptyList == true
+            child: circP
                 ? Center(
-                    child: Text(
-                    'No bookings',
-                    style: TextStyle(fontSize: 20),
+                    child: CircularProgressIndicator(
+                    color: Colors.blue,
                   ))
-                : circP
-                    ? Center(
-                        child: CircularProgressIndicator(
-                        color: Colors.blue,
-                      ))
-                    : Column(
+                : Column(
+                    children: [
+                      SizedBox(height: size.height * 0.03),
+                      Row(
                         children: [
-                          SizedBox(height: size.height * 0.03),
-                          Row(
-                            children: [
-                              Spacer(),
-                              Container(
-                                width: size.width * 0.25,
-                                height: size.width * 0.15,
-                                child: TextFormField(
-                                    controller: slotNumberController,
-                                    decoration: InputDecoration(
-                                      focusedBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(15),
-                                        borderSide: BorderSide(
-                                            color: Colors.purple, width: 1.5),
-                                      ),
-                                      enabledBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(10),
-                                        borderSide: BorderSide(
-                                            color: Colors.purple, width: 1.5),
-                                      ),
-                                      contentPadding: EdgeInsets.only(
-                                          left:
-                                              20), // add padding to adjust text
-                                      suffixIcon: Icon(
-                                        Icons.edit,
-                                        color: Colors.black,
-                                      ),
-                                    )),
-                              ),
-                              Spacer(
-                                flex: 5,
-                              ),
-                              Switcher(
-                                value: false,
-                                size: SwitcherSize.medium,
-                                switcherButtonRadius: 70,
-                                enabledSwitcherButtonRotate: true,
-                                iconOff: Icons.lock_open,
-                                iconOn: Icons.lock,
-                                colorOff: Colors.green,
-                                colorOn: Colors.red,
-                                onChanged: (bool state) {
-                                  //
-                                },
-                              ),
-                              Spacer(),
-                            ],
+                          Spacer(),
+                          Container(
+                            width: size.width * 0.25,
+                            height: size.width * 0.15,
+                            child: TextFormField(
+                                controller: slotNumberController,
+                                decoration: InputDecoration(
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(15),
+                                    borderSide: BorderSide(
+                                        color: Colors.purple, width: 1.5),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    borderSide: BorderSide(
+                                        color: Colors.purple, width: 1.5),
+                                  ),
+                                  contentPadding: EdgeInsets.only(
+                                      left: 20), // add padding to adjust text
+                                  suffixIcon: Icon(
+                                    Icons.edit,
+                                    color: Colors.black,
+                                  ),
+                                )),
                           ),
-                          SizedBox(height: size.height * 0.03),
-                          Expanded(
-                            child: ListView.builder(
-                                physics: ScrollPhysics(),
-                                shrinkWrap: true,
-                                itemCount: pendingList.length,
-                                itemBuilder: (context, index) {
-                                  return AdminSlotCard(
-                                    size: size,
-                                    studentName: pendingList[index]
-                                        ['Student_Name'],
-                                    snuId: pendingList[index]['SNU_ID'],
-                                  );
-                                }),
+                          Spacer(
+                            flex: 5,
                           ),
+                          Switcher(
+                            value: false,
+                            size: SwitcherSize.medium,
+                            switcherButtonRadius: 70,
+                            enabledSwitcherButtonRotate: true,
+                            iconOff: Icons.lock_open,
+                            iconOn: Icons.lock,
+                            colorOff: Colors.green,
+                            colorOn: Colors.red,
+                            onChanged: (bool state) {
+                              if (state) {
+                                disbaleSlot();
+                                getData();
+                              } else {
+                                enableSlot();
+                                 getData();
+                              }
+                            },
+                          ),
+                          Spacer(),
                         ],
                       ),
+                      SizedBox(height: size.height * 0.03),
+                      emptyList == true
+                          ? Center(
+                              child: Text(
+                              'No bookings',
+                              style: TextStyle(fontSize: 20),
+                            ))
+                          : Expanded(
+                              child: ListView.builder(
+                                  physics: ScrollPhysics(),
+                                  shrinkWrap: true,
+                                  itemCount: pendingList.length,
+                                  itemBuilder: (context, index) {
+                                    return AdminSlotCard(
+                                      size: size,
+                                      studentName: pendingList[index]
+                                          ['Student_Name'],
+                                      snuId: pendingList[index]['SNU_ID'],
+                                    );
+                                  }),
+                            ),
+                    ],
+                  ),
           ),
         ));
   }
