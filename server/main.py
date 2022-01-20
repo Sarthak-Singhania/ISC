@@ -49,7 +49,7 @@ def token_required(f):
 @app.route('/games/<game>', methods=['GET'])
 def games(game):
     cursor = mysql.connection.cursor(cur.DictCursor)
-    cursor.execute('select `Sports_Name`,`URL` from `games` order by `Sports_Name`')
+    cursor.execute("select `Sports_Name`,`URL` from `games` order by `Sports_Name` and `Enabled`='1'")
     sports = {i['Sports_Name']: i['URL'] for i in cursor.fetchall()}
     if game:
         return sports[game.title()]
@@ -70,7 +70,7 @@ def max_num():
 def slots(game):
     cursor = mysql.connection.cursor(cur.DictCursor)
     game = game.title().replace(' ', '_')
-    cursor.execute('select * from `{game}`')
+    cursor.execute(f'select * from `{game}`')
     a = cursor.fetchall()
     d = {i: {} for i in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']}
     for i in d:
@@ -204,6 +204,12 @@ def cancel():
     mysql.connection.commit()
     cursor.execute(f"update `{sports_name}` set {day}={day}+1 where Slots='{slot}'")
     mysql.connection.commit()
+    # if round((datetime.strptime(str(datetime.now().strftime('%Y-%m-%d'))+' '+slot[:slot.find('-')],'%Y-%m-%d %I:%M%p')-datetime.now()).total_seconds()/60)<60:
+    #     cursor.execute(f"select `SNU_ID` from `Blacklist`")
+    #     names=[i['SNU_ID'] for i in cursor.fetchall()]
+    #     if snu_id in names:
+    #         cursor.execute(f"update `Blacklist` set `Cancellation_Num`=`Cancellation_Num`+1 where `SNU_ID`='{snu_id}'")
+    #     else:
     return 'Booking cancelled'
 
 
@@ -225,16 +231,75 @@ def pending(snu_id):
 @app.route('/admin-bookings/<game>/<date>/<slot>', methods=['GET'])
 @token_required
 def admin_bookings(game, date, slot):
-    if request.headers['admin-header'] == 'Yes':
+    if request.headers['admin-header'].title()=='Yes':
         cursor = mysql.connection.cursor(cur.DictCursor)
         date = datetime.strptime(date, '%d-%m-%Y').strftime('%Y-%m-%d')
         cursor.execute(
-            f"select `Student_Name`,`SNU_ID` from `bookings` where `Game`='{game}' and `Slot`='{slot}' and `Date`='{date}' and `Confirm`='1'")
+            f"select `Student_Name`,`SNU_ID` from `bookings` where `Game`='{game.title().replace(' ','_')}' and `Slot`='{slot}' and `Date`='{date}' and `Confirm`='1'")
         bookings = cursor.fetchall()
         return make_response({'message': bookings})
     else:
-        return make_response({'massage': 'You cannot access since you are not an admin'}), 403
+        return make_response({'message': 'You cannot access since you are not an admin'}), 403
 
+
+@app.route('/stop',methods=['POST'])
+@token_required
+def stop():
+    x=request.get_json()
+    cursor = mysql.connection.cursor(cur.DictCursor)
+    if request.headers['admin-header'].title()=='Yes':
+        if x['category']=='game':
+            game=x['game'].title().replace(' ','_')
+            cursor.execute(f"update `games` set `Enabled`='0' where `Sports_Name`='{game}' ")
+            mysql.connection.commit()
+            return make_response({'message':f'booking stopped for {game}'})
+        elif x['category']=='date':
+            game=x['game'].title().replace(' ','_')
+            day=pd.to_datetime(x['date']).day_name()
+            cursor.execute(f"update `{game}` set `{day}`='0'")
+            mysql.connection.commit()
+            return make_response({'message':f'booking stopped for {game} for the day {x["date"]}'})
+        elif x['category']=='slot':
+            game=x['game'].title().replace(' ','_')
+            day=pd.to_datetime(x['date']).day_name()
+            slot=x['slot'].lower()
+            cursor.execute(f"update `{game}` set `{day}`='0' where `Slots`='{slot}'")
+            mysql.connection.commit()
+            return make_response({'message':f'booking stopped for {game} for the day {x["date"]} for {slot} slot'})
+    else:
+        return make_response({'message': 'You cannot access since you are not an admin'}), 403
+
+
+@app.route('/unstop',methods=['POST'])
+@token_required
+def unstop():
+    x=request.get_json()
+    cursor = mysql.connection.cursor(cur.DictCursor)
+    if request.headers['admin-header'].title()=='Yes':
+        if x['category']=='game':
+            game=x['game'].title().replace(' ','_')
+            cursor.execute(f"update `games` set `Enabled`='1' where `Sports_Name`='{game}' ")
+            mysql.connection.commit()
+            return make_response({'message':f'booking started for {game}'})
+        elif x['category']=='date':
+            game=x['game'].title().replace(' ','_')
+            day=pd.to_datetime(x['date']).day_name()
+            cursor.execute(f"select `Max_Person` from `games` where `Sports_Name`='{game}'")
+            a=cursor.fetchone()['Max_Person']
+            cursor.execute(f"update `{game}` set `{day}`='{a}'")
+            mysql.connection.commit()
+            return make_response({'message':f'booking started for {game} for the day {x["date"]}'})
+        elif x['category']=='slot':
+            game=x['game'].title().replace(' ','_')
+            day=pd.to_datetime(x['date']).day_name()
+            slot=x['slot'].lower()
+            cursor.execute(f"select `Max_Person` from `games` where `Sports_Name`='{game}'")
+            a=cursor.fetchone()['Max_Person']
+            cursor.execute(f"update `{game}` set `{day}`='{a}' where `Slots`='{slot}'")
+            mysql.connection.commit()
+            return make_response({'message':f'booking started for {game} for the day {x["date"]} for {slot} slot'})
+    else:
+        return make_response({'message': 'You cannot access since you are not an admin'}), 403
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=8080, debug=True)
