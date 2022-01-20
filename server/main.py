@@ -247,8 +247,10 @@ def admin_bookings(game, date, slot):
 def stop():
     x=request.get_json()
     cursor = mysql.connection.cursor(cur.DictCursor)
+    date = datetime.now().strftime('%Y-%m-%d')
     if request.headers['admin-header'].title()=='Yes':
         if x['category']=='game':
+            
             game=x['game'].title().replace(' ','_')
             cursor.execute(f"update `games` set `Enabled`='0' where `Sports_Name`='{game}' ")
             mysql.connection.commit()
@@ -284,8 +286,8 @@ def unstop():
         elif x['category']=='date':
             game=x['game'].title().replace(' ','_')
             day=pd.to_datetime(x['date']).day_name()
-            cursor.execute(f"select `Max_Person` from `games` where `Sports_Name`='{game}'")
-            a=cursor.fetchone()['Max_Person']
+            cursor.execute(f"select `Capacity` from `games` where `Sports_Name`='{game}'")
+            a=cursor.fetchone()['Capacity']
             cursor.execute(f"update `{game}` set `{day}`='{a}'")
             mysql.connection.commit()
             return make_response({'message':f'booking started for {game} for the day {x["date"]}'})
@@ -293,8 +295,8 @@ def unstop():
             game=x['game'].title().replace(' ','_')
             day=pd.to_datetime(x['date']).day_name()
             slot=x['slot'].lower()
-            cursor.execute(f"select `Max_Person` from `games` where `Sports_Name`='{game}'")
-            a=cursor.fetchone()['Max_Person']
+            cursor.execute(f"select `Capacity` from `games` where `Sports_Name`='{game}'")
+            a=cursor.fetchone()['Capacity']
             cursor.execute(f"update `{game}` set `{day}`='{a}' where `Slots`='{slot}'")
             mysql.connection.commit()
             return make_response({'message':f'booking started for {game} for the day {x["date"]} for {slot} slot'})
