@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -20,7 +21,9 @@ class TimeSlot extends StatefulWidget {
 }
 
 class _TimeSlotState extends State<TimeSlot> {
+  bool isDisabled = true;
   int calendarRange = 0;
+  bool isDateChoosen = false;
   bool _decideWhichDayToEnable(DateTime day) {
     if ((day.isAfter(DateTime.now().subtract(Duration(days: 1))) &&
         day.isBefore(
@@ -52,6 +55,66 @@ class _TimeSlotState extends State<TimeSlot> {
     getData();
   }
 
+  void disbaleSlot() async {
+    String JWTtoken = await FirebaseAuth.instance.currentUser!.getIdToken();
+
+    TimeSlot date = TimeSlot();
+
+    var body = jsonEncode({
+      "category": "date",
+      "game": widget.game,
+      "date": SlotCard.dateChoosen,
+    });
+
+    print(body);
+    try {
+      final response = await http.post(
+        Uri.parse(kIpAddress + '/stop'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': '*/*',
+          'Accept-Encoding': 'gzip, deflate, br',
+          'Access-Control-Allow-Origin': ' *',
+          "x-access-token": JWTtoken,
+          "admin-header": "YES"
+        },
+        body: body,
+      );
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  void enableSlot() async {
+    String JWTtoken = await FirebaseAuth.instance.currentUser!.getIdToken();
+
+    TimeSlot date = TimeSlot();
+
+    var body = jsonEncode({
+      "category": "date",
+      "game": widget.game,
+      "date": SlotCard.dateChoosen,
+    });
+
+    print(body);
+    try {
+      final response = await http.post(
+        Uri.parse(kIpAddress + '/unstop'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': '*/*',
+          'Accept-Encoding': 'gzip, deflate, br',
+          'Access-Control-Allow-Origin': ' *',
+          "x-access-token": JWTtoken,
+          "admin-header": "YES"
+        },
+        body: body,
+      );
+    } catch (e) {
+      print(e);
+    }
+  }
+
   void getData() async {
     String JWTtoken = await FirebaseAuth.instance.currentUser!.getIdToken();
     //print(JWTtoken);
@@ -62,14 +125,25 @@ class _TimeSlotState extends State<TimeSlot> {
   }
 
   Future<void> getSlot(String day) async {
+    print(jsonData);
     print("game name=" + widget.game);
     sport = jsonData[widget.game][day];
     print(response!.statusCode);
     print(sport);
     slotAvailable.clear();
+    bool isAllSlotZero = true;
     sport.forEach((k, v) {
       slotAvailable.add(k);
+      if (v > 0) {
+        isAllSlotZero = false;
+      }
     });
+
+    if (isAllSlotZero) {
+      isDisabled = false;
+    } else {
+      isDisabled = true;
+    }
 
     // print(Sports[3]);
     // circP = false;
@@ -93,6 +167,7 @@ class _TimeSlotState extends State<TimeSlot> {
       await getSlot(weekDays[selectedDate!.weekday - 1]);
       SlotCard.dateChoosen =
           '${selectedDate!.day}-${selectedDate!.month}-${selectedDate!.year}';
+      isDateChoosen = true;
       setState(() {});
     }
   }
@@ -153,19 +228,43 @@ class _TimeSlotState extends State<TimeSlot> {
                       ),
                       Spacer(flex: 4),
                       GestureDetector(
-                        onTap: () {
-                          selectDate(context);
+                        onTap: () async {
+                          if (isDateChoosen) {
+                            if (isDisabled) {
+                              disbaleSlot();
+                              isDisabled = false;
+                            } else {
+                              enableSlot();
+                              isDisabled = true;
+                            }
+                            await Future.delayed(const Duration(seconds: 5),
+                                () {
+                              print("Printing first");
+                            });
+                            print("Printing baad me");
+                            getData();
+                            getSlot(weekDays[selectedDate!.weekday - 1]);
+                          }
                         },
                         child: Container(
                           alignment: Alignment.center,
                           width: size.width * 0.4,
                           margin: EdgeInsets.only(top: 5),
                           padding: EdgeInsets.all(15),
-                          decoration: BoxDecoration(color: Colors.red),
-                          child: Text(
-                            'Disable',
-                            style: TextStyle(color: Colors.white, fontSize: 14),
-                          ),
+                          decoration: isDisabled
+                              ? BoxDecoration(color: Colors.red)
+                              : BoxDecoration(color: Colors.green),
+                          child: isDisabled
+                              ? Text(
+                                  'Disable',
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 14),
+                                )
+                              : Text(
+                                  'Enable',
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 14),
+                                ),
                         ),
                       ),
                       Spacer(),

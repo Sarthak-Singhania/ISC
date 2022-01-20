@@ -1,11 +1,16 @@
+import 'dart:convert';
+
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:focused_menu/focused_menu.dart';
 import 'package:focused_menu/modals.dart';
 import 'package:isc/screens/time_slot.dart';
-
+import 'package:http/http.dart' as http;
 import 'package:switcher/core/switcher_size.dart';
 import 'package:switcher/switcher.dart';
 import 'package:transparent_image/transparent_image.dart';
+
+import '../constants.dart';
 
 class EventCard extends StatefulWidget {
   String title;
@@ -26,6 +31,65 @@ class _EventCardState extends State<EventCard> {
   bool value = true;
 
   double blurRadius = 7;
+  void disbaleSlot() async {
+    String JWTtoken = await FirebaseAuth.instance.currentUser!.getIdToken();
+
+    TimeSlot date = TimeSlot();
+
+    var body = jsonEncode({
+       "category": "game",
+      "game": widget.title,
+    });
+
+    print(body);
+    try {
+      final response = await http.post(
+        Uri.parse(kIpAddress + '/stop'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': '*/*',
+          'Accept-Encoding': 'gzip, deflate, br',
+          'Access-Control-Allow-Origin': ' *',
+          "x-access-token": JWTtoken,
+          "admin-header": "YES"
+        },
+        body: body,
+      );
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  void enableSlot() async {
+    String JWTtoken = await FirebaseAuth.instance.currentUser!.getIdToken();
+
+    TimeSlot date = TimeSlot();
+
+    var body = jsonEncode({
+      "category": "game",
+      "game": widget.title,
+      
+    });
+
+    print(body);
+    try {
+      final response = await http.post(
+        Uri.parse(kIpAddress + '/unstop'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': '*/*',
+          'Accept-Encoding': 'gzip, deflate, br',
+          'Access-Control-Allow-Origin': ' *',
+          "x-access-token": JWTtoken,
+          "admin-header": "YES"
+        },
+        body: body,
+      );
+    } catch (e) {
+      print(e);
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +136,11 @@ class _EventCardState extends State<EventCard> {
                     colorOff: Colors.green,
                     colorOn: Colors.red,
                     onChanged: (bool state) {
-                      //
+                      if (state) {
+                        disbaleSlot();
+                      } else {
+                        enableSlot();
+                      }
                     },
                   ),
                   Expanded(
