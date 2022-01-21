@@ -30,13 +30,14 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_custom_clippers: ^2.0.0
+  flutter_switch: ^0.3.2
   fluttertoast: ^8.0.8
   focused_menu: ^1.0.5
   http: ^0.13.3
   intl: ^0.17.0
   provider: ^6.0.2
-  transparent_image: ^2.0.0
   switcher: ^1.0.0
+  transparent_image: ^2.0.0
 
 dev_dependencies:
   flutter_test:

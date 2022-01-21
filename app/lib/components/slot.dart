@@ -13,6 +13,7 @@ class SlotCard extends StatelessWidget {
   static String dateChoosen = '';
   static int maxSlot = 0;
   static String gameChoosen = '';
+  
 
   @override
   Widget build(BuildContext context) {

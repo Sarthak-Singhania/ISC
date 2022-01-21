@@ -60,38 +60,74 @@ class _TimeSlotState extends State<TimeSlot> {
 
   void disbaleSlot() async {
     JWTtoken = await FirebaseAuth.instance.currentUser!.getIdToken();
+    final slotResponse = await http.get(
+        Uri.parse(kIpAddress +
+            "/booking-count?category=date&game=" +
+            widget.game +
+            "&date=" +
+            SlotCard.dateChoosen),
+        headers: {"x-access-token": JWTtoken});
 
-   
-
-    var body = jsonEncode({
-      "category": "date",
-      "game": widget.game,
-      "date": SlotCard.dateChoosen,
-    });
-
-    print(body);
-    try {
-      final response = await http.post(
-        Uri.parse(kIpAddress + '/stop'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': '*/*',
-          'Accept-Encoding': 'gzip, deflate, br',
-          'Access-Control-Allow-Origin': ' *',
-          "x-access-token": JWTtoken,
-          "admin-header": "YES"
-        },
-        body: body,
-      );
-    } catch (e) {
-      print(e);
+    final responseJsonData = jsonDecode(slotResponse.body);
+    String slotsAvailable = responseJsonData['message'];
+    bool isSlotAvailable = false;
+    print("Sport ke slot = $slotsAvailable");
+    if (slotsAvailable != '0') {
+      isSlotAvailable = true;
     }
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            content: isSlotAvailable
+                ? Text(
+                    'There are some bookings for this slot.Do you want to still disable it?')
+                : Text('Do you want to disable the slot?'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('No'),
+              ),
+              TextButton(
+                onPressed: () async {
+                  Navigator.of(context).pop();
+                  var body = jsonEncode({
+                    "category": "date",
+                    "game": widget.game,
+                    "date": SlotCard.dateChoosen,
+                  });
+
+                  print(body);
+                  try {
+                    final disableResponse = await http.post(
+                      Uri.parse(kIpAddress + '/stop'),
+                      headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': '*/*',
+                        'Accept-Encoding': 'gzip, deflate, br',
+                        'Access-Control-Allow-Origin': ' *',
+                        "x-access-token": JWTtoken,
+                        "admin-header": "YES"
+                      },
+                      body: body,
+                    );
+                    isDisabled = false;
+                    print(disableResponse.body);
+                  } catch (e) {
+                    print(e);
+                  }
+                },
+                child: Text('Yes'),
+              ),
+            ],
+          );
+        });
   }
 
   void enableSlot() async {
     JWTtoken = await FirebaseAuth.instance.currentUser!.getIdToken();
-
-    TimeSlot date = TimeSlot();
 
     var body = jsonEncode({
       "category": "date",
@@ -231,7 +267,6 @@ class _TimeSlotState extends State<TimeSlot> {
                           if (isDateChoosen) {
                             if (isDisabled) {
                               disbaleSlot();
-                              isDisabled = false;
                             } else {
                               enableSlot();
                               isDisabled = true;
@@ -251,10 +286,11 @@ class _TimeSlotState extends State<TimeSlot> {
                                     kIpAddress + '/slots' + '/' + widget.game),
                                 headers: {"x-access-token": JWTtoken});
                             jsonData = await jsonDecode(response!.body);
-                            int counter = 1;
+
+                            print("latest");
+                            print(jsonData);
+
                             while (response == oldResponse) {
-                              print(counter);
-                              counter++;
                               response = await http.get(
                                   Uri.parse(kIpAddress +
                                       '/slots' +
