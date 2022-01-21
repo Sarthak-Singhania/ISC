@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:isc/constants.dart';
 import 'package:isc/components/roundedbutton.dart';
@@ -99,115 +100,122 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Center(
           child: Form(
             key: _formKey,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  margin: EdgeInsets.all(10),
-                  padding: EdgeInsets.all(10),
-                  width: size.width * 0.8,
-                  decoration: BoxDecoration(
-                    color: theme.checkTheme(
-                        kPrimaryLightColor, Colors.purple.shade300, context),
-                    borderRadius: BorderRadius.circular(30),
+            child: AutofillGroup(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    margin: EdgeInsets.all(10),
+                    padding: EdgeInsets.all(10),
+                    width: size.width * 0.8,
+                    decoration: BoxDecoration(
+                      color: theme.checkTheme(
+                          kPrimaryLightColor, Colors.purple.shade300, context),
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    child: TextFormField(
+                        autofocus: false,
+                        controller: emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        autofillHints: [AutofillHints.email],
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return ("Please Enter Your Email");
+                          }
+                          if (!RegExp("^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+.[a-z]")
+                              .hasMatch(value)) {
+                            return ("Please Enter a valid email");
+                          }
+                          return null;
+                        },
+                        onSaved: (value) {
+                          emailController.text = value!;
+                        },
+                        textInputAction: TextInputAction.next,
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          prefixIcon: Icon(Icons.mail),
+                          contentPadding: EdgeInsets.fromLTRB(20, 15, 20, 15),
+                          hintText: "Email",
+                        )),
                   ),
-                  child: TextFormField(
+            
+                  Container(
+                    margin: EdgeInsets.all(10),
+                    padding: EdgeInsets.all(10),
+                    width: size.width * 0.8,
+                    decoration: BoxDecoration(
+                      color: theme.checkTheme(
+                          kPrimaryLightColor, Colors.purple.shade300, context),
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    child: TextFormField(
                       autofocus: false,
-                      controller: emailController,
-                      keyboardType: TextInputType.emailAddress,
+                      controller: passwordController,
+                      obscureText: !passwordVisible,
+                      autofillHints: [AutofillHints.password],
+                     onEditingComplete: () {
+                        TextInput.finishAutofillContext();
+                      },
                       validator: (value) {
+                        RegExp regex = new RegExp(r'^.{6,}$');
                         if (value!.isEmpty) {
-                          return ("Please Enter Your Email");
+                          return ("Password is required for login");
                         }
-                        if (!RegExp("^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+.[a-z]")
-                            .hasMatch(value)) {
-                          return ("Please Enter a valid email");
+                        if (!regex.hasMatch(value)) {
+                          return ("Enter Valid Password(Min. 6 Character)");
                         }
-                        return null;
                       },
                       onSaved: (value) {
-                        emailController.text = value!;
+                        passwordController.text = value!;
                       },
-                      textInputAction: TextInputAction.next,
+                      textInputAction: TextInputAction.done,
                       decoration: InputDecoration(
                         border: InputBorder.none,
-                        prefixIcon: Icon(Icons.mail),
+                        prefixIcon: Icon(Icons.lock),
                         contentPadding: EdgeInsets.fromLTRB(20, 15, 20, 15),
-                        hintText: "Email",
-                      )),
-                ),
-
-                Container(
-                  margin: EdgeInsets.all(10),
-                  padding: EdgeInsets.all(10),
-                  width: size.width * 0.8,
-                  decoration: BoxDecoration(
-                    color: theme.checkTheme(
-                        kPrimaryLightColor, Colors.purple.shade300, context),
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  child: TextFormField(
-                    autofocus: false,
-                    controller: passwordController,
-                    obscureText: !passwordVisible,
-                    validator: (value) {
-                      RegExp regex = new RegExp(r'^.{6,}$');
-                      if (value!.isEmpty) {
-                        return ("Password is required for login");
-                      }
-                      if (!regex.hasMatch(value)) {
-                        return ("Enter Valid Password(Min. 6 Character)");
-                      }
-                    },
-                    onSaved: (value) {
-                      passwordController.text = value!;
-                    },
-                    textInputAction: TextInputAction.done,
-                    decoration: InputDecoration(
-                      border: InputBorder.none,
-                      prefixIcon: Icon(Icons.lock),
-                      contentPadding: EdgeInsets.fromLTRB(20, 15, 20, 15),
-                      hintText: "Password",
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          passwordVisible
-                              ? Icons.visibility
-                              : Icons.visibility_off,
+                        hintText: "Password",
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            passwordVisible
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              passwordVisible = !passwordVisible;
+                            });
+                          },
                         ),
-                        onPressed: () {
-                          setState(() {
-                            passwordVisible = !passwordVisible;
-                          });
-                        },
                       ),
                     ),
                   ),
-                ),
-                RoundedButton("LOGIN", kPrimaryColor, Colors.white, size, () {
-                  signIn(emailController.text, passwordController.text);
-                }, context),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text("Don't have an account? "),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => RegistrationScreen()));
-                      },
-                      child: Text(
-                        "SignUp",
-                        style: TextStyle(
-                            color: Colors.redAccent,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15),
-                      ),
-                    )
-                  ],
-                )
-              ],
+                  RoundedButton("LOGIN", kPrimaryColor, Colors.white, size, () {
+                    signIn(emailController.text, passwordController.text);
+                  }, context),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Text("Don't have an account? "),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => RegistrationScreen()));
+                        },
+                        child: Text(
+                          "SignUp",
+                          style: TextStyle(
+                              color: Colors.redAccent,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15),
+                        ),
+                      )
+                    ],
+                  )
+                ],
+              ),
             ),
           ),
         ),

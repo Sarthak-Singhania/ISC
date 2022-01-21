@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_switch/flutter_switch.dart';
 import 'package:http/http.dart' as http;
 import 'package:isc/components/slot.dart';
 import 'package:switcher/core/switcher_size.dart';
@@ -19,6 +20,7 @@ class _AdminSlotScreenState extends State<AdminSlotScreen> {
   dynamic pendingList = [];
   bool emptyList = false;
   bool circP = true;
+  bool toggleValue = false;
   String JWTtoken = " ";
   TextEditingController slotNumberController =
       TextEditingController(text: '20');
@@ -28,33 +30,76 @@ class _AdminSlotScreenState extends State<AdminSlotScreen> {
     getData();
   }
 
-  void disbaleSlot() async {
+  Future<void> disbaleSlot() async {
     JWTtoken = await FirebaseAuth.instance.currentUser!.getIdToken();
+    final slotResponse = await http.get(
+        Uri.parse(kIpAddress +
+            "/booking-count?category=slot&game=" +
+            SlotCard.gameChoosen +
+            "&date=" +
+            SlotCard.dateChoosen +
+            "&slot=" +
+            SlotCard.sltChoosen),
+        headers: {"x-access-token": JWTtoken});
 
-    var body = jsonEncode({
-      "category": "slot",
-      "game": SlotCard.gameChoosen,
-      "date": SlotCard.dateChoosen,
-      "slot": SlotCard.sltChoosen,
-    });
-
-    print(body);
-    try {
-      final response = await http.post(
-        Uri.parse(kIpAddress + '/stop'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': '*/*',
-          'Accept-Encoding': 'gzip, deflate, br',
-          'Access-Control-Allow-Origin': ' *',
-          "x-access-token": JWTtoken,
-          "admin-header": "YES"
-        },
-        body: body,
-      );
-    } catch (e) {
-      print(e);
+    final responseJsonData = await jsonDecode(slotResponse.body);
+    String slotsAvailable = responseJsonData['message'];
+    bool isSlotAvailable = false;
+    print("Sport ke slot = $slotsAvailable");
+    if (slotsAvailable != '0') {
+      isSlotAvailable = true;
     }
+    await showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            content: isSlotAvailable
+                ? Text(
+                    'There are some bookings for this slot.Do you want to still disable it?')
+                : Text('Do you want to disable the slot?'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('No'),
+              ),
+              TextButton(
+                onPressed: () async {
+                  var body = jsonEncode({
+                    "category": "slot",
+                    "game": SlotCard.gameChoosen,
+                    "date": SlotCard.dateChoosen,
+                    "slot": SlotCard.sltChoosen,
+                  });
+                  toggleValue = true;
+                  setState(() {});
+                  print(body);
+                  try {
+                    final disableResponse = await http.post(
+                      Uri.parse(kIpAddress + '/stop'),
+                      headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': '*/*',
+                        'Accept-Encoding': 'gzip, deflate, br',
+                        'Access-Control-Allow-Origin': ' *',
+                        "x-access-token": JWTtoken,
+                        "admin-header": "YES"
+                      },
+                      body: body,
+                    );
+
+                    print(disableResponse.body);
+                  } catch (e) {
+                    print(e);
+                  }
+                  Navigator.of(context).pop();
+                },
+                child: Text('Yes'),
+              ),
+            ],
+          );
+        });
   }
 
   void enableSlot() async {
@@ -81,6 +126,8 @@ class _AdminSlotScreenState extends State<AdminSlotScreen> {
         },
         body: body,
       );
+      toggleValue = false;
+                  setState(() {});
     } catch (e) {
       print(e);
     }
@@ -89,10 +136,10 @@ class _AdminSlotScreenState extends State<AdminSlotScreen> {
   Future<void> getData() async {
     String currEmail = FirebaseAuth.instance.currentUser!.email!;
     JWTtoken = await FirebaseAuth.instance.currentUser!.getIdToken();
-    print(currEmail);
-    print(SlotCard.dateChoosen);
-    print(SlotCard.gameChoosen);
-    print(SlotCard.sltChoosen);
+    // print(currEmail);
+    // print(SlotCard.dateChoosen);
+    // print(SlotCard.gameChoosen);
+    // print(SlotCard.sltChoosen);
     var response = await http.get(
         Uri.parse(kIpAddress +
             '/admin-bookings/${SlotCard.gameChoosen}/${SlotCard.dateChoosen}/${SlotCard.sltChoosen}'),
@@ -159,23 +206,34 @@ class _AdminSlotScreenState extends State<AdminSlotScreen> {
                           Spacer(
                             flex: 5,
                           ),
-                          Switcher(
-                            value: false,
-                            size: SwitcherSize.medium,
-                            switcherButtonRadius: 70,
-                            enabledSwitcherButtonRotate: true,
-                            iconOff: Icons.lock_open,
-                            iconOn: Icons.lock,
-                            colorOff: Colors.green,
-                            colorOn: Colors.red,
-                            onChanged: (bool state) {
-                              if (state) {
-                                disbaleSlot();
-                                getData();
-                              } else {
-                                enableSlot();
-                                 getData();
-                              }
+                          FlutterSwitch(
+                            width: 70.0,
+                            height: 35.0,
+                            activeColor: Colors.red,
+                            inactiveColor: Colors.green,
+                            activeIcon: Icon(
+                              Icons.lock_outlined,
+                              size: 30,
+                              color: Colors.red,
+                            ),
+                            inactiveIcon: Icon(
+                              Icons.lock_outlined,
+                              size: 30,
+                              color: Colors.green,
+                            ),
+                            toggleSize: 25.0,
+                            value: toggleValue,
+                            borderRadius: 30.0,
+                            padding: 5.0,
+                            showOnOff: false,
+                            onToggle: (state) {
+                              setState(() {
+                                if (state) {
+                                  disbaleSlot();
+                                } else {
+                                  enableSlot();
+                                }
+                              });
                             },
                           ),
                           Spacer(),

@@ -3,12 +3,10 @@ import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_switch/flutter_switch.dart';
-import 'package:focused_menu/focused_menu.dart';
-import 'package:focused_menu/modals.dart';
+
 import 'package:isc/screens/time_slot.dart';
 import 'package:http/http.dart' as http;
-import 'package:switcher/core/switcher_size.dart';
-import 'package:switcher/switcher.dart';
+
 import 'package:transparent_image/transparent_image.dart';
 
 import '../constants.dart';
@@ -47,7 +45,7 @@ class _EventCardState extends State<EventCard> {
     if (slotsAvailable != '0') {
       isSlotAvailable = true;
     }
-    showDialog(
+    await showDialog(
         context: context,
         builder: (context) {
           return AlertDialog(

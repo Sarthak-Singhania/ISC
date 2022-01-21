@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:isc/constants.dart';
 import 'package:isc/components/roundedbutton.dart';
@@ -85,7 +86,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     Size size = MediaQuery.of(context).size;
     dynamic theme = Provider.of<ThemeProvider>(context);
 
-
     return Scaffold(
       body: Container(
         child: Center(
@@ -99,14 +99,15 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   padding: EdgeInsets.all(10),
                   width: size.width * 0.8,
                   decoration: BoxDecoration(
-                    color:
-                        theme.checkTheme(kPrimaryLightColor, Colors.purple.shade300,context),
+                    color: theme.checkTheme(
+                        kPrimaryLightColor, Colors.purple.shade300, context),
                     borderRadius: BorderRadius.circular(30),
                   ),
                   child: TextFormField(
                       autofocus: false,
                       controller: emailController,
                       keyboardType: TextInputType.emailAddress,
+                      //autofillHints: [AutofillHints.email],
                       validator: (value) {
                         if (value!.isEmpty) {
                           return ("Please Enter Your Email");
@@ -133,8 +134,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   padding: EdgeInsets.all(10),
                   width: size.width * 0.8,
                   decoration: BoxDecoration(
-                    color:
-                        theme.checkTheme(kPrimaryLightColor, Colors.purple.shade300,context),
+                    color: theme.checkTheme(
+                        kPrimaryLightColor, Colors.purple.shade300, context),
                     borderRadius: BorderRadius.circular(30),
                   ),
                   child: TextFormField(
@@ -145,7 +146,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         if (value!.isEmpty) {
                           return ("Please Enter Your Roll No.");
                         }
-                        if (!RegExp('[a-zA-Z]'+' ').hasMatch(value)) {
+                        if (!RegExp('[a-zA-Z]' + ' ').hasMatch(value)) {
                           return ("Please Enter a valid name");
                         }
                         return null;
@@ -166,8 +167,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   padding: EdgeInsets.all(10),
                   width: size.width * 0.8,
                   decoration: BoxDecoration(
-                    color:
-                        theme.checkTheme(kPrimaryLightColor, Colors.purple.shade300,context),
+                    color: theme.checkTheme(
+                        kPrimaryLightColor, Colors.purple.shade300, context),
                     borderRadius: BorderRadius.circular(30),
                   ),
                   child: TextFormField(
@@ -200,13 +201,15 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   padding: EdgeInsets.all(10),
                   width: size.width * 0.8,
                   decoration: BoxDecoration(
-                    color:
-                        theme.checkTheme(kPrimaryLightColor, Colors.purple.shade300,context),
+                    color: theme.checkTheme(
+                        kPrimaryLightColor, Colors.purple.shade300, context),
                     borderRadius: BorderRadius.circular(30),
                   ),
                   child: TextFormField(
                     autofocus: false,
                     controller: confirmPasswordController,
+                   // autofillHints: [AutofillHints.password],
+                    
                     obscureText: true,
                     validator: (value) {
                       if (value != passwordController.text) {
@@ -223,7 +226,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       prefixIcon: Icon(Icons.lock),
                       contentPadding: EdgeInsets.fromLTRB(20, 15, 20, 15),
                       hintText: "Confirm Password",
-                      
                     ),
                   ),
                 ),
@@ -249,7 +251,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                             nameController.text);
                       }),
                 ),
-                 Row(
+                Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     Text("Already have an account? "),

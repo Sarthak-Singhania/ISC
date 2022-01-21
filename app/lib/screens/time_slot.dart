@@ -22,6 +22,7 @@ class TimeSlot extends StatefulWidget {
 
 class _TimeSlotState extends State<TimeSlot> {
   bool isDisabled = true;
+  
   String JWTtoken = '';
   int calendarRange = 0;
   bool isLoading = false;
@@ -58,7 +59,7 @@ class _TimeSlotState extends State<TimeSlot> {
     getData();
   }
 
-  void disbaleSlot() async {
+  Future<void> disbaleSlot() async {
     JWTtoken = await FirebaseAuth.instance.currentUser!.getIdToken();
     final slotResponse = await http.get(
         Uri.parse(kIpAddress +
@@ -68,14 +69,14 @@ class _TimeSlotState extends State<TimeSlot> {
             SlotCard.dateChoosen),
         headers: {"x-access-token": JWTtoken});
 
-    final responseJsonData = jsonDecode(slotResponse.body);
+    final responseJsonData = await jsonDecode(slotResponse.body);
     String slotsAvailable = responseJsonData['message'];
     bool isSlotAvailable = false;
     print("Sport ke slot = $slotsAvailable");
     if (slotsAvailable != '0') {
       isSlotAvailable = true;
     }
-    showDialog(
+    await showDialog(
         context: context,
         builder: (context) {
           return AlertDialog(
@@ -92,13 +93,12 @@ class _TimeSlotState extends State<TimeSlot> {
               ),
               TextButton(
                 onPressed: () async {
-                  Navigator.of(context).pop();
                   var body = jsonEncode({
                     "category": "date",
                     "game": widget.game,
                     "date": SlotCard.dateChoosen,
                   });
-
+                  
                   print(body);
                   try {
                     final disableResponse = await http.post(
@@ -118,6 +118,7 @@ class _TimeSlotState extends State<TimeSlot> {
                   } catch (e) {
                     print(e);
                   }
+                  Navigator.of(context).pop();
                 },
                 child: Text('Yes'),
               ),
@@ -126,7 +127,7 @@ class _TimeSlotState extends State<TimeSlot> {
         });
   }
 
-  void enableSlot() async {
+  Future<void> enableSlot() async {
     JWTtoken = await FirebaseAuth.instance.currentUser!.getIdToken();
 
     var body = jsonEncode({
@@ -137,7 +138,7 @@ class _TimeSlotState extends State<TimeSlot> {
 
     print(body);
     try {
-      final response = await http.post(
+      final enableResponse = await http.post(
         Uri.parse(kIpAddress + '/unstop'),
         headers: {
           'Content-Type': 'application/json',
@@ -149,6 +150,8 @@ class _TimeSlotState extends State<TimeSlot> {
         },
         body: body,
       );
+      
+      print(enableResponse.body);
     } catch (e) {
       print(e);
     }
@@ -266,9 +269,9 @@ class _TimeSlotState extends State<TimeSlot> {
                         onTap: () async {
                           if (isDateChoosen) {
                             if (isDisabled) {
-                              disbaleSlot();
+                              await disbaleSlot();
                             } else {
-                              enableSlot();
+                              await enableSlot();
                               isDisabled = true;
                             }
                             // await Future.delayed(const Duration(seconds: 2),
@@ -289,16 +292,19 @@ class _TimeSlotState extends State<TimeSlot> {
 
                             print("latest");
                             print(jsonData);
-
-                            while (response == oldResponse) {
-                              response = await http.get(
-                                  Uri.parse(kIpAddress +
-                                      '/slots' +
-                                      '/' +
-                                      widget.game),
-                                  headers: {"x-access-token": JWTtoken});
-                              jsonData = await jsonDecode(response!.body);
-                            }
+                            int counter = 1;
+                            print(response == oldResponse);
+                            // while (response == oldResponse) {
+                            //   print("Counter ki val $counter");
+                            //   counter++;
+                            //   response = await http.get(
+                            //       Uri.parse(kIpAddress +
+                            //           '/slots' +
+                            //           '/' +
+                            //           widget.game),
+                            //       headers: {"x-access-token": JWTtoken});
+                            //   jsonData = await jsonDecode(response!.body);
+                            // }
 
                             getSlot(weekDays[selectedDate!.weekday - 1]);
                           }
