@@ -32,33 +32,39 @@ class _LoginScreenState extends State<LoginScreen> {
 
   // string for displaying the error Message
   String? errorMessage;
-  
 
   void signIn(String email, String password) async {
     if (_formKey.currentState!.validate()) {
       try {
-        bool adminCheck=true;
-        final snapShot = await FirebaseFirestore.instance.collection('admin-users').doc(email).get();
+        bool adminCheck = false;
+        final snapShot = await FirebaseFirestore.instance
+            .collection('admin-users')
+            .doc(email)
+            .get();
 
-   if (snapShot.exists){
-        adminCheck=true;
-   }
-   else{
-        adminCheck=false;
-   }
+        if (snapShot.exists) {
+          adminCheck = true;
+        } else {
+          adminCheck = false;
+        }
         await _auth
             .signInWithEmailAndPassword(email: email, password: password)
             .then((uid) => {
                   Fluttertoast.showToast(msg: "Login Successful"),
-                  if(adminCheck){
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (context) => EventScreen(adminCheck: true,))),
-                  }
-                  else{
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (context) => EventScreen(adminCheck: false,))),
-                  }
-                  
+                  if (adminCheck)
+                    {
+                      Navigator.of(context).pushReplacement(MaterialPageRoute(
+                          builder: (context) => EventScreen(
+                                adminCheck: true,
+                              ))),
+                    }
+                  else
+                    {
+                      Navigator.of(context).pushReplacement(MaterialPageRoute(
+                          builder: (context) => EventScreen(
+                                adminCheck: false,
+                              ))),
+                    }
                 });
       } on FirebaseAuthException catch (error) {
         switch (error.code) {
@@ -139,7 +145,6 @@ class _LoginScreenState extends State<LoginScreen> {
                           hintText: "Email",
                         )),
                   ),
-            
                   Container(
                     margin: EdgeInsets.all(10),
                     padding: EdgeInsets.all(10),
@@ -154,7 +159,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       controller: passwordController,
                       obscureText: !passwordVisible,
                       autofillHints: [AutofillHints.password],
-                     onEditingComplete: () {
+                      onEditingComplete: () {
                         TextInput.finishAutofillContext();
                       },
                       validator: (value) {

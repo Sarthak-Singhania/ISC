@@ -3,9 +3,11 @@ import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_switch/flutter_switch.dart';
+import 'package:isc/provider/theme_provider.dart';
 
 import 'package:isc/screens/time_slot.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 
 import 'package:transparent_image/transparent_image.dart';
 
@@ -35,7 +37,8 @@ class _EventCardState extends State<EventCard> {
   void disbaleSlot() async {
     JWTtoken = await FirebaseAuth.instance.currentUser!.getIdToken();
     final slotResponse = await http.get(
-        Uri.parse(kIpAddress + "/booking-count?category=game&game="+widget.title),
+        Uri.parse(
+            kIpAddress + "/booking-count?category=game&game=" + widget.title),
         headers: {"x-access-token": JWTtoken});
 
     final responseJsonData = jsonDecode(slotResponse.body);
@@ -99,7 +102,6 @@ class _EventCardState extends State<EventCard> {
   void enableSlot() async {
     JWTtoken = await FirebaseAuth.instance.currentUser!.getIdToken();
 
-
     var body = jsonEncode({
       "category": "game",
       "game": widget.title,
@@ -130,6 +132,7 @@ class _EventCardState extends State<EventCard> {
 
   @override
   Widget build(BuildContext context) {
+    dynamic theme = Provider.of<ThemeProvider>(context);
     return widget.checkAdmin == true
         ? GestureDetector(
             onLongPress: () {},
@@ -153,10 +156,11 @@ class _EventCardState extends State<EventCard> {
                 color: Colors.white,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withOpacity(0.5),
+                    color: theme.checkTheme(Colors.grey.withOpacity(0.5),
+                        Colors.purple.shade500, context),
                     spreadRadius: 5,
                     blurRadius: 7,
-                    offset: Offset(0, 17), // changes position of shadow
+                    offset: Offset(0, 5), // changes position of shadow
                   ),
                 ],
               ),
@@ -193,27 +197,6 @@ class _EventCardState extends State<EventCard> {
                       });
                     },
                   ),
-
-                  // Switcher(
-                  //   value: toggleValue,
-                  //   size: SwitcherSize.medium,
-                  //   switcherButtonRadius: 70,
-                  //   enabledSwitcherButtonRotate: true,
-                  //   iconOff: Icons.lock_open,
-                  //   iconOn: Icons.lock,
-                  //   colorOff: Colors.green,
-                  //   colorOn: Colors.red,
-                  //   onTap:(bool state) {
-                  //     if (state) {
-                  //       disbaleSlot();
-                  //     } else {
-                  //       enableSlot();
-
-                  //     }
-                  //   },
-                  //   onChanged: (bool state){},
-
-                  // ),
                   Expanded(
                     child: Center(
                       child: FadeInImage.memoryNetwork(
@@ -227,7 +210,8 @@ class _EventCardState extends State<EventCard> {
                       widget.title,
                       textAlign: TextAlign.left,
                       style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 15,color: theme.checkTheme(
+                            Colors.black, Colors.purple, context)),
                     ),
                   )
                 ],
@@ -254,10 +238,11 @@ class _EventCardState extends State<EventCard> {
                 color: Colors.white,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withOpacity(0.5),
+                    color: theme.checkTheme(Colors.grey.withOpacity(0.5),
+                        Colors.purple.shade500, context), // purple 500
                     spreadRadius: 5,
                     blurRadius: 7,
-                    offset: Offset(0, 17), // changes position of shadow
+                    offset: Offset(0, 5), // changes position of shadow
                   ),
                 ],
               ),
@@ -272,7 +257,11 @@ class _EventCardState extends State<EventCard> {
                   Text(
                     widget.title,
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                        color: theme.checkTheme(
+                            Colors.black, Colors.purple, context)),
                   )
                 ],
               ),

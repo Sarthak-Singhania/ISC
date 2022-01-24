@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:isc/provider/theme_provider.dart';
 import 'package:isc/screens/ticket_screen.dart';
+import 'package:provider/provider.dart';
 
 import '../constants.dart';
 
@@ -29,6 +31,7 @@ class BookingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    ThemeProvider theme = Provider.of<ThemeProvider>(context);
     return GestureDetector(
       onTap: () {
         Navigator.push(context,
@@ -73,14 +76,16 @@ class BookingCard extends StatelessWidget {
                   sportName,
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: kPrimaryColor,
+                      color: theme.checkTheme(
+                          kPrimaryColor, Colors.white, context), //kPrimaryColor
                       fontSize: 17),
                 ),
                 Text(
                   slotTime,
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: kPrimaryColor,
+                      color: theme.checkTheme(
+                          kPrimaryColor, Colors.white, context),
                       fontSize: 16),
                 ),
               ],
@@ -96,7 +101,8 @@ class BookingCard extends StatelessWidget {
                           : "$studentName +${int.parse(totalCount) - 1} others",
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: kPrimaryColor,
+                      color: theme.checkTheme(
+                          kPrimaryColor, Colors.white, context),
                       fontSize: 17),
                 ),
               ],
@@ -106,12 +112,13 @@ class BookingCard extends StatelessWidget {
         width: size.width * 0.9,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(5.0),
-          color: kPrimaryLightColor,
+          color: theme.checkTheme(kPrimaryLightColor, Colors.purple.shade600,
+              context), //kPrimaryLightColor
           boxShadow: [
             BoxShadow(
               color: Colors.grey,
               offset: Offset(0.0, 2.0), //(x,y)
-              blurRadius: 10.0,
+              blurRadius: 5.0,
             ),
           ],
         ),

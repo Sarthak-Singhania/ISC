@@ -126,7 +126,7 @@ class _EventScreenState extends State<EventScreen> {
                 ],
               ),
             ),
-      bottomNavigationBar: BottomNaviBar('event'),
+      bottomNavigationBar: BottomNaviBar('event',widget.adminCheck),
     );
   }
 }

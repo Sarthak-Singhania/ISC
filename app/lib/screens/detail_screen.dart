@@ -178,7 +178,6 @@ class _DetailScreenState extends State<DetailScreen> {
               },
               child: Icon(Icons.add)),
           centerTitle: true,
-          backgroundColor: Colors.purple,
         ),
         body: circP == true
             ? Center(

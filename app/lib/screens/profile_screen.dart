@@ -14,34 +14,35 @@ import 'package:provider/provider.dart';
 import 'booking_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({Key? key}) : super(key: key);
+  bool adminCheck;
+  ProfileScreen(this.adminCheck);
 
   @override
   _ProfileScreenState createState() => _ProfileScreenState();
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  bool hasInternet = true;
-  StreamSubscription? subscription;
+  //bool hasInternet = true;
+  // StreamSubscription? subscription;
   @override
   void initState() {
     super.initState();
 
-    subscription = Connectivity()
-        .onConnectivityChanged
-        .listen((ConnectivityResult result) {
-      hasInternet = result != ConnectivityResult.none;
-      if (hasInternet) {
-        print("internet hai");
-      } else {
-        print('nO internet');
-      }
-    });
+    // subscription = Connectivity()
+    //     .onConnectivityChanged
+    //     .listen((ConnectivityResult result) {
+    //   hasInternet = result != ConnectivityResult.none;
+    //   if (hasInternet) {
+    //     print("internet hai");
+    //   } else {
+    //     print('nO internet');
+    //   }
+    // });
   }
 
   @override
   void dispose() {
-    subscription!.cancel();
+    //subscription!.cancel();
     super.dispose();
   }
 
@@ -61,7 +62,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         centerTitle: true,
         title: Text("Profile", style: TextStyle(color: kPrimaryColor)),
       ),
-      bottomNavigationBar: BottomNaviBar('profile'),
+      bottomNavigationBar: BottomNaviBar('profile', widget.adminCheck),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -77,14 +78,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 text: 'Account',
                 icon: Icons.account_box_outlined,
                 func: () {}),
-            ProfileCard(
+            widget.adminCheck==false?ProfileCard(
                 size: size,
                 text: 'Bookings',
                 icon: Icons.my_library_books_sharp,
                 func: () {
                   Navigator.push(context,
                       MaterialPageRoute(builder: (context) => BookingScreen()));
-                }),
+                }):Container(),
             ProfileCard(
                 size: size,
                 text: 'Settings',
@@ -93,11 +94,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Navigator.push(context,
                       MaterialPageRoute(builder: (context) => SettingScreen()));
                 }),
-            ProfileCard(
-                size: size,
-                text: 'Help Center',
-                icon: Icons.help_center,
-                func: () {}),
             ProfileCard(
               size: size,
               text: 'Log Out',

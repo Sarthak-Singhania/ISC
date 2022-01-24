@@ -7,6 +7,8 @@ import 'package:http/http.dart' as http;
 import 'dart:ui';
 import 'package:flutter_custom_clippers/flutter_custom_clippers.dart';
 import 'package:isc/constants.dart';
+import 'package:isc/provider/theme_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:transparent_image/transparent_image.dart';
 
 class TicketScreen extends StatefulWidget {
@@ -328,6 +330,7 @@ class _TicketScreenState extends State<TicketScreen> {
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
+    ThemeProvider theme = Provider.of<ThemeProvider>(context);
 
     return circP
         ? Scaffold(
@@ -354,7 +357,8 @@ class _TicketScreenState extends State<TicketScreen> {
                       'Pending',
                       style: TextStyle(color: Color(0xffFF6109), fontSize: 25),
                     ),
-              backgroundColor: Colors.white,
+              backgroundColor:
+                  theme.checkTheme(Colors.white, Colors.black, context),
             ),
             body: Container(
               child: Column(
@@ -413,8 +417,10 @@ class _TicketScreenState extends State<TicketScreen> {
                               style: TextStyle(fontSize: 20),
                             )),
                             decoration: BoxDecoration(
-                                border:
-                                    Border.all(color: Colors.black, width: 1),
+                                border: Border.all(
+                                    color: theme.checkTheme(
+                                        Colors.black, Colors.white, context),
+                                    width: 1),
                                 borderRadius: BorderRadius.only(
                                     topLeft: Radius.circular(15))),
                           ),
@@ -427,8 +433,10 @@ class _TicketScreenState extends State<TicketScreen> {
                             height: size.height * 0.1,
                             width: size.width * 0.7,
                             decoration: BoxDecoration(
-                                border:
-                                    Border.all(color: Colors.black, width: 1),
+                                border: Border.all(
+                                    color: theme.checkTheme(
+                                        Colors.black, Colors.white, context),
+                                    width: 1),
                                 borderRadius: BorderRadius.only(
                                     topRight: Radius.circular(15))),
                           )
@@ -450,8 +458,10 @@ class _TicketScreenState extends State<TicketScreen> {
                             height: size.height * 0.35,
                             width: size.width * 0.2,
                             decoration: BoxDecoration(
-                                border:
-                                    Border.all(color: Colors.black, width: 1),
+                                border: Border.all(
+                                    color: theme.checkTheme(
+                                        Colors.black, Colors.white, context),
+                                    width: 1),
                                 borderRadius: BorderRadius.only(
                                     bottomLeft: Radius.circular(15))),
                           ),
@@ -472,8 +482,10 @@ class _TicketScreenState extends State<TicketScreen> {
                             height: size.height * 0.35,
                             width: size.width * 0.7,
                             decoration: BoxDecoration(
-                                border:
-                                    Border.all(color: Colors.black, width: 1),
+                                border: Border.all(
+                                    color: theme.checkTheme(
+                                        Colors.black, Colors.white, context),
+                                    width: 1),
                                 borderRadius: BorderRadius.only(
                                     bottomRight: Radius.circular(15))),
                           )

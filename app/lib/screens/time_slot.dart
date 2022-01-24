@@ -8,6 +8,8 @@ import 'package:isc/components/event_card.dart';
 import 'package:isc/constants.dart';
 import 'package:isc/components/slot.dart';
 import 'package:http/http.dart' as http;
+import 'package:isc/provider/theme_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:switcher/core/switcher_size.dart';
 import 'package:switcher/switcher.dart';
 
@@ -22,7 +24,7 @@ class TimeSlot extends StatefulWidget {
 
 class _TimeSlotState extends State<TimeSlot> {
   bool isDisabled = true;
-  
+
   String JWTtoken = '';
   int calendarRange = 0;
   bool isLoading = false;
@@ -98,7 +100,7 @@ class _TimeSlotState extends State<TimeSlot> {
                     "game": widget.game,
                     "date": SlotCard.dateChoosen,
                   });
-                  
+
                   print(body);
                   try {
                     final disableResponse = await http.post(
@@ -150,7 +152,7 @@ class _TimeSlotState extends State<TimeSlot> {
         },
         body: body,
       );
-      
+
       print(enableResponse.body);
     } catch (e) {
       print(e);
@@ -211,6 +213,7 @@ class _TimeSlotState extends State<TimeSlot> {
   }
 
   Widget build(BuildContext context) {
+    ThemeProvider theme = Provider.of<ThemeProvider>(context);
     Size size = MediaQuery.of(context).size;
     return Scaffold(
         appBar: AppBar(
@@ -346,7 +349,8 @@ class _TimeSlotState extends State<TimeSlot> {
                             game: widget.game,
                             slt_time: slotAvailable[index],
                             color: sport[slotAvailable[index]] > 0
-                                ? Colors.green
+                                ? theme.checkTheme(Colors.green,
+                                    Colors.green.shade600, context)
                                 : Colors.grey,
                             slotAvailable: sport[slotAvailable[index]]);
                       })
