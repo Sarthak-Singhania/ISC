@@ -7,6 +7,7 @@ import 'package:isc/provider/theme_provider.dart';
 
 import 'package:isc/screens/time_slot.dart';
 import 'package:http/http.dart' as http;
+import 'package:isc/screens/user-info.dart';
 import 'package:provider/provider.dart';
 
 import 'package:transparent_image/transparent_image.dart';
@@ -16,9 +17,8 @@ import '../constants.dart';
 class EventCard extends StatefulWidget {
   String title;
   String uri;
-  bool checkAdmin;
 
-  EventCard({required this.checkAdmin, required this.title, required this.uri});
+  EventCard({required this.title, required this.uri});
 
   @override
   _EventCardState createState() => _EventCardState();
@@ -133,17 +133,15 @@ class _EventCardState extends State<EventCard> {
   @override
   Widget build(BuildContext context) {
     dynamic theme = Provider.of<ThemeProvider>(context);
-    return widget.checkAdmin == true
+    return StudentInfo.isAdmin == true
         ? GestureDetector(
             onLongPress: () {},
             onTap: () {
+              StudentInfo.gameChoosen = widget.title;
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) {
-                  return TimeSlot(
-                    game: widget.title,
-                    adminCheck: widget.checkAdmin,
-                  );
+                  return TimeSlot();
                 }),
               );
             },
@@ -209,9 +207,11 @@ class _EventCardState extends State<EventCard> {
                     child: Text(
                       widget.title,
                       textAlign: TextAlign.left,
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 15,color: theme.checkTheme(
-                            Colors.black, Colors.purple, context)),
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                          color: theme.checkTheme(
+                              Colors.black, Colors.purple, context)),
                     ),
                   )
                 ],
@@ -220,13 +220,11 @@ class _EventCardState extends State<EventCard> {
           )
         : GestureDetector(
             onTap: () {
+              StudentInfo.gameChoosen = widget.title;
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) {
-                  return TimeSlot(
-                    game: widget.title,
-                    adminCheck: widget.checkAdmin,
-                  );
+                  return TimeSlot();
                 }),
               );
             },

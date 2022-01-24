@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
@@ -8,6 +8,7 @@ import 'dart:ui';
 import 'package:flutter_custom_clippers/flutter_custom_clippers.dart';
 import 'package:isc/constants.dart';
 import 'package:isc/provider/theme_provider.dart';
+import 'package:isc/screens/user-info.dart';
 import 'package:provider/provider.dart';
 import 'package:transparent_image/transparent_image.dart';
 
@@ -35,8 +36,8 @@ class _TicketScreenState extends State<TicketScreen> {
   }
 
   void getData() async {
-    currEmail = FirebaseAuth.instance.currentUser!.email!;
-    JWTtoken = await FirebaseAuth.instance.currentUser!.getIdToken();
+    currEmail = StudentInfo.emailId;
+    JWTtoken = StudentInfo.jwtToken;
     print(currEmail);
     var json = await http.get(
         Uri.parse(

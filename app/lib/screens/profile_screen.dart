@@ -1,21 +1,21 @@
 import 'dart:async';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:isc/components/bottom_navi_bar.dart';
 import 'package:isc/constants.dart';
 import 'package:isc/provider/theme_provider.dart';
 import 'package:isc/screens/setting_screen.dart';
+import 'package:isc/screens/user-info.dart';
 import 'package:isc/screens/welcome_screen.dart';
 import 'package:provider/provider.dart';
 
 import 'booking_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
-  bool adminCheck;
-  ProfileScreen(this.adminCheck);
+ 
+  ProfileScreen();
 
   @override
   _ProfileScreenState createState() => _ProfileScreenState();
@@ -62,7 +62,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         centerTitle: true,
         title: Text("Profile", style: TextStyle(color: kPrimaryColor)),
       ),
-      bottomNavigationBar: BottomNaviBar('profile', widget.adminCheck),
+      bottomNavigationBar: BottomNaviBar('profile'),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -78,7 +78,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 text: 'Account',
                 icon: Icons.account_box_outlined,
                 func: () {}),
-            widget.adminCheck==false?ProfileCard(
+            StudentInfo.isAdmin==false?ProfileCard(
                 size: size,
                 text: 'Bookings',
                 icon: Icons.my_library_books_sharp,

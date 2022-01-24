@@ -4,9 +4,8 @@ import 'package:isc/screens/event_screen.dart';
 import 'package:isc/screens/profile_screen.dart';
 
 class BottomNaviBar extends StatelessWidget {
-  String? screen;
-  BottomNaviBar(this.screen,this.checkAdmin);
-  bool? checkAdmin;
+  final String? screen;
+  BottomNaviBar(this.screen);
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +22,6 @@ class BottomNaviBar extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                         builder: (context) => EventScreen(
-                              adminCheck: checkAdmin!,
                             )));
               },
               icon: Icon(
@@ -35,7 +33,7 @@ class BottomNaviBar extends StatelessWidget {
             IconButton(
               onPressed: () {
                 Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => ProfileScreen(checkAdmin!)));
+                    MaterialPageRoute(builder: (context) => ProfileScreen()));
               },
               icon: Icon(
                 Icons.person,

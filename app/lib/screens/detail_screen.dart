@@ -1,17 +1,16 @@
 import 'dart:convert';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:isc/components/event_card.dart';
+
 import 'package:isc/components/roundedbutton.dart';
 import 'package:isc/components/slot.dart';
 import 'package:isc/constants.dart';
-import 'package:isc/screens/profile_screen.dart';
+
+import 'package:isc/screens/user-info.dart';
 import 'booking_screen.dart';
-import 'event_screen.dart';
-import 'welcome_screen.dart';
+
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'time_slot.dart';
@@ -43,18 +42,17 @@ class _DetailScreenState extends State<DetailScreen> {
   }
 
   void postData() async {
-    String JWTtoken = await FirebaseAuth.instance.currentUser!.getIdToken();
+    String JWTtoken =StudentInfo.jwtToken;
     Map<String, dynamic> mp = {};
     mp.putIfAbsent(firstNameController!.text, () => currEmail);
     for (var i = 0; i < (length * 2) - 2; i = i + 2) {
       mp.putIfAbsent(_controller[i].text, () => _controller[i + 1].text);
     }
-    TimeSlot date = TimeSlot();
 
     var body = jsonEncode({
-      "sports_name": SlotCard.gameChoosen,
-      "date": SlotCard.dateChoosen,
-      "slot": SlotCard.sltChoosen,
+      "sports_name": StudentInfo.gameChoosen,
+      "date": StudentInfo.dateChoosen,
+      "slot": StudentInfo.slotChoosen,
       "student_details": mp,
     });
 
@@ -105,22 +103,17 @@ class _DetailScreenState extends State<DetailScreen> {
   }
 
   void getData() async {
-    currEmail = await FirebaseAuth.instance.currentUser!.email!;
     var response = await http.get(Uri.parse(kIpAddress + '/max-person'));
-    var collection = FirebaseFirestore.instance.collection('users');
-    var docSnapshot = await collection.doc(currEmail).get();
-    if (docSnapshot.exists) {
-      Map<String, dynamic>? data = docSnapshot.data();
-      firstName = data?['Name']; // <-- The value you want to retrieve.
-      // Call setState if needed.
-    }
+   
+    currEmail = StudentInfo.emailId;
+    firstName = StudentInfo.name;
 
     firstNameController = TextEditingController(text: firstName);
     firstEmailController = TextEditingController(text: currEmail);
     circP = false;
     Map<String, dynamic> jsonData = await jsonDecode(response.body);
     print(response.statusCode);
-    maxLength = jsonData[SlotCard.gameChoosen];
+    maxLength = jsonData[StudentInfo.gameChoosen];
     setState(() {});
   }
 

@@ -87,6 +87,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     dynamic theme = Provider.of<ThemeProvider>(context);
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Container(
         child: Center(
           child: Form(

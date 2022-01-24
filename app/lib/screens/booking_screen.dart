@@ -1,13 +1,12 @@
 import 'dart:convert';
 
-import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:flutter/material.dart';
 import 'package:isc/components/booking_card.dart';
 
-
 import 'package:http/http.dart' as http;
 import 'package:isc/constants.dart';
-
+import 'package:isc/screens/user-info.dart';
 
 class BookingScreen extends StatefulWidget {
   @override
@@ -25,11 +24,12 @@ class _BookingScreenState extends State<BookingScreen> {
   }
 
   Future<void> getData() async {
-    String currEmail = FirebaseAuth.instance.currentUser!.email!;
-    String JWTtoken = await FirebaseAuth.instance.currentUser!.getIdToken();
+    String currEmail = StudentInfo.emailId;
+    String JWTtoken = StudentInfo.jwtToken;
     print(currEmail);
-    var response = await http
-        .get(Uri.parse(kIpAddress+'/get_bookings/${currEmail}'), headers: {"x-access-token": JWTtoken});
+    var response = await http.get(
+        Uri.parse(kIpAddress + '/get_bookings/$currEmail'),
+        headers: {"x-access-token": JWTtoken});
     var jsonData = await jsonDecode(response.body);
     print(jsonData);
     bookingList = jsonData["message"];
@@ -69,23 +69,20 @@ class _BookingScreenState extends State<BookingScreen> {
                   child: ListView(
                     children: [
                       ListView.builder(
-                      physics: ScrollPhysics(),
+                          physics: ScrollPhysics(),
                           shrinkWrap: true,
                           itemCount: bookingList.length,
                           itemBuilder: (context, index) {
-                            return 
-                                 BookingCard(
-                                    isConfirm:bookingList[index]['Confirm'],
-                                    size: size,
-                                    date: bookingList[index]['Date'],
-                                    sportName: bookingList[index]['Game'],
-                                    bookingId: bookingList[index]['Booking_ID'],
-                                    studentName: bookingList[index]
-                                        ['Student_Name'],
-                                    totalCount: bookingList[index]['Count'],
-                                    slotTime: bookingList[index]['Slot'],
-                                  )
-                              ;
+                            return BookingCard(
+                              isConfirm: bookingList[index]['Confirm'],
+                              size: size,
+                              date: bookingList[index]['Date'],
+                              sportName: bookingList[index]['Game'],
+                              bookingId: bookingList[index]['Booking_ID'],
+                              studentName: bookingList[index]['Student_Name'],
+                              totalCount: bookingList[index]['Count'],
+                              slotTime: bookingList[index]['Slot'],
+                            );
                           })
 
                       //PendingBooking(size: size),

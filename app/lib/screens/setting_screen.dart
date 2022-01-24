@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:isc/constants.dart';
-import 'package:isc/main.dart';
+
 import 'package:isc/provider/theme_provider.dart';
 import 'package:provider/provider.dart';
 

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 //import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -8,49 +9,53 @@ import 'package:http/http.dart' as http;
 import 'package:isc/components/bottom_navi_bar.dart';
 import 'package:isc/components/event_card.dart';
 import 'package:isc/constants.dart';
+import 'package:isc/screens/user-info.dart';
 
 import 'notification_screen.dart';
 
 class EventScreen extends StatefulWidget {
-  bool adminCheck;
-  EventScreen({required this.adminCheck});
+  EventScreen();
 
   @override
   _EventScreenState createState() => _EventScreenState();
 }
 
 class _EventScreenState extends State<EventScreen> {
-  List Sports = [];
-  List ImgUri = [];
-  // String JWTtoken='';
+  List sports = [];
+  List imgUri = [];
   bool isInternet = true;
   bool circP = true;
   @override
   void initState() {
     super.initState();
-
     getData();
-    if (widget.adminCheck) {
-      print("admin hai");
-    } else {
-      print("ADMIN NHI HAI");
-    }
   }
 
   void getData() async {
-    String JWTtoken = await FirebaseAuth.instance.currentUser!.getIdToken();
+    StudentInfo.emailId = FirebaseAuth.instance.currentUser!.email!;
+    StudentInfo.jwtToken =
+        await FirebaseAuth.instance.currentUser!.getIdToken();
+    var collection = FirebaseFirestore.instance.collection('users');
+    var docSnapshot = await collection.doc(StudentInfo.emailId).get();
+    if (docSnapshot.exists) {
+      Map<String, dynamic>? data = docSnapshot.data();
+      StudentInfo.name = data?['Name']; // <-- The value you want to retrieve.
+      // Call setState if needed.
+    }
+
+
     var response = await http.get(
       Uri.parse(kIpAddress + '/games'),
     );
     Map<String, dynamic> jsonData = await jsonDecode(response.body);
     print(response.statusCode);
     jsonData.forEach((k, v) {
-      Sports.add(k);
-      ImgUri.add(v);
+      sports.add(k);
+      imgUri.add(v);
     });
     // print(Sports);
     circP = false;
-    print(JWTtoken);
+    print(StudentInfo.jwtToken);
     //print(ImgUri[2]);
     setState(() {});
   }
@@ -109,14 +114,13 @@ class _EventScreenState extends State<EventScreen> {
                           gridDelegate:
                               SliverGridDelegateWithFixedCrossAxisCount(
                                   childAspectRatio:
-                                      widget.adminCheck ? 0.79 : 1,
+                                      StudentInfo.isAdmin ? 0.79 : 1,
                                   crossAxisCount: 2),
-                          itemCount: Sports.length,
+                          itemCount: sports.length,
                           itemBuilder: (context, index) {
                             return EventCard(
-                              checkAdmin: widget.adminCheck,
-                              title: Sports[index],
-                              uri: ImgUri[index],
+                              title: sports[index],
+                              uri: imgUri[index],
                             );
                           },
                         )
@@ -126,7 +130,7 @@ class _EventScreenState extends State<EventScreen> {
                 ],
               ),
             ),
-      bottomNavigationBar: BottomNaviBar('event',widget.adminCheck),
+      bottomNavigationBar: BottomNaviBar('event'),
     );
   }
 }

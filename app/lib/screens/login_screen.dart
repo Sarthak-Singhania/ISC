@@ -6,14 +6,15 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:isc/constants.dart';
 import 'package:isc/components/roundedbutton.dart';
 import 'package:isc/provider/theme_provider.dart';
-import 'package:isc/screens/profile_screen.dart';
+
 
 import 'package:isc/screens/registration.dart';
-import 'package:isc/screens/time_slot.dart';
+
+import 'package:isc/screens/user-info.dart';
 import 'package:provider/provider.dart';
 
 import 'event_screen.dart';
-import 'notification_screen.dart';
+
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -36,35 +37,26 @@ class _LoginScreenState extends State<LoginScreen> {
   void signIn(String email, String password) async {
     if (_formKey.currentState!.validate()) {
       try {
-        bool adminCheck = false;
+       
         final snapShot = await FirebaseFirestore.instance
             .collection('admin-users')
             .doc(email)
             .get();
 
         if (snapShot.exists) {
-          adminCheck = true;
+          StudentInfo.isAdmin = true;
         } else {
-          adminCheck = false;
+          StudentInfo.isAdmin = false;
         }
         await _auth
             .signInWithEmailAndPassword(email: email, password: password)
             .then((uid) => {
                   Fluttertoast.showToast(msg: "Login Successful"),
-                  if (adminCheck)
-                    {
+                 
                       Navigator.of(context).pushReplacement(MaterialPageRoute(
-                          builder: (context) => EventScreen(
-                                adminCheck: true,
+                          builder: (context) => EventScreen(                
                               ))),
-                    }
-                  else
-                    {
-                      Navigator.of(context).pushReplacement(MaterialPageRoute(
-                          builder: (context) => EventScreen(
-                                adminCheck: false,
-                              ))),
-                    }
+                    
                 });
       } on FirebaseAuthException catch (error) {
         switch (error.code) {
