@@ -1,5 +1,5 @@
 import mysql.connector as sql
-# from datetime import datetime
+from datetime import datetime
 # import pandas as pd
 db=sql.connect(host='185.210.145.1',user='u724843278_ISC',password='ISCdatabase@1234',database='u724843278_ISC')
 cur=db.cursor(dictionary=True)
@@ -24,5 +24,9 @@ cur=db.cursor(dictionary=True)
 # for i in d:
 #     for x in a:
 #         d[i][x['Slots']]=x[i]
-cur.execute("select `Max_Person` from `games` where `Sports_Name`='Gym'")
-print(cur.fetchone()['Max_Person'])
+today=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+game='Squash'
+date=datetime.strptime('27-01-2022', '%d-%m-%Y').strftime('%Y-%m-%d')
+slot='5:00pm-6:00pm'
+cur.execute(f"update `bookings` set `Cancelled`=1, `Cancellation_Date`='{today}', `Confirm`=0 where `Game`='{game}' and `Date`='{date}' and `Slot`='{slot}'")
+db.commit()

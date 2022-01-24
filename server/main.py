@@ -1,17 +1,26 @@
 from flask import Flask, request, make_response
 from flask_cors import CORS, cross_origin
 from flask_mysqldb import MySQL
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from datetime import datetime
 from firebase_admin import auth, credentials
 from functools import wraps
 import MySQLdb.cursors as cur
+import requests as rq
 import pandas as pd
 import firebase_admin
 import secrets
 import string
 
-app = Flask(__name__)
+application = app = Flask(__name__)
 cors = CORS(app)
+
+limiter = Limiter(
+    application,
+    key_func=get_remote_address,
+    default_limits=["200 per day", "50 per hour"]
+)
 
 app.config['CORS_HEADERS'] = 'Content-Type'
 app.config['MYSQL_HOST'] = '185.210.145.1'
@@ -81,7 +90,7 @@ def slots(game):
 
 @app.route('/book', methods=['POST'])
 @cross_origin()
-@token_required
+# @token_required
 def book():
     x = request.get_json()
     cursor = mysql.connection.cursor(cur.DictCursor)
@@ -247,26 +256,39 @@ def admin_bookings(game, date, slot):
 def stop():
     x=request.get_json()
     cursor = mysql.connection.cursor(cur.DictCursor)
-    date = datetime.now().strftime('%Y-%m-%d')
     if request.headers['admin-header'].title()=='Yes':
         if x['category']=='game':
-            
-            game=x['game'].title().replace(' ','_')
-            cursor.execute(f"update `games` set `Enabled`='0' where `Sports_Name`='{game}' ")
+            game=x['game']
+            today=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            date=datetime.now().strftime('%Y-%m-%d')
+            cursor.execute(f"update `games` set `Enabled`='0' where `Sports_Name`='{game}'")
             mysql.connection.commit()
+            cursor.execute(f"update `bookings` set `Cancelled`=1, `Cancellation_Date`='{today}', `Confirm`=0 where `Game`='{game}' and `Date`>='{date}'")
+            mysql.connection.commit()
+            cursor.execute(f"update `{game.title().replace(' ','_')}` set `Monday`='0',`Tuesday`='0',`Wednesday`='0',`Thursday`='0',`Friday`='0',`Saturday`='0',`Sunday`='0'")
+            mysql.connection.commit()
+            print('band ho gaya game',x)
             return make_response({'message':f'booking stopped for {game}'})
         elif x['category']=='date':
             game=x['game'].title().replace(' ','_')
             day=pd.to_datetime(x['date']).day_name()
+            date=datetime.strptime(x['date'], '%d-%m-%Y').strftime('%Y-%m-%d')
             cursor.execute(f"update `{game}` set `{day}`='0'")
             mysql.connection.commit()
+            cursor.execute(f"update `bookings` set `Cancelled`=1, `Cancellation_Date`='{today}', `Confirm`=0 where `Game`='{game}' and `Date`='{date}'")
+            mysql.connection.commit()
+            print('band ho gaya date',x)
             return make_response({'message':f'booking stopped for {game} for the day {x["date"]}'})
         elif x['category']=='slot':
             game=x['game'].title().replace(' ','_')
             day=pd.to_datetime(x['date']).day_name()
             slot=x['slot'].lower()
+            date=datetime.strptime(x['date'], '%d-%m-%Y').strftime('%Y-%m-%d')
             cursor.execute(f"update `{game}` set `{day}`='0' where `Slots`='{slot}'")
             mysql.connection.commit()
+            cursor.execute(f"update `bookings` set `Cancelled`=1, `Cancellation_Date`='{today}', `Confirm`=0 where `Game`='{game}' and `Date`='{date}' and `Slot`='{slot}'")
+            mysql.connection.commit()
+            print('band ho gaya slot',x)
             return make_response({'message':f'booking stopped for {game} for the day {x["date"]} for {slot} slot'})
     else:
         return make_response({'message': 'You cannot access since you are not an admin'}), 403
@@ -280,8 +302,13 @@ def unstop():
     if request.headers['admin-header'].title()=='Yes':
         if x['category']=='game':
             game=x['game'].title().replace(' ','_')
-            cursor.execute(f"update `games` set `Enabled`='1' where `Sports_Name`='{game}' ")
+            cursor.execute(f"update `games` set `Enabled`='1' where `Sports_Name`='{game}'")
             mysql.connection.commit()
+            cursor.execute(f"select `Capacity` from `games` where `Sports_Name`='{game}'")
+            a=cursor.fetchone()['Capacity']
+            cursor.execute(f"update `{game.title().replace(' ','_')}` set `Monday`='{a}',`Tuesday`='{a}',`Wednesday`='{a}',`Thursday`='{a}',`Friday`='{a}',`Saturday`='{a}',`Sunday`='{a}'")
+            mysql.connection.commit()
+            print('chaloo ho gaya game',x)
             return make_response({'message':f'booking started for {game}'})
         elif x['category']=='date':
             game=x['game'].title().replace(' ','_')
@@ -290,6 +317,7 @@ def unstop():
             a=cursor.fetchone()['Capacity']
             cursor.execute(f"update `{game}` set `{day}`='{a}'")
             mysql.connection.commit()
+            print('chaloo ho gaya date',x)
             return make_response({'message':f'booking started for {game} for the day {x["date"]}'})
         elif x['category']=='slot':
             game=x['game'].title().replace(' ','_')
@@ -299,9 +327,33 @@ def unstop():
             a=cursor.fetchone()['Capacity']
             cursor.execute(f"update `{game}` set `{day}`='{a}' where `Slots`='{slot}'")
             mysql.connection.commit()
+            print('chaloo ho gaya slot',x)
             return make_response({'message':f'booking started for {game} for the day {x["date"]} for {slot} slot'})
     else:
         return make_response({'message': 'You cannot access since you are not an admin'}), 403
+
+
+@app.route('/booking-count',methods=['GET'])
+@token_required
+def booking_count():
+    cursor = mysql.connection.cursor(cur.DictCursor)
+    if request.args.get('category').lower()=='game':
+        game=request.args.get('game').title().replace(' ','_')
+        date=datetime.now().strftime('%Y-%m-%d')
+        cursor.execute(f"select count(`SNU_ID`) as Num from `bookings` where `Date`>='{date}' and `Game`='{game}' and `Confirm`=1")
+        return make_response({'message':str(cursor.fetchone()['Num'])})
+    elif request.args.get('category').lower()=='date':
+        game=request.args.get('game').title().replace(' ','_')
+        date=datetime.strptime(request.args.get('date'),'%d-%m-%Y').strftime('%Y-%m-%d')
+        cursor.execute(f"select count(`SNU_ID`) as Num from `bookings` where `Game`='{game}' and `Date`='{date}'")
+        return make_response({'message':str(cursor.fetchone()['Num'])})
+    elif request.args.get('category').lower()=='slot':
+        game=request.args.get('game').title().replace(' ','_')
+        date=datetime.strptime(request.args.get('date'),'%d-%m-%Y').strftime('%Y-%m-%d')
+        slot=request.args.get('slot')
+        cursor.execute(f"select count(`SNU_ID`) as Num from `bookings` where `Game`='{game}' and `Date`='{date}' and `Slot`='{slot}'")
+        return make_response({'message':str(cursor.fetchone()['Num'])})
+
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=8080, debug=True)
