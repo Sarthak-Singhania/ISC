@@ -1,8 +1,8 @@
 import 'dart:convert';
 
-
 import 'package:flutter/material.dart';
 import 'package:flutter_switch/flutter_switch.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:isc/screens/user-info.dart';
@@ -106,8 +106,8 @@ class _AdminSlotScreenState extends State<AdminSlotScreen> {
     var body = jsonEncode({
       "category": "slot",
       "game": StudentInfo.gameChoosen,
-                    "date": StudentInfo.dateChoosen,
-                    "slot": StudentInfo.slotChoosen,
+      "date": StudentInfo.dateChoosen,
+      "slot": StudentInfo.slotChoosen,
     });
 
     print(body);
@@ -125,18 +125,20 @@ class _AdminSlotScreenState extends State<AdminSlotScreen> {
         body: body,
       );
       toggleValue = false;
-                  setState(() {});
+      setState(() {});
     } catch (e) {
       print(e);
     }
   }
 
   Future<void> getData() async {
-
     var response = await http.get(
         Uri.parse(kIpAddress +
             '/admin-bookings/${StudentInfo.gameChoosen}/${StudentInfo.dateChoosen}/${StudentInfo.slotChoosen}'),
-        headers: {"x-access-token": StudentInfo.jwtToken, "admin-header": "YES"});
+        headers: {
+          "x-access-token": StudentInfo.jwtToken,
+          "admin-header": "YES"
+        });
     var jsonData = await jsonDecode(response.body);
     print(jsonData);
     pendingList = jsonData["message"];
@@ -247,6 +249,8 @@ class _AdminSlotScreenState extends State<AdminSlotScreen> {
                                   itemBuilder: (context, index) {
                                     return AdminSlotCard(
                                       size: size,
+                                      bookingId: pendingList[index]
+                                          ['Booking_ID'],
                                       studentName: pendingList[index]
                                           ['Student_Name'],
                                       snuId: pendingList[index]['SNU_ID'],
@@ -264,6 +268,7 @@ class AdminSlotCard extends StatelessWidget {
   const AdminSlotCard(
       {Key? key,
       required this.size,
+      required this.bookingId,
       required this.studentName,
       required this.snuId})
       : super(key: key);
@@ -271,31 +276,83 @@ class AdminSlotCard extends StatelessWidget {
   final Size size;
   final studentName;
   final snuId;
+  final bookingId;
+
+  Future<void> attendance(String attendance) async {
+    var body = jsonEncode({
+      "name":studentName,
+      "snu_id": snuId,
+      "booking_id": bookingId,
+    });
+
+    try {
+      final response = await http.post(
+        Uri.parse(kIpAddress + '/$attendance'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': '*/*',
+          'Accept-Encoding': 'gzip, deflate, br',
+          'Access-Control-Allow-Origin': ' *',
+          "x-access-token": StudentInfo.jwtToken,
+          "admin-header": "YES"
+        },
+        body: body,
+      );
+      print(response.body);
+    } catch (e) {
+      print(e);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Container(
       margin: EdgeInsets.all(10),
-      padding: EdgeInsets.only(left: 10),
+      padding: EdgeInsets.only(left: 10, right: 10),
       width: size.width * 0.9,
       height: size.height * 0.1,
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(
-              'Student Name : $studentName',
-              style: TextStyle(fontSize: 15),
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Student Name : $studentName',
+                style: TextStyle(fontSize: 15),
+              ),
+              GestureDetector(
+                onTap: () {
+                  attendance("present");
+                  Fluttertoast.showToast(
+                      msg: "Student has been marked present ");
+                },
+                child: Text(
+                  'Present',
+                  style: TextStyle(fontSize: 15, color: Colors.green),
+                ),
+              ),
+            ],
           ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(
-              'SNU ID: $snuId',
-              style: TextStyle(fontSize: 15),
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'SNU ID: $snuId',
+                style: TextStyle(fontSize: 15),
+              ),
+              GestureDetector(
+                onTap: () {
+                  attendance("absent");
+                  Fluttertoast.showToast(msg: "Student has been marked absent");
+                },
+                child: Text(
+                  'Absent',
+                  style: TextStyle(fontSize: 15, color: Colors.red),
+                ),
+              ),
+            ],
           ),
         ],
       ),

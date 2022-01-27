@@ -54,8 +54,9 @@ class _TimeSlotState extends State<TimeSlot> {
   @override
   void initState() {
     super.initState();
-    getData();
     gameChoosen = StudentInfo.gameChoosen;
+    getData();
+    
   }
 
   Future<void> disbaleSlot() async {
@@ -156,7 +157,7 @@ class _TimeSlotState extends State<TimeSlot> {
   void getData() async {
     //print(JWTtoken);
     response = await http.get(
-        Uri.parse(kIpAddress + '/slots' + '/' + gameChoosen),
+        Uri.parse(kIpAddress + '/slots' + '/' + StudentInfo.gameChoosen),
         headers: {"x-access-token": StudentInfo.jwtToken});
     jsonData = await jsonDecode(response!.body);
     oldResponse = response;
