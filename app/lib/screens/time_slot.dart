@@ -7,7 +7,7 @@ import 'package:isc/constants.dart';
 import 'package:isc/components/slot.dart';
 import 'package:http/http.dart' as http;
 import 'package:isc/provider/theme_provider.dart';
-import 'package:isc/screens/user-info.dart';
+import 'package:isc/user-info.dart';
 import 'package:provider/provider.dart';
 // import 'package:switcher/core/switcher_size.dart';
 // import 'package:switcher/switcher.dart';
@@ -309,23 +309,19 @@ class _TimeSlotState extends State<TimeSlot> {
                     ],
                   ),
             Expanded(
-              child: ListView(
-                children: [
-                  ListView.builder(
-                      physics: ScrollPhysics(),
-                      shrinkWrap: true,
-                      itemCount: slotAvailable.length,
-                      itemBuilder: (context, index) {
-                        return SlotCard(
-                            slotTime: slotAvailable[index],
-                            color: sport[slotAvailable[index]] > 0
-                                ? theme.checkTheme(Colors.green,
-                                    Colors.green.shade600, context)
-                                : Colors.grey,
-                            slotAvailable: sport[slotAvailable[index]]);
-                      })
-                ],
-              ),
+              child: ListView.builder(
+                  physics: ScrollPhysics(),
+                  shrinkWrap: true,
+                  itemCount: slotAvailable.length,
+                  itemBuilder: (context, index) {
+                    return SlotCard(
+                        slotTime: slotAvailable[index],
+                        color: sport[slotAvailable[index]] > 0
+                            ? theme.checkTheme(Colors.green,
+                                Colors.green.shade600, context)
+                            : Colors.grey,
+                        slotAvailable: sport[slotAvailable[index]]);
+                  }),
             )
           ],
         ));

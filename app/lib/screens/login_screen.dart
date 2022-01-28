@@ -3,18 +3,18 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:isc/constants.dart';
 import 'package:isc/components/roundedbutton.dart';
 import 'package:isc/provider/theme_provider.dart';
 
-
 import 'package:isc/screens/registration.dart';
+import 'package:isc/screens/time_day_slot.dart';
 
-import 'package:isc/screens/user-info.dart';
+import 'package:isc/user-info.dart';
 import 'package:provider/provider.dart';
 
 import 'event_screen.dart';
-
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -35,9 +35,10 @@ class _LoginScreenState extends State<LoginScreen> {
   String? errorMessage;
 
   void signIn(String email, String password) async {
-    if (_formKey.currentState!.validate()) {
+    bool hasInternet = await InternetConnectionChecker().hasConnection;
+    if (hasInternet) {
+       if (_formKey.currentState!.validate()) {
       try {
-       
         final snapShot = await FirebaseFirestore.instance
             .collection('admin-users')
             .doc(email)
@@ -52,11 +53,12 @@ class _LoginScreenState extends State<LoginScreen> {
             .signInWithEmailAndPassword(email: email, password: password)
             .then((uid) => {
                   Fluttertoast.showToast(msg: "Login Successful"),
-                 
-                      Navigator.of(context).pushReplacement(MaterialPageRoute(
-                          builder: (context) => EventScreen(                
-                              ))),
-                    
+
+                  // Navigator.of(context).pushReplacement(MaterialPageRoute(
+                  //     builder: (context) => EventScreen(
+                  //         ))),
+                  Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (context) => TimeDaySlot())),
                 });
       } on FirebaseAuthException catch (error) {
         switch (error.code) {
@@ -85,6 +87,9 @@ class _LoginScreenState extends State<LoginScreen> {
         Fluttertoast.showToast(msg: errorMessage!);
         print(error.code);
       }
+    }
+    } else {
+      Fluttertoast.showToast(msg: "Pleas check your internet connection");
     }
   }
 
@@ -187,9 +192,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ),
-                  RoundedButton("LOGIN", kPrimaryColor, Colors.white, size, () {
+                  RoundedButton(s:"LOGIN", color:kPrimaryColor, tcolor:Colors.white,size: size,func: () {
                     signIn(emailController.text, passwordController.text);
-                  }, context),
+                  }),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[

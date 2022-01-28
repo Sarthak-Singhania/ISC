@@ -1,14 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:isc/screens/ticket_screen.dart';
 
 import '../constants.dart';
 
-Widget notificationCard(
-      Size size, dynamic ownername, dynamic game, dynamic bookingId,BuildContext context) {
+class NotificationCard extends StatelessWidget {
+  const NotificationCard({Key? key, this.username, this.game, this.bookingId})
+      : super(key: key);
+  final game;
+  final username;
+  final bookingId;
+  @override
+  Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
     return GestureDetector(
-      onTap: () {
-        Navigator.pushReplacement(context,
-            MaterialPageRoute(builder: (context) => TicketScreen(bookingId)));
+      onTap: () async {
+        bool hasInternet = await InternetConnectionChecker().hasConnection;
+        if (hasInternet) {
+          Navigator.pushReplacement(context,
+              MaterialPageRoute(builder: (context) => TicketScreen(bookingId)));
+        } else {
+          Fluttertoast.showToast(msg: "Please check your internet connection");
+        }
       },
       child: Container(
         margin: EdgeInsets.all(10),
@@ -16,7 +30,7 @@ Widget notificationCard(
         height: size.height * 0.09,
         child: Center(
             child: Text(
-          '$ownername has invited you to play $game',
+          '$username has invited you to play $game',
           style: TextStyle(fontSize: 15),
         )),
         decoration: BoxDecoration(
@@ -34,4 +48,4 @@ Widget notificationCard(
       ),
     );
   }
-
+}

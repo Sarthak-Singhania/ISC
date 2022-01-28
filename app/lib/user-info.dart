@@ -6,5 +6,5 @@ class StudentInfo {
   static String gameChoosen = " ";
   static String dateChoosen = " ";
   static String slotChoosen = " ";
-
+  
 }

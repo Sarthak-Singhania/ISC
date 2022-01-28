@@ -6,7 +6,7 @@ import 'package:isc/components/notification_card.dart';
 import 'package:isc/constants.dart';
 import 'package:http/http.dart' as http;
 import 'package:isc/screens/ticket_screen.dart';
-import 'package:isc/screens/user-info.dart';
+import 'package:isc/user-info.dart';
 
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({Key? key}) : super(key: key);
@@ -70,21 +70,17 @@ class _NotificationScreenState extends State<NotificationScreen> {
                   child: Column(
                     children: [
                       Expanded(
-                        child: ListView(
-                          children: [
-                            ListView.builder(
-                                physics: ScrollPhysics(),
-                                shrinkWrap: true,
-                                itemCount: pendingList.length,
-                                itemBuilder: (context, index) {
-                                  return notificationCard(
-                                      size,
-                                      pendingList[index]['First_name'],
-                                      pendingList[index]['Game'],
-                                      pendingList[index]['Booking_ID'],context);
-                                })
-                          ],
-                        ),
+                        child: ListView.builder(
+                            physics: ScrollPhysics(),
+                            shrinkWrap: true,
+                            itemCount: pendingList.length,
+                            itemBuilder: (context, index) {
+                              return NotificationCard(
+                                  
+                                  username:pendingList[index]['First_name'],
+                                  game:pendingList[index]['Game'],
+                                 bookingId: pendingList[index]['Booking_ID']);
+                            }),
                       ),
                     ],
                   ),

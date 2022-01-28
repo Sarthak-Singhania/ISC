@@ -6,7 +6,7 @@ import 'package:isc/components/booking_card.dart';
 
 import 'package:http/http.dart' as http;
 import 'package:isc/constants.dart';
-import 'package:isc/screens/user-info.dart';
+import 'package:isc/user-info.dart';
 
 class BookingScreen extends StatefulWidget {
   @override
@@ -66,28 +66,22 @@ class _BookingScreenState extends State<BookingScreen> {
                 ))
               : RefreshIndicator(
                   onRefresh: getData,
-                  child: ListView(
-                    children: [
-                      ListView.builder(
-                          physics: ScrollPhysics(),
-                          shrinkWrap: true,
-                          itemCount: bookingList.length,
-                          itemBuilder: (context, index) {
-                            return BookingCard(
-                              isConfirm: bookingList[index]['Confirm'],
-                              size: size,
-                              date: bookingList[index]['Date'],
-                              sportName: bookingList[index]['Game'],
-                              bookingId: bookingList[index]['Booking_ID'],
-                              studentName: bookingList[index]['Student_Name'],
-                              totalCount: bookingList[index]['Count'],
-                              slotTime: bookingList[index]['Slot'],
-                            );
-                          })
-
-                      //PendingBooking(size: size),
-                    ],
-                  ),
+                  child: ListView.builder(
+                      physics: ScrollPhysics(),
+                      shrinkWrap: true,
+                      itemCount: bookingList.length,
+                      itemBuilder: (context, index) {
+                        return BookingCard(
+                          isConfirm: bookingList[index]['Confirm'],
+                          size: size,
+                          date: bookingList[index]['Date'],
+                          sportName: bookingList[index]['Game'],
+                          bookingId: bookingList[index]['Booking_ID'],
+                          studentName: bookingList[index]['Student_Name'],
+                          totalCount: bookingList[index]['Count'],
+                          slotTime: bookingList[index]['Slot'],
+                        );
+                      }),
                 ),
     );
   }

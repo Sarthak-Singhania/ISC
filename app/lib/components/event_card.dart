@@ -7,7 +7,7 @@ import 'package:isc/provider/theme_provider.dart';
 
 import 'package:isc/screens/time_slot.dart';
 import 'package:http/http.dart' as http;
-import 'package:isc/screens/user-info.dart';
+import 'package:isc/user-info.dart';
 import 'package:provider/provider.dart';
 
 import 'package:transparent_image/transparent_image.dart';

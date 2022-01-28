@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:isc/screens/admin_slot_screen.dart';
 import 'package:isc/screens/detail_screen.dart';
-import 'package:isc/screens/user-info.dart';
+import 'package:isc/user-info.dart';
 
 class SlotCard extends StatelessWidget {
   String slotTime;
@@ -36,7 +36,11 @@ class SlotCard extends StatelessWidget {
         }
       },
       child: Container(
-          margin: EdgeInsets.all(size.width * 0.05),
+          margin: EdgeInsets.only(
+              top: size.width * 0.05,
+              bottom: size.width * 0.05,
+              left: size.width * 0.1,
+              right: size.width * 0.1),
           padding: EdgeInsets.all(size.width * 0.04),
           alignment: Alignment.center,
           decoration: BoxDecoration(
@@ -52,12 +56,15 @@ class SlotCard extends StatelessWidget {
             // ],
           ),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              Spacer(
+                flex: 1,
+              ),
               Text(
                 slotTime.toUpperCase(),
                 style: TextStyle(color: Colors.white, fontSize: 25),
               ),
+              Spacer(),
               Icon(
                 Icons.navigate_next,
                 color: Colors.white,

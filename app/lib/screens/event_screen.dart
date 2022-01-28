@@ -9,7 +9,7 @@ import 'package:http/http.dart' as http;
 import 'package:isc/components/bottom_navi_bar.dart';
 import 'package:isc/components/event_card.dart';
 import 'package:isc/constants.dart';
-import 'package:isc/screens/user-info.dart';
+import 'package:isc/user-info.dart';
 
 import 'notification_screen.dart';
 

@@ -1,20 +1,21 @@
 import 'dart:async';
 
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:isc/components/bottom_navi_bar.dart';
+import 'package:isc/components/profile_card.dart';
 import 'package:isc/constants.dart';
 import 'package:isc/provider/theme_provider.dart';
 import 'package:isc/screens/setting_screen.dart';
-import 'package:isc/screens/user-info.dart';
+import 'package:isc/user-info.dart';
 import 'package:isc/screens/welcome_screen.dart';
 import 'package:provider/provider.dart';
 
 import 'booking_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
- 
   ProfileScreen();
 
   @override
@@ -78,14 +79,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 text: 'Account',
                 icon: Icons.account_box_outlined,
                 func: () {}),
-            StudentInfo.isAdmin==false?ProfileCard(
-                size: size,
-                text: 'Bookings',
-                icon: Icons.my_library_books_sharp,
-                func: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => BookingScreen()));
-                }):Container(),
+            StudentInfo.isAdmin == false
+                ? ProfileCard(
+                    size: size,
+                    text: 'Bookings',
+                    icon: Icons.my_library_books_sharp,
+                    func: () async {
+                      bool hasInternet =
+                          await InternetConnectionChecker().hasConnection;
+                      if (hasInternet) {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => BookingScreen()));
+                      } else {
+                        Fluttertoast.showToast(
+                            msg: "Please check your internet connection");
+                      }
+                    })
+                : Container(),
             ProfileCard(
                 size: size,
                 text: 'Settings',
@@ -98,10 +110,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
               size: size,
               text: 'Log Out',
               icon: Icons.login_outlined,
-              func: () {
-                logout();
+              func: () async {
+                 bool hasInternet =
+                          await InternetConnectionChecker().hasConnection;
+                if(hasInternet){
+                  logout();
                 Navigator.pushReplacement(context,
                     MaterialPageRoute(builder: (context) => WelcomeScreen()));
+                }else{
+                   Fluttertoast.showToast(
+                            msg: "Please check your internet connection");
+                }
               },
             ),
           ],
@@ -111,63 +130,3 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 }
 
-class ProfileCard extends StatelessWidget {
-  const ProfileCard({
-    Key? key,
-    required this.size,
-    required this.text,
-    required this.icon,
-    required this.func,
-  }) : super(key: key);
-
-  final Size size;
-  final String text;
-  final IconData icon;
-  final Function func;
-
-  @override
-  Widget build(BuildContext context) {
-    dynamic theme = Provider.of<ThemeProvider>(context);
-    return GestureDetector(
-      onTap: () {
-        func();
-      },
-      //  theme == ThemeMode.light ? Colors.grey[100] : Colors.purple[700],
-      child: Container(
-        margin: EdgeInsets.all(10),
-        padding: EdgeInsets.all(10),
-        width: size.width * 0.9,
-        height: size.height * 0.07,
-        decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(15),
-            color: theme.checkTheme(
-                Colors.grey.shade100, Colors.purple.shade700, context)),
-        child: Row(children: [
-          Icon(
-            icon,
-            color: theme.checkTheme(
-                kPrimaryColor, Colors.purple.shade100, context),
-            size: size.width * 0.08,
-          ),
-          Expanded(
-            child: Container(
-                margin: EdgeInsets.fromLTRB(20, 0, 20, 0),
-                child: Text(
-                  text,
-                  style: TextStyle(
-                      fontSize: 20,
-                      color: theme.checkTheme(
-                          Colors.black, Colors.white, context)),
-                )),
-          ),
-          Icon(
-            Icons.navigate_next_outlined,
-            color: theme.checkTheme(
-                kPrimaryColor, Colors.purple.shade100, context),
-            size: size.width * 0.09,
-          ),
-        ]),
-      ),
-    );
-  }
-}
