@@ -24,9 +24,11 @@ cur=db.cursor(dictionary=True)
 # for i in d:
 #     for x in a:
 #         d[i][x['Slots']]=x[i]
-today=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-game='Squash'
-date=datetime.strptime('27-01-2022', '%d-%m-%Y').strftime('%Y-%m-%d')
-slot='5:00pm-6:00pm'
-cur.execute(f"update `bookings` set `Cancelled`=1, `Cancellation_Date`='{today}', `Confirm`=0 where `Game`='{game}' and `Date`='{date}' and `Slot`='{slot}'")
-db.commit()
+today=datetime.today().strftime('%Y-%m-%d')
+# game='Squash'
+# date=datetime.strptime('27-01-2022', '%d-%m-%Y').strftime('%Y-%m-%d')
+# slot='5:00pm-6:00pm'
+# cur.execute(f"update `bookings` set `Cancelled`=1, `Cancellation_Date`='{today}', `Confirm`=0 where `Game`='{game}' and `Date`='{date}' and `Slot`='{slot}'")
+# db.commit()
+cur.execute("select exists(select * from `blacklist`) as exists")
+print(cur.fetchall())
