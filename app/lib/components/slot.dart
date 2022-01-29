@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:isc/routes.dart';
 import 'package:isc/screens/admin_slot_screen.dart';
 import 'package:isc/screens/detail_screen.dart';
 import 'package:isc/user-info.dart';
@@ -20,19 +21,9 @@ class SlotCard extends StatelessWidget {
         StudentInfo.slotChoosen = slotTime;
         maxSlot = slotAvailable;
         if (StudentInfo.isAdmin) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) {
-              return AdminSlotScreen();
-            }),
-          );
+          Navigator.pushReplacementNamed(context, AppRoutes.adminSlot);
         } else {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) {
-              return DetailScreen();
-            }),
-          );
+           Navigator.pushReplacementNamed(context, AppRoutes.studentDetail);
         }
       },
       child: Container(

@@ -8,6 +8,7 @@ import 'package:isc/components/bottom_navi_bar.dart';
 import 'package:isc/components/profile_card.dart';
 import 'package:isc/constants.dart';
 import 'package:isc/provider/theme_provider.dart';
+import 'package:isc/routes.dart';
 import 'package:isc/screens/setting_screen.dart';
 import 'package:isc/user-info.dart';
 import 'package:isc/screens/welcome_screen.dart';
@@ -88,10 +89,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       bool hasInternet =
                           await InternetConnectionChecker().hasConnection;
                       if (hasInternet) {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => BookingScreen()));
+                        Navigator.pushNamed(context, AppRoutes.bookingsScreen);
                       } else {
                         Fluttertoast.showToast(
                             msg: "Please check your internet connection");
@@ -103,23 +101,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 text: 'Settings',
                 icon: Icons.settings,
                 func: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => SettingScreen()));
+                  Navigator.pushNamed(context, AppRoutes.settingScreen);
                 }),
             ProfileCard(
               size: size,
               text: 'Log Out',
               icon: Icons.login_outlined,
               func: () async {
-                 bool hasInternet =
-                          await InternetConnectionChecker().hasConnection;
-                if(hasInternet){
+                bool hasInternet =
+                    await InternetConnectionChecker().hasConnection;
+                if (hasInternet) {
                   logout();
-                Navigator.pushReplacement(context,
-                    MaterialPageRoute(builder: (context) => WelcomeScreen()));
-                }else{
-                   Fluttertoast.showToast(
-                            msg: "Please check your internet connection");
+                  Navigator.popUntil(context, ModalRoute.withName(AppRoutes.homeScreen));
+                } else {
+                  Fluttertoast.showToast(
+                      msg: "Please check your internet connection");
                 }
               },
             ),
@@ -129,4 +125,3 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 }
-

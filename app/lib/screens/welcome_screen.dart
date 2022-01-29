@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:isc/constants.dart';
-import 'package:isc/screens/registration.dart';
-import 'login_screen.dart';
+import 'package:isc/routes.dart';
 import 'package:isc/components/roundedbutton.dart';
 
 class WelcomeScreen extends StatelessWidget {
@@ -15,20 +14,21 @@ class WelcomeScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               RoundedButton(
-                  s:"LOGIN",color: kPrimaryColor,tcolor: Colors.white,size:size,func:(){Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) {
-              return LoginScreen();
-            }),
-          );} ),
-          
+                  s: "LOGIN",
+                  color: kPrimaryColor,
+                  tcolor: Colors.white,
+                  size: size,
+                  func: () {
+                    Navigator.pushNamed(context, AppRoutes.loginScreen);
+                  }),
               RoundedButton(
-                 s: "SIGN UP",color: kPrimaryLightColor, tcolor:Colors.black,size: size,func:(){Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) {
-              return RegistrationScreen();
-            }),
-          );} )
+                  s: "SIGN UP",
+                  color: kPrimaryLightColor,
+                  tcolor: Colors.black,
+                  size: size,
+                  func: () {
+                    Navigator.pushNamed(context, AppRoutes.registrationScreen);
+                  })
             ],
           ),
         ),

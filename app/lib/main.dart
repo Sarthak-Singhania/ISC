@@ -3,6 +3,18 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:isc/constants.dart';
 import 'package:isc/provider/theme_provider.dart';
+import 'package:isc/routes.dart';
+import 'package:isc/screens/admin_slot_screen.dart';
+import 'package:isc/screens/booking_screen.dart';
+import 'package:isc/screens/detail_screen.dart';
+import 'package:isc/screens/event_screen.dart';
+import 'package:isc/screens/login_screen.dart';
+import 'package:isc/screens/notification_screen.dart';
+import 'package:isc/screens/profile_screen.dart';
+import 'package:isc/screens/registration.dart';
+import 'package:isc/screens/setting_screen.dart';
+import 'package:isc/screens/ticket_screen.dart';
+import 'package:isc/screens/time_slot.dart';
 import 'package:isc/screens/welcome_screen.dart';
 import 'package:provider/provider.dart';
 
@@ -35,7 +47,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     super.dispose();
   }
 
-
   @override
   Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
     super.didChangeAppLifecycleState(state);
@@ -65,7 +76,27 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 scaffoldBackgroundColor: Colors.black,
                 brightness: Brightness.dark),
             themeMode: themeProvider.themeMode,
-            home: WelcomeScreen(),
+            initialRoute: AppRoutes.homeScreen,
+            routes: {
+              AppRoutes.homeScreen: (context) => WelcomeScreen(),
+              AppRoutes.loginScreen: (context) => LoginScreen(),
+              AppRoutes.registrationScreen: (context) => RegistrationScreen(),
+              AppRoutes.eventScreen: (context) => EventScreen(),
+              AppRoutes.adminTime: (context) => TimeSlot(),
+              AppRoutes.adminSlot: (context) => AdminSlotScreen(),
+              AppRoutes.studentTime: (context) => TimeSlot(),
+              AppRoutes.studentDetail: (context) => DetailScreen(),
+              AppRoutes.bookingsScreen: (context) => BookingScreen(),
+              AppRoutes.ticketScreen: (context) => TicketScreen(
+                    bookingId: ModalRoute.of(context)!.settings.arguments,
+                  ),
+              AppRoutes.settingScreen: (context) => SettingScreen(),
+              AppRoutes.notificationScreen: (context) => NotificationScreen(
+                    notificationJsonData:
+                        ModalRoute.of(context)!.settings.arguments,
+                  ),
+              AppRoutes.profileScreen: (context) => ProfileScreen(),
+            },
           );
         },
       );

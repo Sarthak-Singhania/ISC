@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:isc/provider/theme_provider.dart';
+import 'package:isc/routes.dart';
 
 import 'package:isc/screens/time_slot.dart';
 import 'package:http/http.dart' as http;
@@ -138,11 +139,9 @@ class _EventCardState extends State<EventCard> {
             onLongPress: () {},
             onTap: () {
               StudentInfo.gameChoosen = widget.title;
-              Navigator.push(
+              Navigator.pushNamed(
                 context,
-                MaterialPageRoute(builder: (context) {
-                  return TimeSlot();
-                }),
+                AppRoutes.studentTime
               );
             },
             child: Container(
@@ -221,11 +220,9 @@ class _EventCardState extends State<EventCard> {
         : GestureDetector(
             onTap: () {
               StudentInfo.gameChoosen = widget.title;
-              Navigator.push(
+              Navigator.pushNamed(
                 context,
-                MaterialPageRoute(builder: (context) {
-                  return TimeSlot();
-                }),
+                AppRoutes.studentTime
               );
             },
             child: Container(

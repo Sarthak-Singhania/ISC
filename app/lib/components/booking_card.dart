@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:isc/provider/theme_provider.dart';
+import 'package:isc/routes.dart';
 import 'package:isc/screens/ticket_screen.dart';
 import 'package:provider/provider.dart';
 
@@ -38,8 +39,8 @@ class BookingCard extends StatelessWidget {
       onTap: () async {
         bool hasInternet = await InternetConnectionChecker().hasConnection;
         if (hasInternet) {
-          Navigator.push(context,
-              MaterialPageRoute(builder: (context) => TicketScreen(bookingId)));
+          Navigator.pushNamed(context, AppRoutes.ticketScreen,
+              arguments: bookingId);
         } else {
           Fluttertoast.showToast(msg: "Please check your internet connection");
         }

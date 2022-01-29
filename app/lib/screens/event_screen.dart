@@ -9,6 +9,7 @@ import 'package:http/http.dart' as http;
 import 'package:isc/components/bottom_navi_bar.dart';
 import 'package:isc/components/event_card.dart';
 import 'package:isc/constants.dart';
+import 'package:isc/routes.dart';
 import 'package:isc/user-info.dart';
 
 import 'notification_screen.dart';
@@ -23,6 +24,7 @@ class EventScreen extends StatefulWidget {
 class _EventScreenState extends State<EventScreen> {
   List sports = [];
   List imgUri = [];
+  late final notificationJsonData;
   bool isInternet = true;
   bool circP = true;
   @override
@@ -35,14 +37,16 @@ class _EventScreenState extends State<EventScreen> {
     StudentInfo.emailId = FirebaseAuth.instance.currentUser!.email!;
     StudentInfo.jwtToken =
         await FirebaseAuth.instance.currentUser!.getIdToken();
+    var notificationResponse = await http.get(
+        Uri.parse(kIpAddress + '/pending/${StudentInfo.emailId}'),
+        headers: {"x-access-token": StudentInfo.jwtToken});
+    notificationJsonData = await jsonDecode(notificationResponse.body);
     var collection = FirebaseFirestore.instance.collection('users');
     var docSnapshot = await collection.doc(StudentInfo.emailId).get();
     if (docSnapshot.exists) {
       Map<String, dynamic>? data = docSnapshot.data();
-      StudentInfo.name = data?['Name']; // <-- The value you want to retrieve.
-      // Call setState if needed.
+      StudentInfo.name = data?['Name'];
     }
-
 
     var response = await http.get(
       Uri.parse(kIpAddress + '/games'),
@@ -86,8 +90,9 @@ class _EventScreenState extends State<EventScreen> {
                           child: IconButton(
                             color: Colors.white,
                             onPressed: () {
-                              Navigator.of(context).push(MaterialPageRoute(
-                                  builder: (context) => NotificationScreen()));
+                              Navigator.pushNamed(
+                                  context, AppRoutes.notificationScreen,
+                                  arguments: notificationJsonData);
                             },
                             icon: Icon(
                               Icons.notifications,

@@ -9,8 +9,9 @@ import 'package:isc/screens/ticket_screen.dart';
 import 'package:isc/user-info.dart';
 
 class NotificationScreen extends StatefulWidget {
-  const NotificationScreen({Key? key}) : super(key: key);
-
+  const NotificationScreen({Key? key, this.notificationJsonData})
+      : super(key: key);
+  final notificationJsonData;
   @override
   _NotificationScreenState createState() => _NotificationScreenState();
 }
@@ -26,14 +27,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
   }
 
   Future<void> getData() async {
-    String currEmail = StudentInfo.emailId;
-    String JWTtoken = StudentInfo.jwtToken;
-    print(currEmail);
-    var response =
-        await http.get(Uri.parse(kIpAddress + '/pending/$currEmail'),headers: {
-        "x-access-token":JWTtoken
-      });
-    var jsonData = await jsonDecode(response.body);
+    final jsonData = widget.notificationJsonData;
     print(jsonData);
     pendingList = jsonData["message"];
     if (pendingList.length == 0) {
@@ -76,10 +70,9 @@ class _NotificationScreenState extends State<NotificationScreen> {
                             itemCount: pendingList.length,
                             itemBuilder: (context, index) {
                               return NotificationCard(
-                                  
-                                  username:pendingList[index]['First_name'],
-                                  game:pendingList[index]['Game'],
-                                 bookingId: pendingList[index]['Booking_ID']);
+                                  username: pendingList[index]['First_name'],
+                                  game: pendingList[index]['Game'],
+                                  bookingId: pendingList[index]['Booking_ID']);
                             }),
                       ),
                     ],

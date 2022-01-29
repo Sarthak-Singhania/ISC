@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
@@ -8,12 +7,13 @@ import 'dart:ui';
 import 'package:flutter_custom_clippers/flutter_custom_clippers.dart';
 import 'package:isc/constants.dart';
 import 'package:isc/provider/theme_provider.dart';
+import 'package:isc/routes.dart';
 import 'package:isc/user-info.dart';
 import 'package:provider/provider.dart';
 import 'package:transparent_image/transparent_image.dart';
 
 class TicketScreen extends StatefulWidget {
-  TicketScreen(this.bookingId);
+  TicketScreen({this.bookingId});
   final bookingId;
 
   @override
@@ -21,8 +21,8 @@ class TicketScreen extends StatefulWidget {
 }
 
 class _TicketScreenState extends State<TicketScreen> {
-  String currEmail = '';
-  String JWTtoken = '';
+  late String currEmail ;
+  late String jwtToken ;
   bool circP = true;
   var response;
   var sNo;
@@ -33,16 +33,17 @@ class _TicketScreenState extends State<TicketScreen> {
     sNo = ['', '', '', ''];
     nameList = ['', '', '', ''];
     getData();
+    
   }
 
   void getData() async {
     currEmail = StudentInfo.emailId;
-    JWTtoken = StudentInfo.jwtToken;
+    jwtToken = StudentInfo.jwtToken;
     print(currEmail);
     var json = await http.get(
         Uri.parse(
             kIpAddress + '/get_bookings/${currEmail}/${widget.bookingId}'),
-        headers: {"x-access-token": JWTtoken});
+        headers: {"x-access-token": jwtToken});
     response = jsonDecode(json.body);
     var list = response['name'];
     for (var i = 0; i < list.length; i++) {
@@ -65,7 +66,7 @@ class _TicketScreenState extends State<TicketScreen> {
           'Accept': '*/*',
           'Accept-Encoding': 'gzip, deflate, br',
           'Access-Control-Allow-Origin': ' *',
-          "x-access-token": JWTtoken
+          "x-access-token": jwtToken
         },
         body: body,
       );
@@ -91,7 +92,7 @@ class _TicketScreenState extends State<TicketScreen> {
           'Accept': '*/*',
           'Accept-Encoding': 'gzip, deflate, br',
           'Access-Control-Allow-Origin': ' *',
-          "x-access-token": JWTtoken
+          "x-access-token": jwtToken
         },
         body: body,
       );
@@ -115,7 +116,7 @@ class _TicketScreenState extends State<TicketScreen> {
           'Accept': '*/*',
           'Accept-Encoding': 'gzip, deflate, br',
           'Access-Control-Allow-Origin': ' *',
-          "x-access-token": JWTtoken
+          "x-access-token": jwtToken
         },
         body: body,
       );
@@ -494,12 +495,11 @@ class _TicketScreenState extends State<TicketScreen> {
                       ),
                     ],
                   ),
-
                   secondLast(context),
                   SizedBox(
                     height: size.height * 0.01,
                   ),
-                   lastWidget(context),
+                  lastWidget(context),
                 ],
               ),
             ),

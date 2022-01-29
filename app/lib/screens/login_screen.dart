@@ -7,6 +7,7 @@ import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:isc/constants.dart';
 import 'package:isc/components/roundedbutton.dart';
 import 'package:isc/provider/theme_provider.dart';
+import 'package:isc/routes.dart';
 
 import 'package:isc/screens/registration.dart';
 import 'package:isc/screens/time_day_slot.dart';
@@ -37,57 +38,53 @@ class _LoginScreenState extends State<LoginScreen> {
   void signIn(String email, String password) async {
     bool hasInternet = await InternetConnectionChecker().hasConnection;
     if (hasInternet) {
-       if (_formKey.currentState!.validate()) {
-      try {
-        final snapShot = await FirebaseFirestore.instance
-            .collection('admin-users')
-            .doc(email)
-            .get();
+      if (_formKey.currentState!.validate()) {
+        try {
+          final snapShot = await FirebaseFirestore.instance
+              .collection('admin-users')
+              .doc(email)
+              .get();
 
-        if (snapShot.exists) {
-          StudentInfo.isAdmin = true;
-        } else {
-          StudentInfo.isAdmin = false;
+          if (snapShot.exists) {
+            StudentInfo.isAdmin = true;
+          } else {
+            StudentInfo.isAdmin = false;
+          }
+          await _auth
+              .signInWithEmailAndPassword(email: email, password: password)
+              .then((uid) => {
+                    Fluttertoast.showToast(msg: "Login Successful"),
+                    Navigator.pushNamed(context, AppRoutes.eventScreen)
+                  });
+        } on FirebaseAuthException catch (error) {
+          switch (error.code) {
+            case "invalid-email":
+              errorMessage = "Your email address appears to be malformed.";
+
+              break;
+            case "wrong-password":
+              errorMessage = "Your password is wrong.";
+              break;
+            case "user-not-found":
+              errorMessage = "User with this email doesn't exist.";
+              break;
+            case "user-disabled":
+              errorMessage = "User with this email has been disabled.";
+              break;
+            case "too-many-requests":
+              errorMessage = "Too many requests";
+              break;
+            case "operation-not-allowed":
+              errorMessage =
+                  "Signing in with Email and Password is not enabled.";
+              break;
+            default:
+              errorMessage = "An undefined Error happened.";
+          }
+          Fluttertoast.showToast(msg: errorMessage!);
+          print(error.code);
         }
-        await _auth
-            .signInWithEmailAndPassword(email: email, password: password)
-            .then((uid) => {
-                  Fluttertoast.showToast(msg: "Login Successful"),
-
-                  // Navigator.of(context).pushReplacement(MaterialPageRoute(
-                  //     builder: (context) => EventScreen(
-                  //         ))),
-                  Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (context) => TimeDaySlot())),
-                });
-      } on FirebaseAuthException catch (error) {
-        switch (error.code) {
-          case "invalid-email":
-            errorMessage = "Your email address appears to be malformed.";
-
-            break;
-          case "wrong-password":
-            errorMessage = "Your password is wrong.";
-            break;
-          case "user-not-found":
-            errorMessage = "User with this email doesn't exist.";
-            break;
-          case "user-disabled":
-            errorMessage = "User with this email has been disabled.";
-            break;
-          case "too-many-requests":
-            errorMessage = "Too many requests";
-            break;
-          case "operation-not-allowed":
-            errorMessage = "Signing in with Email and Password is not enabled.";
-            break;
-          default:
-            errorMessage = "An undefined Error happened.";
-        }
-        Fluttertoast.showToast(msg: errorMessage!);
-        print(error.code);
       }
-    }
     } else {
       Fluttertoast.showToast(msg: "Pleas check your internet connection");
     }
@@ -192,19 +189,22 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ),
-                  RoundedButton(s:"LOGIN", color:kPrimaryColor, tcolor:Colors.white,size: size,func: () {
-                    signIn(emailController.text, passwordController.text);
-                  }),
+                  RoundedButton(
+                      s: "LOGIN",
+                      color: kPrimaryColor,
+                      tcolor: Colors.white,
+                      size: size,
+                      func: () {
+                        signIn(emailController.text, passwordController.text);
+                      }),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       Text("Don't have an account? "),
                       GestureDetector(
                         onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => RegistrationScreen()));
+                          Navigator.pushNamed(
+                              context, AppRoutes.registrationScreen);
                         },
                         child: Text(
                           "SignUp",

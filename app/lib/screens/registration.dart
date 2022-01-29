@@ -7,6 +7,7 @@ import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:isc/constants.dart';
 import 'package:isc/components/roundedbutton.dart';
 import 'package:isc/provider/theme_provider.dart';
+import 'package:isc/routes.dart';
 import 'package:isc/screens/event_screen.dart';
 import 'package:isc/screens/welcome_screen.dart';
 import 'package:provider/provider.dart';
@@ -49,12 +50,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           await docUser.set(emailData);
 
           Fluttertoast.showToast(msg: "Registered Successfully");
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) {
-              return WelcomeScreen();
-            }),
-          );
+          Navigator.pushReplacementNamed(context, AppRoutes.homeScreen);
         } on FirebaseAuthException catch (error) {
           switch (error.code) {
             case "invalid-email":
@@ -265,10 +261,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     Text("Already have an account? "),
                     GestureDetector(
                       onTap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => LoginScreen()));
+                        Navigator.pushReplacementNamed(
+                            context, AppRoutes.loginScreen);
                       },
                       child: Text(
                         "Sign In",

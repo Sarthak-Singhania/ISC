@@ -8,12 +8,12 @@ import 'package:isc/components/roundedbutton.dart';
 import 'package:isc/components/slot.dart';
 import 'package:isc/components/student_detail.dart';
 import 'package:isc/constants.dart';
+import 'package:isc/routes.dart';
 
 import 'package:isc/user-info.dart';
 import 'booking_screen.dart';
 
 import 'package:http/http.dart' as http;
-import 'package:intl/intl.dart';
 import 'time_slot.dart';
 
 class DetailScreen extends StatefulWidget {
@@ -74,6 +74,7 @@ class _DetailScreenState extends State<DetailScreen> {
           body: body,
         );
         Map jsonData = await jsonDecode(response.body);
+        print("details");
         print(jsonData);
         // if (jsonData['status'] == 'confirmed') {
         Fluttertoast.showToast(msg: "YOUR DETAILS HAS BEEN SUBMITTED ");
@@ -86,16 +87,16 @@ class _DetailScreenState extends State<DetailScreen> {
                   TextButton(
                     onPressed: () {
                       Navigator.of(context).pop();
-                      Navigator.of(context).pushReplacement(MaterialPageRoute(
-                          builder: (context) => BookingScreen()));
+                      Navigator.pushReplacementNamed(
+                          context, AppRoutes.bookingsScreen);
                     },
                     child: Text('No'),
                   ),
                   TextButton(
                     onPressed: () {
                       Navigator.of(context).pop();
-                      Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(builder: (context) => TimeSlot()));
+                      Navigator.pushReplacementNamed(
+                          context, AppRoutes.studentTime);
                     },
                     child: Text('Yes'),
                   ),
@@ -108,6 +109,7 @@ class _DetailScreenState extends State<DetailScreen> {
         //   Fluttertoast.showToast(msg: "YOU HAVE BEEN BLACKLISTED FOR THIS GAME");
         // }
       } catch (e) {
+        print('error');
         print(e);
       }
     } else {
@@ -195,6 +197,7 @@ class _DetailScreenState extends State<DetailScreen> {
                   Container(
                     margin: EdgeInsets.all(10),
                     child: TextFormField(
+                      readOnly: true,
                       controller: firstNameController,
                       decoration: InputDecoration(
                         labelText: 'First Student Name',
@@ -217,11 +220,8 @@ class _DetailScreenState extends State<DetailScreen> {
                   Container(
                     margin: EdgeInsets.all(10),
                     child: TextFormField(
-                      //  focusNode: FocusNode(canRequestFocus: false),
-                      // enableInteractiveSelection: false,
                       readOnly: true,
                       controller: firstEmailController,
-                      // initialValue: currEmail.toString(),
                       decoration: InputDecoration(
                         labelText: 'SNU ID',
                         focusedBorder: OutlineInputBorder(
@@ -241,13 +241,15 @@ class _DetailScreenState extends State<DetailScreen> {
                     ),
                   ),
                   Form(
-                    key:_formKey,
+                    key: _formKey,
                     child: ListView.builder(
                         shrinkWrap: true,
                         itemCount: (length * 2) - 2,
                         itemBuilder: (context, index) {
                           return StudentDetail(
-                              title:sNames[index], controller:_controller[index], index:index);
+                              title: sNames[index],
+                              controller: _controller[index],
+                              index: index);
                         }),
                   ),
                   RoundedButton(
@@ -256,11 +258,11 @@ class _DetailScreenState extends State<DetailScreen> {
                       tcolor: Colors.white,
                       size: size * 0.7,
                       func: () {
-                        postData();
+                        if (_formKey.currentState!.validate()) {
+                          postData();
+                        }
                       })
                 ],
               ));
   }
 }
-
-
