@@ -7,7 +7,6 @@ from datetime import datetime
 from firebase_admin import auth, credentials
 from functools import wraps
 import MySQLdb.cursors as cur
-import requests as rq
 import pandas as pd
 import firebase_admin
 import secrets
@@ -55,7 +54,7 @@ def token_required(f):
 
 
 @app.route('/games', defaults={'game': None})
-@app.route('/games/<game>', methods=['GET'])
+@app.route('/games/<game>',methods=['GET'])
 def games(game):
     cursor = mysql.connection.cursor(cur.DictCursor)
     cursor.execute("select `Sports_Name`,`URL` from `games` order by `Sports_Name` and `Enabled`='1'")
@@ -66,7 +65,7 @@ def games(game):
         return sports
 
 
-@app.route('/max-person', methods=['GET'])
+@app.get('/max-person')
 def max_num():
     cursor = mysql.connection.cursor(cur.DictCursor)
     cursor.execute('select `Sports_Name`,`Max_Person` from games')
@@ -74,7 +73,7 @@ def max_num():
     return num
 
 
-@app.route('/slots/<game>', methods=['GET'])
+@app.get('/slots/<game>')
 @token_required
 def slots(game):
     cursor = mysql.connection.cursor(cur.DictCursor)
@@ -88,44 +87,55 @@ def slots(game):
     return make_response({game.replace('_',' '): d})
 
 
-@app.route('/book', methods=['POST'])
+@app.post('/book')
 @cross_origin()
-# @token_required
+@token_required
 def book():
     x = request.get_json()
     cursor = mysql.connection.cursor(cur.DictCursor)
     sports_name = x['sports_name'].title().replace(' ', '_')
     slot = x['slot']
     day = pd.to_datetime(x['date'], dayfirst=True).day_name()
-    cursor.execute('select Booking_ID from bookings')
+    cursor.execute('select `Booking_ID` from bookings')
     ids = [i['Booking_ID'] for i in cursor.fetchall()]
     booking_id = ''.join(secrets.choice(string.ascii_uppercase + string.digits) for i in range(9))
-    if booking_id in ids:
-        booking_id = ''.join(secrets.choice(string.ascii_uppercase + string.digits) for i in range(9))
+    if booking_id in ids: booking_id = ''.join(secrets.choice(string.ascii_uppercase + string.digits) for i in range(9))
     date = datetime.strptime(x['date'], "%d-%m-%Y").strftime("%Y-%m-%d")
     cnt = 0
-    cursor.execute(f"update {sports_name} set {day}={day}-1 where `Slots`='{slot}'")
+    cursor.execute(f"update `{sports_name}` set `{day}`=`{day}`-1 where `Slots`='{slot}' and `Cancelled`='0'")
     mysql.connection.commit()
+    cursor.execute(f"select `SNU_ID` from `bookings` where `Game`='{sports_name}' and `Date`='{date}'")
+    duplicate=[i['SNU_ID'] for i in cursor.fetchall()]
+    cursor.execute("select `SNU_ID` from blacklist")
+    blacklist=[i['SNU_ID'] for i in cursor.fetchall()]
+    message=''
     for i in x['student_details']:
-        if cnt == 0:
-            confirm = 1
+        if x['student_details'][i] not in duplicate and x['student_details'][i] not in blacklist:
+            if cnt == 0:
+                cursor.execute(f"update `{sports_name}` set `{day}`=`{day}`-1 where `Slots`='{slot}'")
+                message=booking_id
+                flag='confirmed'
+                confirm = 1
+            else: confirm = 0
+            com = 'INSERT INTO bookings (`Student_Name`, `SNU_ID`, `Game`, `Date`, `Slot`, `Booking_ID`, `Confirm`) VALUES (%s,%s,%s,%s,%s,%s,%s)'
+            val = (
+                str(i), str(x['student_details'][i]), str(sports_name), str(date), str(slot), str(booking_id), str(confirm))
+            cursor.execute(com, val)
+            mysql.connection.commit()
+            cnt += 1
         else:
-            confirm = 0
-        com = 'INSERT INTO bookings (Student_Name, SNU_ID, Game, Date, Slot, Booking_ID, Confirm) VALUES (%s,%s,%s,%s,%s,%s,%s)'
-        val = (
-            str(i), str(x['student_details'][i]), str(sports_name), str(date), str(slot), str(booking_id), str(confirm))
-        cursor.execute(com, val)
-        mysql.connection.commit()
-        cnt += 1
-    return str(booking_id)
+            message=cnt
+            flag='blacklist' if x['student_details'][i] in blacklist else 'duplicate'
+            break
+    return make_response({'message':message,'status':flag})
 
 
 @app.route('/get_bookings/<snu_id>', defaults={'booking_id': None})
-@app.route('/get_bookings/<snu_id>/<booking_id>', methods=['GET'])
+@app.route('/get_bookings/<snu_id>/<booking_id>',methods=['GET'])
 @token_required
 def get_bookings(snu_id, booking_id):
     cursor = mysql.connection.cursor(cur.DictCursor)
-    date = datetime.today().strftime('%Y-%m-%d')
+    date = datetime.now().strftime('%Y-%m-%d')
     if booking_id:
         cursor.execute(
             f"select `Game`,`Date`,`Slot`,`Student_Name`,`Confirm`,`SNU_ID` from `bookings` where `Booking_ID`='{booking_id}' and `Cancelled`='0'")
@@ -145,7 +155,7 @@ def get_bookings(snu_id, booking_id):
         return b
     else:
         cursor.execute(
-            f"select `Student_Name`,`Booking_ID`,`Date`,`Slot`,`Game`,`Confirm` from `bookings` where `SNU_ID`='{snu_id}' and `Date`>={date} and `Cancelled`='0'")
+            f"select `Student_Name`,`Booking_ID`,`Date`,`Slot`,`Game`,`Confirm` from `bookings` where `SNU_ID`='{snu_id}' and `Date`>='{date}' and `Cancelled`='0'")
         bookings = cursor.fetchall()
         if len(bookings) > 0:
             for i in bookings:
@@ -159,7 +169,7 @@ def get_bookings(snu_id, booking_id):
             return make_response({'message': []})
 
 
-@app.route('/confirm', methods=['POST'])
+@app.post('/confirm')
 @cross_origin()
 @token_required
 def confirm():
@@ -179,7 +189,7 @@ def confirm():
     return 'Booking confirmed'
 
 
-@app.route('/reject', methods=['POST'])
+@app.post('/reject')
 @cross_origin()
 @token_required
 def reject():
@@ -194,7 +204,7 @@ def reject():
     return 'Booking cancelled'
 
 
-@app.route('/cancel', methods=['POST'])
+@app.post('/cancel')
 @cross_origin()
 @token_required
 def cancel():
@@ -222,13 +232,13 @@ def cancel():
     return 'Booking cancelled'
 
 
-@app.route('/pending/<snu_id>', methods=['GET'])
+@app.get('/pending/<snu_id>')
 @token_required
 def pending(snu_id):
     cursor = mysql.connection.cursor(cur.DictCursor)
     date = datetime.today().strftime('%Y-%m-%d')
     cursor.execute(
-        f"select `Booking_ID`,`Student_Name`,`Game` from `bookings` where `SNU_ID`='{snu_id}' and `Date`>={date} and `Confirm`='0' and `Cancelled`=0")
+        f"select `Booking_ID`,`Student_Name`,`Game` from `bookings` where `SNU_ID`='{snu_id}' and `Date`>='{date}' and `Confirm`='0' and `Cancelled`=0")
     l1 = cursor.fetchall()
     for i in l1:
         cursor.execute(f"select `Student_Name` from `bookings` where `Booking_ID`='{i['Booking_ID']}' limit 1")
@@ -237,29 +247,29 @@ def pending(snu_id):
     return make_response({'message': l1})
 
 
-@app.route('/admin-bookings/<game>/<date>/<slot>', methods=['GET'])
+@app.get('/admin-bookings/<game>/<date>/<slot>')
 @token_required
 def admin_bookings(game, date, slot):
     if request.headers['admin-header'].title()=='Yes':
         cursor = mysql.connection.cursor(cur.DictCursor)
         date = datetime.strptime(date, '%d-%m-%Y').strftime('%Y-%m-%d')
         cursor.execute(
-            f"select `Student_Name`,`SNU_ID` from `bookings` where `Game`='{game.title().replace(' ','_')}' and `Slot`='{slot}' and `Date`='{date}' and `Confirm`='1'")
+            f"select `Student_Name`,`SNU_ID`,`Booking_ID` from `bookings` where `Game`='{game.title().replace(' ','_')}' and `Slot`='{slot}' and `Date`='{date}' and `Confirm`='1'")
         bookings = cursor.fetchall()
         return make_response({'message': bookings})
     else:
         return make_response({'message': 'You cannot access since you are not an admin'}), 403
 
 
-@app.route('/stop',methods=['POST'])
+@app.post('/stop')
 @token_required
 def stop():
     x=request.get_json()
     cursor = mysql.connection.cursor(cur.DictCursor)
+    today=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     if request.headers['admin-header'].title()=='Yes':
         if x['category']=='game':
             game=x['game']
-            today=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             date=datetime.now().strftime('%Y-%m-%d')
             cursor.execute(f"update `games` set `Enabled`='0' where `Sports_Name`='{game}'")
             mysql.connection.commit()
@@ -294,7 +304,7 @@ def stop():
         return make_response({'message': 'You cannot access since you are not an admin'}), 403
 
 
-@app.route('/unstop',methods=['POST'])
+@app.post('/unstop')
 @token_required
 def unstop():
     x=request.get_json()
@@ -333,7 +343,7 @@ def unstop():
         return make_response({'message': 'You cannot access since you are not an admin'}), 403
 
 
-@app.route('/booking-count',methods=['GET'])
+@app.get('/booking-count')
 @token_required
 def booking_count():
     cursor = mysql.connection.cursor(cur.DictCursor)
@@ -353,6 +363,33 @@ def booking_count():
         slot=request.args.get('slot')
         cursor.execute(f"select count(`SNU_ID`) as Num from `bookings` where `Game`='{game}' and `Date`='{date}' and `Slot`='{slot}'")
         return make_response({'message':str(cursor.fetchone()['Num'])})
+
+
+@app.post('/present')
+@token_required
+def present():
+    cursor=mysql.connection.cursor(cur.DictCursor)
+    x=request.get_json()
+    cursor.execute(f"update `bookings` set `Present`='1' where `SNU_ID`='{x['snu_id']}' and `Booking_ID`='{x['booking_id']}'")
+    mysql.connection.commit()
+    cursor.execute(f"select exists(select * from blacklist where `SNU_ID`='{x['snu_id']}' and `Booking_ID`='{x['booking_id']}') as bool")
+    if cursor.fetone()['bool']:
+        cursor.execute(f"delete from `blacklist` where `SNU_ID`='{x['snu_id']}'")
+    return make_response({'message':f"{x['name']} has been marked present"})
+
+
+@app.post('/absent')
+@token_required
+def absent():
+    cursor=mysql.connection.cursor(cur.DictCursor)
+    x=request.get_json()
+    cursor.execute(f"update `bookings` set `Present`='0' where `SNU_ID`='{x['snu_id']}' and `Booking_ID`='{x['booking_id']}'")
+    mysql.connection.commit()
+    com="INSERT INTO `blacklist`(`Student_Name`, `SNU_ID`, `Date`, `Booking_ID`) VALUES (%s,%s,%s,%s)"
+    val=(str(x['name']),str(x['snu_id']),str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')),str(x['booking_id']))
+    cursor.execute(com,val)
+    mysql.connection.commit()
+    return make_response({'message':f"{x['name']} has been marked absent"})
 
 
 if __name__ == "__main__":
