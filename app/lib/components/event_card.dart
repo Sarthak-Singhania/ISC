@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_switch/flutter_switch.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:isc/provider/theme_provider.dart';
 import 'package:isc/routes.dart';
 
@@ -30,6 +32,7 @@ class _EventCardState extends State<EventCard> {
   String JWTtoken = '';
   //String game = '';
   bool toggleValue = false;
+  late bool hasInternet;
 
   double spreadRadius = 5;
   bool value = true;
@@ -137,12 +140,16 @@ class _EventCardState extends State<EventCard> {
     return StudentInfo.isAdmin == true
         ? GestureDetector(
             onLongPress: () {},
-            onTap: () {
-              StudentInfo.gameChoosen = widget.title;
-              Navigator.pushNamed(
-                context,
-                AppRoutes.studentTime
-              );
+            onTap: () async {
+              bool hasInternet =
+                  await InternetConnectionChecker().hasConnection;
+              if (hasInternet) {
+                StudentInfo.gameChoosen = widget.title;
+                Navigator.pushNamed(context, AppRoutes.studentTime);
+              } else {
+                Fluttertoast.showToast(
+                    msg: "Please check your internet connection");
+              }
             },
             child: Container(
               height: MediaQuery.of(context).size.height * 0.7,
@@ -184,14 +191,20 @@ class _EventCardState extends State<EventCard> {
                     borderRadius: 30.0,
                     padding: 5.0,
                     showOnOff: false,
-                    onToggle: (state) {
-                      setState(() {
-                        if (state) {
-                          disbaleSlot();
-                        } else {
-                          enableSlot();
-                        }
-                      });
+                    onToggle: (state) async {
+                      hasInternet =
+                          await InternetConnectionChecker().hasConnection;
+                      if (hasInternet) {
+                        setState(() {
+                          if (state) {
+                            disbaleSlot();
+                          } else {
+                            enableSlot();
+                          }
+                        });
+                      } else {
+                        Fluttertoast.showToast(msg: "Please check your internet connection");
+                      }
                     },
                   ),
                   Expanded(
@@ -218,12 +231,16 @@ class _EventCardState extends State<EventCard> {
             ),
           )
         : GestureDetector(
-            onTap: () {
-              StudentInfo.gameChoosen = widget.title;
-              Navigator.pushNamed(
-                context,
-                AppRoutes.studentTime
-              );
+            onTap: () async {
+              bool hasInternet =
+                  await InternetConnectionChecker().hasConnection;
+              if (hasInternet) {
+                StudentInfo.gameChoosen = widget.title;
+                Navigator.pushNamed(context, AppRoutes.studentTime);
+              } else {
+                Fluttertoast.showToast(
+                    msg: "Please check your internet connection");
+              }
             },
             child: Container(
               padding: EdgeInsets.all(10),

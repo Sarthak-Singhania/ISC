@@ -2,7 +2,9 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_switch/flutter_switch.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:isc/components/admin_slotcard.dart';
 
 import 'package:isc/user-info.dart';
@@ -22,6 +24,7 @@ class _AdminSlotScreenState extends State<AdminSlotScreen> {
   bool emptyList = false;
   bool circP = true;
   bool toggleValue = false;
+  late bool hasInternet;
 
   TextEditingController slotNumberController =
       TextEditingController(text: '20');
@@ -221,14 +224,22 @@ class _AdminSlotScreenState extends State<AdminSlotScreen> {
                             borderRadius: 30.0,
                             padding: 5.0,
                             showOnOff: false,
-                            onToggle: (state) {
-                              setState(() {
-                                if (state) {
-                                  disbaleSlot();
-                                } else {
-                                  enableSlot();
-                                }
-                              });
+                            onToggle: (state) async {
+                              hasInternet = await InternetConnectionChecker()
+                                  .hasConnection;
+                              if (hasInternet) {
+                                setState(() {
+                                  if (state) {
+                                    disbaleSlot();
+                                  } else {
+                                    enableSlot();
+                                  }
+                                });
+                              } else {
+                                Fluttertoast.showToast(
+                                    msg:
+                                        "Please check your internet connection");
+                              }
                             },
                           ),
                           Spacer(),
@@ -263,4 +274,3 @@ class _AdminSlotScreenState extends State<AdminSlotScreen> {
         ));
   }
 }
-

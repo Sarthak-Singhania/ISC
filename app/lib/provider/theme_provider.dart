@@ -17,11 +17,9 @@ class ThemeProvider extends ChangeNotifier {
       }
     }
 
-  void initalTheme() {
-    themeMode = ThemeMode.system;
+  
 
-    notifyListeners();
-  }
+  
 
   void toggleLightTheme() {
     themeMode = ThemeMode.light;

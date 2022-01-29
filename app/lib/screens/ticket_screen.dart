@@ -5,6 +5,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'dart:ui';
 import 'package:flutter_custom_clippers/flutter_custom_clippers.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:isc/constants.dart';
 import 'package:isc/provider/theme_provider.dart';
 import 'package:isc/routes.dart';
@@ -21,9 +22,10 @@ class TicketScreen extends StatefulWidget {
 }
 
 class _TicketScreenState extends State<TicketScreen> {
-  late String currEmail ;
-  late String jwtToken ;
+  late String currEmail;
+  late String jwtToken;
   bool circP = true;
+  late bool hasInternet;
   var response;
   var sNo;
   var nameList;
@@ -33,7 +35,6 @@ class _TicketScreenState extends State<TicketScreen> {
     sNo = ['', '', '', ''];
     nameList = ['', '', '', ''];
     getData();
-    
   }
 
   void getData() async {
@@ -233,9 +234,17 @@ class _TicketScreenState extends State<TicketScreen> {
                             child: Text('No'),
                           ),
                           TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                              cancelResponse();
+                            onPressed: () async {
+                              hasInternet = await InternetConnectionChecker()
+                                  .hasConnection;
+                              if (hasInternet) {
+                                Navigator.of(context).pop();
+                                cancelResponse();
+                              } else {
+                                Fluttertoast.showToast(
+                                    msg:
+                                        "Please check your internet connection");
+                              }
                             },
                             child: Text('Yes'),
                           ),
@@ -272,8 +281,14 @@ class _TicketScreenState extends State<TicketScreen> {
         children: [
           Expanded(
             child: GestureDetector(
-              onTap: () {
-                rejectResponse();
+              onTap: () async {
+                hasInternet = await InternetConnectionChecker().hasConnection;
+                if (hasInternet) {
+                  rejectResponse();
+                } else {
+                  Fluttertoast.showToast(
+                      msg: "Please check your internet connection");
+                }
               },
               child: Container(
                 height: size.height * 0.08,
@@ -299,8 +314,15 @@ class _TicketScreenState extends State<TicketScreen> {
           ),
           Expanded(
             child: GestureDetector(
-              onTap: () {
-                acceptResponse();
+              onTap: () async {
+                bool hasInternet =
+                    await InternetConnectionChecker().hasConnection;
+                if (hasInternet) {
+                  acceptResponse();
+                } else {
+                  Fluttertoast.showToast(
+                      msg: "Please check your internet connection");
+                }
               },
               child: Container(
                 height: size.height * 0.08,

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:isc/user-info.dart';
 import 'package:http/http.dart' as http;
 import '../constants.dart';
@@ -22,7 +23,7 @@ class AdminSlotCard extends StatelessWidget {
 
   Future<void> attendance(String attendance) async {
     var body = jsonEncode({
-      "name":studentName,
+      "name": studentName,
       "snu_id": snuId,
       "booking_id": bookingId,
     });
@@ -65,10 +66,17 @@ class AdminSlotCard extends StatelessWidget {
                 style: TextStyle(fontSize: 15),
               ),
               GestureDetector(
-                onTap: () {
-                  attendance("present");
-                  Fluttertoast.showToast(
-                      msg: "Student has been marked present ");
+                onTap: () async {
+                  bool hasInternet =
+                      await InternetConnectionChecker().hasConnection;
+                  if (hasInternet) {
+                    attendance("present");
+                    Fluttertoast.showToast(
+                        msg: "Student has been marked present ");
+                  } else {
+                    Fluttertoast.showToast(
+                        msg: "Please check your internet connection");
+                  }
                 },
                 child: Text(
                   'Present',
@@ -85,9 +93,17 @@ class AdminSlotCard extends StatelessWidget {
                 style: TextStyle(fontSize: 15),
               ),
               GestureDetector(
-                onTap: () {
-                  attendance("absent");
-                  Fluttertoast.showToast(msg: "Student has been marked absent");
+                onTap: () async {
+                  bool hasInternet =
+                      await InternetConnectionChecker().hasConnection;
+                  if (hasInternet) {
+                    attendance("absent");
+                    Fluttertoast.showToast(
+                        msg: "Student has been marked absent");
+                  } else {
+                    Fluttertoast.showToast(
+                        msg: "Please check your internet connection");
+                  }
                 },
                 child: Text(
                   'Absent',

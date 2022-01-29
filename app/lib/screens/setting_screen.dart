@@ -12,16 +12,20 @@ class SettingScreen extends StatefulWidget {
 }
 
 class _SettingScreenState extends State<SettingScreen> {
+  late int systemDefault;
+  late int light;
+  late int dark;
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<ThemeProvider>(context);
-    if (provider.themeMode == null) {
-      provider.initalTheme();
-    }
+    print(provider.themeMode);
 
-    int systemDefault = provider.themeMode == ThemeMode.system ? 1 : 0;
-    int light = provider.themeMode == ThemeMode.light ? 1 : 0;
-    int dark = provider.themeMode == ThemeMode.dark ? 1 : 0;
+     systemDefault =  provider.themeMode == ThemeMode.system ? 1 : 0;
+     light = provider.themeMode == ThemeMode.light ? 1 : 0;
+     dark = provider.themeMode == ThemeMode.dark ? 1 : 0;
+    print(systemDefault);
+    print(light);
+    print(dark);
 
     return Scaffold(
       appBar: AppBar(

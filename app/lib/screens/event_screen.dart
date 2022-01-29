@@ -4,7 +4,9 @@ import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 
 import 'package:isc/components/bottom_navi_bar.dart';
 import 'package:isc/components/event_card.dart';
@@ -89,10 +91,19 @@ class _EventScreenState extends State<EventScreen> {
                           alignment: Alignment.topRight,
                           child: IconButton(
                             color: Colors.white,
-                            onPressed: () {
-                              Navigator.pushNamed(
-                                  context, AppRoutes.notificationScreen,
-                                  arguments: notificationJsonData);
+                            onPressed: () async {
+                              bool hasInternet =
+                                  await InternetConnectionChecker()
+                                      .hasConnection;
+                              if (hasInternet) {
+                                Navigator.pushNamed(
+                                    context, AppRoutes.notificationScreen,
+                                    arguments: notificationJsonData);
+                              } else {
+                                Fluttertoast.showToast(
+                                    msg:
+                                        "Please check your internet connection");
+                              }
                             },
                             icon: Icon(
                               Icons.notifications,
