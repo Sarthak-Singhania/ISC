@@ -1,12 +1,13 @@
 import 'dart:convert';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:http/http.dart' as http;
-import 'package:isc/components/slot.dart';
-import 'package:switcher/core/switcher_size.dart';
-import 'package:switcher/switcher.dart';
+import 'package:isc/components/admin_slotcard.dart';
+
+import 'package:isc/user-info.dart';
+// import 'package:switcher/core/switcher_size.dart';
+// import 'package:switcher/switcher.dart';
 import '../constants.dart';
 
 class AdminSlotScreen extends StatefulWidget {
@@ -21,7 +22,7 @@ class _AdminSlotScreenState extends State<AdminSlotScreen> {
   bool emptyList = false;
   bool circP = true;
   bool toggleValue = false;
-  String JWTtoken = " ";
+
   TextEditingController slotNumberController =
       TextEditingController(text: '20');
   @override
@@ -31,16 +32,15 @@ class _AdminSlotScreenState extends State<AdminSlotScreen> {
   }
 
   Future<void> disbaleSlot() async {
-    JWTtoken = await FirebaseAuth.instance.currentUser!.getIdToken();
     final slotResponse = await http.get(
         Uri.parse(kIpAddress +
             "/booking-count?category=slot&game=" +
-            SlotCard.gameChoosen +
+            StudentInfo.gameChoosen +
             "&date=" +
-            SlotCard.dateChoosen +
+            StudentInfo.dateChoosen +
             "&slot=" +
-            SlotCard.sltChoosen),
-        headers: {"x-access-token": JWTtoken});
+            StudentInfo.slotChoosen),
+        headers: {"x-access-token": StudentInfo.jwtToken});
 
     final responseJsonData = await jsonDecode(slotResponse.body);
     String slotsAvailable = responseJsonData['message'];
@@ -68,9 +68,9 @@ class _AdminSlotScreenState extends State<AdminSlotScreen> {
                 onPressed: () async {
                   var body = jsonEncode({
                     "category": "slot",
-                    "game": SlotCard.gameChoosen,
-                    "date": SlotCard.dateChoosen,
-                    "slot": SlotCard.sltChoosen,
+                    "game": StudentInfo.gameChoosen,
+                    "date": StudentInfo.dateChoosen,
+                    "slot": StudentInfo.slotChoosen,
                   });
                   toggleValue = true;
                   setState(() {});
@@ -83,7 +83,7 @@ class _AdminSlotScreenState extends State<AdminSlotScreen> {
                         'Accept': '*/*',
                         'Accept-Encoding': 'gzip, deflate, br',
                         'Access-Control-Allow-Origin': ' *',
-                        "x-access-token": JWTtoken,
+                        "x-access-token": StudentInfo.jwtToken,
                         "admin-header": "YES"
                       },
                       body: body,
@@ -103,13 +103,11 @@ class _AdminSlotScreenState extends State<AdminSlotScreen> {
   }
 
   void enableSlot() async {
-    JWTtoken = await FirebaseAuth.instance.currentUser!.getIdToken();
-
     var body = jsonEncode({
       "category": "slot",
-      "game": SlotCard.gameChoosen,
-      "date": SlotCard.dateChoosen,
-      "slot": SlotCard.sltChoosen,
+      "game": StudentInfo.gameChoosen,
+      "date": StudentInfo.dateChoosen,
+      "slot": StudentInfo.slotChoosen,
     });
 
     print(body);
@@ -121,29 +119,26 @@ class _AdminSlotScreenState extends State<AdminSlotScreen> {
           'Accept': '*/*',
           'Accept-Encoding': 'gzip, deflate, br',
           'Access-Control-Allow-Origin': ' *',
-          "x-access-token": JWTtoken,
+          "x-access-token": StudentInfo.jwtToken,
           "admin-header": "YES"
         },
         body: body,
       );
       toggleValue = false;
-                  setState(() {});
+      setState(() {});
     } catch (e) {
       print(e);
     }
   }
 
   Future<void> getData() async {
-    String currEmail = FirebaseAuth.instance.currentUser!.email!;
-    JWTtoken = await FirebaseAuth.instance.currentUser!.getIdToken();
-    // print(currEmail);
-    // print(SlotCard.dateChoosen);
-    // print(SlotCard.gameChoosen);
-    // print(SlotCard.sltChoosen);
     var response = await http.get(
         Uri.parse(kIpAddress +
-            '/admin-bookings/${SlotCard.gameChoosen}/${SlotCard.dateChoosen}/${SlotCard.sltChoosen}'),
-        headers: {"x-access-token": JWTtoken, "admin-header": "YES"});
+            '/admin-bookings/${StudentInfo.gameChoosen}/${StudentInfo.dateChoosen}/${StudentInfo.slotChoosen}'),
+        headers: {
+          "x-access-token": StudentInfo.jwtToken,
+          "admin-header": "YES"
+        });
     var jsonData = await jsonDecode(response.body);
     print(jsonData);
     pendingList = jsonData["message"];
@@ -254,6 +249,8 @@ class _AdminSlotScreenState extends State<AdminSlotScreen> {
                                   itemBuilder: (context, index) {
                                     return AdminSlotCard(
                                       size: size,
+                                      bookingId: pendingList[index]
+                                          ['Booking_ID'],
                                       studentName: pendingList[index]
                                           ['Student_Name'],
                                       snuId: pendingList[index]['SNU_ID'],
@@ -267,57 +264,3 @@ class _AdminSlotScreenState extends State<AdminSlotScreen> {
   }
 }
 
-class AdminSlotCard extends StatelessWidget {
-  const AdminSlotCard(
-      {Key? key,
-      required this.size,
-      required this.studentName,
-      required this.snuId})
-      : super(key: key);
-
-  final Size size;
-  final studentName;
-  final snuId;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.all(10),
-      padding: EdgeInsets.only(left: 10),
-      width: size.width * 0.9,
-      height: size.height * 0.1,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(
-              'Student Name : $studentName',
-              style: TextStyle(fontSize: 15),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(
-              'SNU ID: $snuId',
-              style: TextStyle(fontSize: 15),
-            ),
-          ),
-        ],
-      ),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: [
-          BoxShadow(
-            color: kPrimaryLightColor,
-            spreadRadius: 5,
-            blurRadius: 8,
-            offset: Offset(0, 3), // changes position of shadow
-          ),
-        ],
-      ),
-    );
-  }
-}

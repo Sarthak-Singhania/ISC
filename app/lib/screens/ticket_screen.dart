@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
@@ -8,6 +8,7 @@ import 'dart:ui';
 import 'package:flutter_custom_clippers/flutter_custom_clippers.dart';
 import 'package:isc/constants.dart';
 import 'package:isc/provider/theme_provider.dart';
+import 'package:isc/user-info.dart';
 import 'package:provider/provider.dart';
 import 'package:transparent_image/transparent_image.dart';
 
@@ -35,8 +36,8 @@ class _TicketScreenState extends State<TicketScreen> {
   }
 
   void getData() async {
-    currEmail = FirebaseAuth.instance.currentUser!.email!;
-    JWTtoken = await FirebaseAuth.instance.currentUser!.getIdToken();
+    currEmail = StudentInfo.emailId;
+    JWTtoken = StudentInfo.jwtToken;
     print(currEmail);
     var json = await http.get(
         Uri.parse(
@@ -495,42 +496,10 @@ class _TicketScreenState extends State<TicketScreen> {
                   ),
 
                   secondLast(context),
-
-                  // Stack(alignment: Alignment.center, children: [
-                  //   Container(
-                  //     decoration: BoxDecoration(
-                  //         color: Color(0xFFFFFF),
-                  //         borderRadius: BorderRadius.only(
-                  //           topLeft: Radius.elliptical(10, 10),
-                  //           topRight: Radius.elliptical(10, 10),
-                  //           bottomLeft: Radius.elliptical(0, 0),
-                  //           bottomRight: Radius.elliptical(10, 10),
-                  //         )),
-                  //     margin: EdgeInsets.only(top: 5, left: 12),
-                  //     //padding: EdgeInset.only(left: 5, right: 10),
-                  //     alignment: Alignment.topLeft,
-                  //     child: SimpleShadow(
-                  //       child: SvgPicture.network(
-                  //           'lib/assets/images/Group 1.png'), //Image.asset('lib/assets/images/Group 3.png'),
-                  //       opacity: 0.8, // Default: 0.5
-                  //       color: Colors.black, // Default: Black
-                  //       offset: Offset(5, 5), // Default: Offset(2, 2)
-                  //       sigma: 7, // Default: 2
-                  //     ),
-                  //   ),
-                  //   Container(
-                  //     alignment: Alignment.topLeft,
-                  //     width: size.width * 0.8,
-                  //     child: Text('Sarthak Singhania has added you to the booking',
-                  //         style: TextStyle(color: Colors.white, fontSize: 15)),
-                  //   ),
-                  // ]),
-
                   SizedBox(
                     height: size.height * 0.01,
                   ),
-
-                  lastWidget(context),
+                   lastWidget(context),
                 ],
               ),
             ),

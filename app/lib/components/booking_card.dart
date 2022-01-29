@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:isc/provider/theme_provider.dart';
 import 'package:isc/screens/ticket_screen.dart';
 import 'package:provider/provider.dart';
@@ -33,9 +35,14 @@ class BookingCard extends StatelessWidget {
   Widget build(BuildContext context) {
     ThemeProvider theme = Provider.of<ThemeProvider>(context);
     return GestureDetector(
-      onTap: () {
-        Navigator.push(context,
-            MaterialPageRoute(builder: (context) => TicketScreen(bookingId)));
+      onTap: () async {
+        bool hasInternet = await InternetConnectionChecker().hasConnection;
+        if (hasInternet) {
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => TicketScreen(bookingId)));
+        } else {
+          Fluttertoast.showToast(msg: "Please check your internet connection");
+        }
       },
       child: Container(
         margin: EdgeInsets.all(20),

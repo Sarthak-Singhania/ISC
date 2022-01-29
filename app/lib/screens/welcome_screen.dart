@@ -15,20 +15,20 @@ class WelcomeScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               RoundedButton(
-                  "LOGIN", kPrimaryColor, Colors.white, size,(){Navigator.push(
+                  s:"LOGIN",color: kPrimaryColor,tcolor: Colors.white,size:size,func:(){Navigator.push(
             context,
             MaterialPageRoute(builder: (context) {
               return LoginScreen();
             }),
-          );} ,context),
+          );} ),
           
               RoundedButton(
-                  "SIGN UP", kPrimaryLightColor, Colors.black, size,(){Navigator.push(
+                 s: "SIGN UP",color: kPrimaryLightColor, tcolor:Colors.black,size: size,func:(){Navigator.push(
             context,
             MaterialPageRoute(builder: (context) {
               return RegistrationScreen();
             }),
-          );} ,context)
+          );} )
             ],
           ),
         ),

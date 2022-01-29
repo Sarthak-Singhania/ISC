@@ -1,22 +1,19 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
-import 'package:isc/components/event_card.dart';
 import 'package:isc/constants.dart';
 import 'package:isc/components/slot.dart';
 import 'package:http/http.dart' as http;
 import 'package:isc/provider/theme_provider.dart';
+import 'package:isc/user-info.dart';
 import 'package:provider/provider.dart';
-import 'package:switcher/core/switcher_size.dart';
-import 'package:switcher/switcher.dart';
+// import 'package:switcher/core/switcher_size.dart';
+// import 'package:switcher/switcher.dart';
 
 class TimeSlot extends StatefulWidget {
-  var game;
-  var adminCheck;
-  TimeSlot({this.game, this.adminCheck});
+  TimeSlot();
 
   @override
   _TimeSlotState createState() => _TimeSlotState();
@@ -24,11 +21,10 @@ class TimeSlot extends StatefulWidget {
 
 class _TimeSlotState extends State<TimeSlot> {
   bool isDisabled = true;
-
-  String JWTtoken = '';
   int calendarRange = 0;
   bool isLoading = false;
   bool isDateChoosen = false;
+  String gameChoosen = " ";
   Response? oldResponse;
   bool _decideWhichDayToEnable(DateTime day) {
     if ((day.isAfter(DateTime.now().subtract(Duration(days: 1))) &&
@@ -58,18 +54,19 @@ class _TimeSlotState extends State<TimeSlot> {
   @override
   void initState() {
     super.initState();
+    gameChoosen = StudentInfo.gameChoosen;
     getData();
+    
   }
 
   Future<void> disbaleSlot() async {
-    JWTtoken = await FirebaseAuth.instance.currentUser!.getIdToken();
     final slotResponse = await http.get(
         Uri.parse(kIpAddress +
             "/booking-count?category=date&game=" +
-            widget.game +
+            gameChoosen +
             "&date=" +
-            SlotCard.dateChoosen),
-        headers: {"x-access-token": JWTtoken});
+            StudentInfo.dateChoosen),
+        headers: {"x-access-token": StudentInfo.jwtToken});
 
     final responseJsonData = await jsonDecode(slotResponse.body);
     String slotsAvailable = responseJsonData['message'];
@@ -97,8 +94,8 @@ class _TimeSlotState extends State<TimeSlot> {
                 onPressed: () async {
                   var body = jsonEncode({
                     "category": "date",
-                    "game": widget.game,
-                    "date": SlotCard.dateChoosen,
+                    "game": gameChoosen,
+                    "date": StudentInfo.dateChoosen,
                   });
 
                   print(body);
@@ -110,7 +107,7 @@ class _TimeSlotState extends State<TimeSlot> {
                         'Accept': '*/*',
                         'Accept-Encoding': 'gzip, deflate, br',
                         'Access-Control-Allow-Origin': ' *',
-                        "x-access-token": JWTtoken,
+                        "x-access-token": StudentInfo.jwtToken,
                         "admin-header": "YES"
                       },
                       body: body,
@@ -130,12 +127,10 @@ class _TimeSlotState extends State<TimeSlot> {
   }
 
   Future<void> enableSlot() async {
-    JWTtoken = await FirebaseAuth.instance.currentUser!.getIdToken();
-
     var body = jsonEncode({
       "category": "date",
-      "game": widget.game,
-      "date": SlotCard.dateChoosen,
+      "game": gameChoosen,
+      "date": StudentInfo.dateChoosen,
     });
 
     print(body);
@@ -147,7 +142,7 @@ class _TimeSlotState extends State<TimeSlot> {
           'Accept': '*/*',
           'Accept-Encoding': 'gzip, deflate, br',
           'Access-Control-Allow-Origin': ' *',
-          "x-access-token": JWTtoken,
+          "x-access-token": StudentInfo.jwtToken,
           "admin-header": "YES"
         },
         body: body,
@@ -160,19 +155,18 @@ class _TimeSlotState extends State<TimeSlot> {
   }
 
   void getData() async {
-    JWTtoken = await FirebaseAuth.instance.currentUser!.getIdToken();
     //print(JWTtoken);
     response = await http.get(
-        Uri.parse(kIpAddress + '/slots' + '/' + widget.game),
-        headers: {"x-access-token": JWTtoken});
+        Uri.parse(kIpAddress + '/slots' + '/' + StudentInfo.gameChoosen),
+        headers: {"x-access-token": StudentInfo.jwtToken});
     jsonData = await jsonDecode(response!.body);
     oldResponse = response;
   }
 
   Future<void> getSlot(String day) async {
     print(jsonData);
-    print("game name=" + widget.game);
-    sport = jsonData[widget.game][day];
+    print("game name=" + gameChoosen);
+    sport = jsonData[gameChoosen][day];
     print(response!.statusCode);
     print(sport);
     slotAvailable.clear();
@@ -205,7 +199,7 @@ class _TimeSlotState extends State<TimeSlot> {
       selectedDate = newDate;
       print(weekDays[selectedDate!.weekday - 1]);
       await getSlot(weekDays[selectedDate!.weekday - 1]);
-      SlotCard.dateChoosen =
+      StudentInfo.dateChoosen =
           '${selectedDate!.day}-${selectedDate!.month}-${selectedDate!.year}';
       isDateChoosen = true;
       setState(() {});
@@ -227,7 +221,7 @@ class _TimeSlotState extends State<TimeSlot> {
         ),
         body: Column(
           children: [
-            widget.adminCheck == false
+            StudentInfo.isAdmin == false
                 ? GestureDetector(
                     onTap: () {
                       selectDate(context);
@@ -277,38 +271,16 @@ class _TimeSlotState extends State<TimeSlot> {
                               await enableSlot();
                               isDisabled = true;
                             }
-                            // await Future.delayed(const Duration(seconds: 2),
-                            //     () {
-                            //   print("Printing first");
-                            // });
-                            // print("Printing baad me");
-
-                            //getData();
-
-                            //print(JWTtoken);
-
                             response = await http.get(
                                 Uri.parse(
-                                    kIpAddress + '/slots' + '/' + widget.game),
-                                headers: {"x-access-token": JWTtoken});
+                                    kIpAddress + '/slots' + '/' + gameChoosen),
+                                headers: {
+                                  "x-access-token": StudentInfo.jwtToken
+                                });
                             jsonData = await jsonDecode(response!.body);
 
                             print("latest");
                             print(jsonData);
-                            int counter = 1;
-                            print(response == oldResponse);
-                            // while (response == oldResponse) {
-                            //   print("Counter ki val $counter");
-                            //   counter++;
-                            //   response = await http.get(
-                            //       Uri.parse(kIpAddress +
-                            //           '/slots' +
-                            //           '/' +
-                            //           widget.game),
-                            //       headers: {"x-access-token": JWTtoken});
-                            //   jsonData = await jsonDecode(response!.body);
-                            // }
-
                             getSlot(weekDays[selectedDate!.weekday - 1]);
                           }
                         },
@@ -337,25 +309,19 @@ class _TimeSlotState extends State<TimeSlot> {
                     ],
                   ),
             Expanded(
-              child: ListView(
-                children: [
-                  ListView.builder(
-                      physics: ScrollPhysics(),
-                      shrinkWrap: true,
-                      itemCount: slotAvailable.length,
-                      itemBuilder: (context, index) {
-                        return SlotCard(
-                            adminCheck: widget.adminCheck,
-                            game: widget.game,
-                            slt_time: slotAvailable[index],
-                            color: sport[slotAvailable[index]] > 0
-                                ? theme.checkTheme(Colors.green,
-                                    Colors.green.shade600, context)
-                                : Colors.grey,
-                            slotAvailable: sport[slotAvailable[index]]);
-                      })
-                ],
-              ),
+              child: ListView.builder(
+                  physics: ScrollPhysics(),
+                  shrinkWrap: true,
+                  itemCount: slotAvailable.length,
+                  itemBuilder: (context, index) {
+                    return SlotCard(
+                        slotTime: slotAvailable[index],
+                        color: sport[slotAvailable[index]] > 0
+                            ? theme.checkTheme(Colors.green,
+                                Colors.green.shade600, context)
+                            : Colors.grey,
+                        slotAvailable: sport[slotAvailable[index]]);
+                  }),
             )
           ],
         ));

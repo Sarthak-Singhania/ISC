@@ -1,17 +1,17 @@
 import 'dart:convert';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:isc/components/event_card.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
+
 import 'package:isc/components/roundedbutton.dart';
 import 'package:isc/components/slot.dart';
+import 'package:isc/components/student_detail.dart';
 import 'package:isc/constants.dart';
-import 'package:isc/screens/profile_screen.dart';
+
+import 'package:isc/user-info.dart';
 import 'booking_screen.dart';
-import 'event_screen.dart';
-import 'welcome_screen.dart';
+
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'time_slot.dart';
@@ -23,6 +23,7 @@ class DetailScreen extends StatefulWidget {
 
 class _DetailScreenState extends State<DetailScreen> {
   TextEditingController? firstNameController;
+  final _formKey = GlobalKey<FormState>();
   String firstName = '';
   bool circP = true;
   TextEditingController? firstEmailController;
@@ -43,84 +44,89 @@ class _DetailScreenState extends State<DetailScreen> {
   }
 
   void postData() async {
-    String JWTtoken = await FirebaseAuth.instance.currentUser!.getIdToken();
-    Map<String, dynamic> mp = {};
-    mp.putIfAbsent(firstNameController!.text, () => currEmail);
-    for (var i = 0; i < (length * 2) - 2; i = i + 2) {
-      mp.putIfAbsent(_controller[i].text, () => _controller[i + 1].text);
-    }
-    TimeSlot date = TimeSlot();
+    bool hasInternet = await InternetConnectionChecker().hasConnection;
+    if (hasInternet) {
+      String JWTtoken = StudentInfo.jwtToken;
+      Map<String, dynamic> mp = {};
+      mp.putIfAbsent(firstNameController!.text, () => currEmail);
+      for (var i = 0; i < (length * 2) - 2; i = i + 2) {
+        mp.putIfAbsent(_controller[i].text, () => _controller[i + 1].text);
+      }
 
-    var body = jsonEncode({
-      "sports_name": SlotCard.gameChoosen,
-      "date": SlotCard.dateChoosen,
-      "slot": SlotCard.sltChoosen,
-      "student_details": mp,
-    });
+      var body = jsonEncode({
+        "sports_name": StudentInfo.gameChoosen,
+        "date": StudentInfo.dateChoosen,
+        "slot": StudentInfo.slotChoosen,
+        "student_details": mp,
+      });
 
-    print(body);
-    try {
-      final response = await http.post(
-        Uri.parse(kIpAddress + '/book'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': '*/*',
-          'Accept-Encoding': 'gzip, deflate, br',
-          'Access-Control-Allow-Origin': ' *',
-          "x-access-token": JWTtoken,
-        },
-        body: body,
-      );
-
-      print(response.body);
-      Fluttertoast.showToast(msg: "YOUR DETAILS HAS BEEN SUBMITTED ");
-      showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              content: Text('Do you want to book more slots this sport?'),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    Navigator.of(context).pushReplacement(MaterialPageRoute(
-                        builder: (context) => BookingScreen()));
-                  },
-                  child: Text('No'),
-                ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(builder: (context) => TimeSlot()));
-                  },
-                  child: Text('Yes'),
-                ),
-              ],
-            );
-          });
-    } catch (e) {
-      print(e);
+      print(body);
+      try {
+        final response = await http.post(
+          Uri.parse(kIpAddress + '/book'),
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': '*/*',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Access-Control-Allow-Origin': ' *',
+            "x-access-token": JWTtoken,
+          },
+          body: body,
+        );
+        Map jsonData = await jsonDecode(response.body);
+        print(jsonData);
+        // if (jsonData['status'] == 'confirmed') {
+        Fluttertoast.showToast(msg: "YOUR DETAILS HAS BEEN SUBMITTED ");
+        showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                content: Text('Do you want to book more slots this sport?'),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      Navigator.of(context).pushReplacement(MaterialPageRoute(
+                          builder: (context) => BookingScreen()));
+                    },
+                    child: Text('No'),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(builder: (context) => TimeSlot()));
+                    },
+                    child: Text('Yes'),
+                  ),
+                ],
+              );
+            });
+        // } else if (jsonData['status'] == 'duplicate') {
+        //   Fluttertoast.showToast(msg: "YOU ALREADY HAVE A BOOKING FOR THIS GAME");
+        // } else {
+        //   Fluttertoast.showToast(msg: "YOU HAVE BEEN BLACKLISTED FOR THIS GAME");
+        // }
+      } catch (e) {
+        print(e);
+      }
+    } else {
+      Fluttertoast.showToast(msg: "Please check your internet connection");
     }
   }
 
   void getData() async {
-    currEmail = await FirebaseAuth.instance.currentUser!.email!;
     var response = await http.get(Uri.parse(kIpAddress + '/max-person'));
-    var collection = FirebaseFirestore.instance.collection('users');
-    var docSnapshot = await collection.doc(currEmail).get();
-    if (docSnapshot.exists) {
-      Map<String, dynamic>? data = docSnapshot.data();
-      firstName = data?['Name']; // <-- The value you want to retrieve.
-      // Call setState if needed.
-    }
+
+    currEmail = StudentInfo.emailId;
+    firstName = StudentInfo.name;
 
     firstNameController = TextEditingController(text: firstName);
     firstEmailController = TextEditingController(text: currEmail);
     circP = false;
     Map<String, dynamic> jsonData = await jsonDecode(response.body);
     print(response.statusCode);
-    maxLength = jsonData[SlotCard.gameChoosen];
+    maxLength = jsonData[StudentInfo.gameChoosen];
     setState(() {});
   }
 
@@ -234,47 +240,27 @@ class _DetailScreenState extends State<DetailScreen> {
                       // },
                     ),
                   ),
-                  ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: (length * 2) - 2,
-                      itemBuilder: (context, index) {
-                        return StudentDetail(sNames[index], _controller[index]);
-                      }),
+                  Form(
+                    key:_formKey,
+                    child: ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: (length * 2) - 2,
+                        itemBuilder: (context, index) {
+                          return StudentDetail(
+                              title:sNames[index], controller:_controller[index], index:index);
+                        }),
+                  ),
                   RoundedButton(
-                      'SUBMIT', Colors.green, Colors.white, size * 0.7, () {
-                    postData();
-                  }, context)
+                      s: 'SUBMIT',
+                      color: Colors.green,
+                      tcolor: Colors.white,
+                      size: size * 0.7,
+                      func: () {
+                        postData();
+                      })
                 ],
               ));
   }
 }
 
-class StudentDetail extends StatelessWidget {
-  final String title;
-  final TextEditingController controller;
-  StudentDetail(this.title, this.controller);
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.all(10),
-      child: TextFormField(
-        controller: controller,
-        decoration: InputDecoration(
-          labelText: title,
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(15),
-            borderSide: BorderSide(color: Colors.greenAccent, width: 5.0),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(color: Colors.blue, width: 3.0),
-          ),
-        ),
-        onSaved: (value) {
-          controller.text = value!;
-        },
-      ),
-    );
-  }
-}

@@ -1,47 +1,46 @@
 import 'package:flutter/material.dart';
 import 'package:isc/screens/admin_slot_screen.dart';
 import 'package:isc/screens/detail_screen.dart';
+import 'package:isc/user-info.dart';
 
 class SlotCard extends StatelessWidget {
-  String slt_time = '';
+  String slotTime;
   Color? color;
   var slotAvailable;
-  var game;
-  var adminCheck;
-  SlotCard({this.adminCheck,this.game, required this.slt_time, this.color, this.slotAvailable});
-  static String sltChoosen = '';
-  static String dateChoosen = '';
+
+  SlotCard({required this.slotTime, this.color, this.slotAvailable});
+
   static int maxSlot = 0;
-  static String gameChoosen = '';
-  
 
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     return GestureDetector(
       onTap: () {
-        sltChoosen = slt_time;
+        StudentInfo.slotChoosen = slotTime;
         maxSlot = slotAvailable;
-        gameChoosen = game;
-       if(adminCheck){
+        if (StudentInfo.isAdmin) {
           Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) {
-            return AdminSlotScreen();
-          }),
-        );
-       }
-       else{
+            context,
+            MaterialPageRoute(builder: (context) {
+              return AdminSlotScreen();
+            }),
+          );
+        } else {
           Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) {
-            return DetailScreen();
-          }),
-        );
-       }
+            context,
+            MaterialPageRoute(builder: (context) {
+              return DetailScreen();
+            }),
+          );
+        }
       },
       child: Container(
-          margin: EdgeInsets.all(size.width * 0.05),
+          margin: EdgeInsets.only(
+              top: size.width * 0.05,
+              bottom: size.width * 0.05,
+              left: size.width * 0.1,
+              right: size.width * 0.1),
           padding: EdgeInsets.all(size.width * 0.04),
           alignment: Alignment.center,
           decoration: BoxDecoration(
@@ -57,12 +56,15 @@ class SlotCard extends StatelessWidget {
             // ],
           ),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              Spacer(
+                flex: 1,
+              ),
               Text(
-                slt_time.toUpperCase(),
+                slotTime.toUpperCase(),
                 style: TextStyle(color: Colors.white, fontSize: 25),
               ),
+              Spacer(),
               Icon(
                 Icons.navigate_next,
                 color: Colors.white,
