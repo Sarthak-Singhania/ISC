@@ -73,42 +73,46 @@ class _DetailScreenState extends State<DetailScreen> {
           },
           body: body,
         );
+        print("Hello ${response.statusCode}");
         Map jsonData = await jsonDecode(response.body);
         print("details");
         print(jsonData);
-        // if (jsonData['status'] == 'confirmed') {
-        Fluttertoast.showToast(msg: "YOUR DETAILS HAS BEEN SUBMITTED ");
-        showDialog(
-            context: context,
-            builder: (context) {
-              return AlertDialog(
-                content: Text('Do you want to book more slots this sport?'),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      Navigator.pushReplacementNamed(
-                          context, AppRoutes.bookingsScreen);
-                    },
-                    child: Text('No'),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      Navigator.pushReplacementNamed(
-                          context, AppRoutes.studentTime);
-                    },
-                    child: Text('Yes'),
-                  ),
-                ],
-              );
-            });
-        // } else if (jsonData['status'] == 'duplicate') {
-        //   Fluttertoast.showToast(msg: "YOU ALREADY HAVE A BOOKING FOR THIS GAME");
-        // } else {
-        //   Fluttertoast.showToast(msg: "YOU HAVE BEEN BLACKLISTED FOR THIS GAME");
-        // }
+        if (jsonData['status'] == 'confirmed') {
+          Fluttertoast.showToast(msg: "YOUR DETAILS HAS BEEN SUBMITTED ");
+          showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  content: Text('Do you want to book more slots this sport?'),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        Navigator.pushReplacementNamed(
+                            context, AppRoutes.bookingsScreen);
+                      },
+                      child: Text('No'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        Navigator.pushReplacementNamed(
+                            context, AppRoutes.studentTime);
+                      },
+                      child: Text('Yes'),
+                    ),
+                  ],
+                );
+              });
+        } else if (jsonData['status'] == 'duplicate') {
+          Fluttertoast.showToast(
+              msg: "YOU HAVE ALREADY A BOOKING FOR THIS GAME");
+        } else {
+          Fluttertoast.showToast(
+              msg: "YOU HAVE BEEN BLACKLISTED FOR THIS GAME");
+        }
       } catch (e) {
+        circP = false;
         print('error');
         print(e);
       }

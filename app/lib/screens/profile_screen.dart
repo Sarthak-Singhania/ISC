@@ -86,14 +86,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     text: 'Bookings',
                     icon: Icons.my_library_books_sharp,
                     func: () async {
-                      bool hasInternet =
-                          await InternetConnectionChecker().hasConnection;
-                      if (hasInternet) {
+                      // bool hasInternet =
+                      //     await InternetConnectionChecker().hasConnection;
+                      // if (hasInternet) {
                         Navigator.pushNamed(context, AppRoutes.bookingsScreen);
-                      } else {
-                        Fluttertoast.showToast(
-                            msg: "Please check your internet connection");
-                      }
+                      // } else {
+                      //   Fluttertoast.showToast(
+                      //       msg: "Please check your internet connection");
+                      // }
                     })
                 : Container(),
             ProfileCard(

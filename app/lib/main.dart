@@ -92,8 +92,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                   ),
               AppRoutes.settingScreen: (context) => SettingScreen(),
               AppRoutes.notificationScreen: (context) => NotificationScreen(
-                    notificationJsonData:
-                        ModalRoute.of(context)!.settings.arguments,
                   ),
               AppRoutes.profileScreen: (context) => ProfileScreen(),
             },

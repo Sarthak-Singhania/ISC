@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 //import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -7,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:internet_connection_checker/internet_connection_checker.dart';
+import 'package:isc/components/admin_eventcard.dart';
 
 import 'package:isc/components/bottom_navi_bar.dart';
 import 'package:isc/components/event_card.dart';
@@ -26,9 +28,9 @@ class EventScreen extends StatefulWidget {
 class _EventScreenState extends State<EventScreen> {
   List sports = [];
   List imgUri = [];
-  late final notificationJsonData;
   bool isInternet = true;
   bool circP = true;
+  int notificationListLength = 0;
   @override
   void initState() {
     super.initState();
@@ -39,31 +41,42 @@ class _EventScreenState extends State<EventScreen> {
     StudentInfo.emailId = FirebaseAuth.instance.currentUser!.email!;
     StudentInfo.jwtToken =
         await FirebaseAuth.instance.currentUser!.getIdToken();
-    var notificationResponse = await http.get(
-        Uri.parse(kIpAddress + '/pending/${StudentInfo.emailId}'),
-        headers: {"x-access-token": StudentInfo.jwtToken});
-    notificationJsonData = await jsonDecode(notificationResponse.body);
+    print(StudentInfo.jwtToken);
+
     var collection = FirebaseFirestore.instance.collection('users');
     var docSnapshot = await collection.doc(StudentInfo.emailId).get();
     if (docSnapshot.exists) {
       Map<String, dynamic>? data = docSnapshot.data();
       StudentInfo.name = data?['Name'];
     }
+    // String adminheader;
+    // if (StudentInfo.isAdmin) {
+    //   adminheader = 'YES';
+    // } else {
+    //   adminheader = 'NO';
+    // }
 
-    var response = await http.get(
-      Uri.parse(kIpAddress + '/games'),
-    );
-    Map<String, dynamic> jsonData = await jsonDecode(response.body);
-    print(response.statusCode);
-    jsonData.forEach((k, v) {
-      sports.add(k);
-      imgUri.add(v);
-    });
-    // print(Sports);
-    circP = false;
-    print(StudentInfo.jwtToken);
-    //print(ImgUri[2]);
-    setState(() {});
+    try {
+      var response = await http.get(Uri.parse(kIpAddress + '/games'), headers: {
+        "x-access-token": StudentInfo.jwtToken,
+        "admin-header": "YES"
+      });
+      var notificationResponse = await http.get(
+          Uri.parse(kIpAddress + '/pending/${StudentInfo.emailId}'),
+          headers: {"x-access-token": StudentInfo.jwtToken});
+      var notificationJsonData = await jsonDecode(notificationResponse.body);
+      notificationListLength = notificationJsonData["message"].length;
+      Map<String, dynamic> jsonData = await jsonDecode(response.body);
+      print(response.statusCode);
+      jsonData.forEach((k, v) {
+        sports.add(k);
+        imgUri.add(v);
+      });
+      circP = false;
+      setState(() {});
+    } catch (e) {
+      print(e);
+    }
   }
 
   @override
@@ -71,6 +84,57 @@ class _EventScreenState extends State<EventScreen> {
     //getData();
     Size size = MediaQuery.of(context).size;
     return Scaffold(
+      appBar: AppBar(
+        toolbarHeight: 80.0,
+        automaticallyImplyLeading: false,
+       actions:[
+
+         !StudentInfo.isAdmin? Container(
+            child: Stack(
+              children: [
+                Center(
+                  child: IconButton(
+                    color: Colors.white,
+                    onPressed: () {
+                      Navigator.pushNamed(
+                          context, AppRoutes.notificationScreen);
+                    },
+                    icon: Icon(
+                      Icons.notifications,
+                      size: 30,
+                    ),
+                  ),
+                ),
+                notificationListLength > 0
+                    ? Positioned(
+                        top: 20,
+                        right: 9,
+                        child: Container(
+                          width: 20,
+                          height: 20,
+                          decoration: BoxDecoration(
+                              shape: BoxShape.circle, color: Colors.red),
+                          child: Center(
+                            child: Text(
+                              '$notificationListLength',
+                              style: TextStyle(fontSize: 10),
+                            ),
+                          ),
+                        ))
+                    : Container()
+              ],
+            ),
+          ):Container()
+        ],
+        elevation: 0,
+        backgroundColor: Colors.purple[600],
+        centerTitle: true,
+        title: Text(
+          "SELECT YOUR SPORT",
+          style: TextStyle(
+              color: Colors.white, fontSize: 25, fontWeight: FontWeight.bold),
+        ),
+      ),
       body: circP
           ? Center(
               child: CircularProgressIndicator(
@@ -82,47 +146,13 @@ class _EventScreenState extends State<EventScreen> {
                   Container(
                     decoration: BoxDecoration(color: Colors.purple[600]),
                     width: size.width,
-                    height: size.height * 0.3,
+                    height: size.height * 0.2,
                   ),
                   SafeArea(
                     child: Column(
                       children: [
-                        Align(
-                          alignment: Alignment.topRight,
-                          child: IconButton(
-                            color: Colors.white,
-                            onPressed: () async {
-                              bool hasInternet =
-                                  await InternetConnectionChecker()
-                                      .hasConnection;
-                              if (hasInternet) {
-                                Navigator.pushNamed(
-                                    context, AppRoutes.notificationScreen,
-                                    arguments: notificationJsonData);
-                              } else {
-                                Fluttertoast.showToast(
-                                    msg:
-                                        "Please check your internet connection");
-                              }
-                            },
-                            icon: Icon(
-                              Icons.notifications,
-                              size: 25,
-                            ),
-                          ),
-                        ),
                         SizedBox(
                           height: size.height * 0.04,
-                        ),
-                        Text(
-                          "SELECT YOUR SPORT",
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 25,
-                              fontWeight: FontWeight.bold),
-                        ),
-                        SizedBox(
-                          height: size.height * 0.05,
                         ),
                         GridView.builder(
                           physics: ScrollPhysics(),
@@ -134,10 +164,13 @@ class _EventScreenState extends State<EventScreen> {
                                   crossAxisCount: 2),
                           itemCount: sports.length,
                           itemBuilder: (context, index) {
-                            return EventCard(
-                              title: sports[index],
-                              uri: imgUri[index],
-                            );
+                            return StudentInfo.isAdmin
+                                ? AdminEventCard(
+                                    title: sports[index], uri: imgUri[index])
+                                : EventCard(
+                                    title: sports[index],
+                                    uri: imgUri[index],
+                                  );
                           },
                         )
                       ],

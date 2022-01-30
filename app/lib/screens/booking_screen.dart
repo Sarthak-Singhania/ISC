@@ -1,7 +1,8 @@
 import 'dart:convert';
 
-
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:isc/components/booking_card.dart';
 
 import 'package:http/http.dart' as http;
@@ -17,6 +18,7 @@ class _BookingScreenState extends State<BookingScreen> {
   dynamic bookingList = [];
   bool circP = true;
   bool emptyList = false;
+  late bool tapToRefresh;
   @override
   void initState() {
     super.initState();
@@ -27,21 +29,30 @@ class _BookingScreenState extends State<BookingScreen> {
     String currEmail = StudentInfo.emailId;
     String JWTtoken = StudentInfo.jwtToken;
     print(currEmail);
-    var response = await http.get(
-        Uri.parse(kIpAddress + '/get_bookings/$currEmail'),
-        headers: {"x-access-token": JWTtoken});
-    var jsonData = await jsonDecode(response.body);
-    print(jsonData);
-    bookingList = jsonData["message"];
-    if (bookingList.length == 0) {
+    try {
+      var response = await http.get(
+          Uri.parse(kIpAddress + '/get_bookings/$currEmail'),
+          headers: {"x-access-token": JWTtoken});
+      print("new ${response.statusCode}");
+      var jsonData = await jsonDecode(response.body);
+      print(jsonData);
+      bookingList = jsonData["message"];
+      if (bookingList.length == 0) {
+        circP = false;
+        emptyList = true;
+        setState(() {});
+      } else {
+        print('yeh');
+        print(bookingList[0]);
+        circP = false;
+        tapToRefresh = false;
+        setState(() {});
+      }
+    } catch (e) {
       circP = false;
-      emptyList = true;
+      tapToRefresh = true;
       setState(() {});
-    } else {
-      print('yeh');
-      print(bookingList[0]);
-      circP = false;
-      setState(() {});
+      print(e);
     }
   }
 
@@ -64,25 +75,52 @@ class _BookingScreenState extends State<BookingScreen> {
                   child: CircularProgressIndicator(
                   color: Colors.blue,
                 ))
-              : RefreshIndicator(
-                  onRefresh: getData,
-                  child: ListView.builder(
-                      physics: ScrollPhysics(),
-                      shrinkWrap: true,
-                      itemCount: bookingList.length,
-                      itemBuilder: (context, index) {
-                        return BookingCard(
-                          isConfirm: bookingList[index]['Confirm'],
-                          size: size,
-                          date: bookingList[index]['Date'],
-                          sportName: bookingList[index]['Game'],
-                          bookingId: bookingList[index]['Booking_ID'],
-                          studentName: bookingList[index]['Student_Name'],
-                          totalCount: bookingList[index]['Count'],
-                          slotTime: bookingList[index]['Slot'],
-                        );
-                      }),
-                ),
+              : tapToRefresh
+                  ? GestureDetector(
+                      onTap: () async {
+                        if (!(await InternetConnectionChecker()
+                            .hasConnection)) {
+                          Fluttertoast.showToast(
+                              msg: "Please check your internet connection");
+                        } else {
+                          circP = true;
+                          tapToRefresh = false;
+                          setState(() {});
+                          getData();
+                        }
+                      },
+                      child: Container(
+                          color: Colors.white,
+                          width: double.infinity,
+                          height: double.infinity,
+                          child: Center(
+                              child: Text(
+                            "Tap To Refresh",
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ))),
+                    )
+                  : RefreshIndicator(
+                      onRefresh: getData,
+                      child: ListView.builder(
+                          physics: AlwaysScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          itemCount: bookingList.length,
+                          itemBuilder: (context, index) {
+                            return BookingCard(
+                              isConfirm: bookingList[index]['Confirm'],
+                              size: size,
+                              date: bookingList[index]['Date'],
+                              sportName: bookingList[index]['Game'],
+                              bookingId: bookingList[index]['Booking_ID'],
+                              studentName: bookingList[index]['Student_Name'],
+                              totalCount: bookingList[index]['Count'],
+                              slotTime: bookingList[index]['Slot'],
+                            );
+                          }),
+                    ),
     );
   }
 }

@@ -124,9 +124,7 @@ class _TicketScreenState extends State<TicketScreen> {
 
       print(acceptResponse.body);
       Fluttertoast.showToast(msg: "BOOKING REQUEST REJECTED");
-      setState(() {
-        getData();
-      });
+      Navigator.pop(context);
     } catch (e) {
       print(e);
     }
@@ -170,13 +168,6 @@ class _TicketScreenState extends State<TicketScreen> {
                   width: size.width * 0.8,
                   height: size.width * 0.17,
                   decoration: BoxDecoration(
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey,
-                          offset: Offset(-10.0, 5.0), //(x,y)
-                          blurRadius: 10.0,
-                        ),
-                      ],
                       color: Color(0xFF5A62B0),
                       borderRadius:
                           BorderRadius.all(Radius.elliptical(10, 10))),

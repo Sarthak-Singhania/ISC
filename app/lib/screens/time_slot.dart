@@ -29,9 +29,9 @@ class _TimeSlotState extends State<TimeSlot> {
   bool _decideWhichDayToEnable(DateTime day) {
     if ((day.isAfter(DateTime.now().subtract(Duration(days: 1))) &&
         day.isBefore(
-            DateTime.now().add(Duration(days: 7 - calendarRange - 1))))) {
+            DateTime.now().add(Duration(days: 7 - calendarRange ))))) {
       return true;
-    }
+    } 
     return false;
   }
 
@@ -56,7 +56,6 @@ class _TimeSlotState extends State<TimeSlot> {
     super.initState();
     gameChoosen = StudentInfo.gameChoosen;
     getData();
-    
   }
 
   Future<void> disbaleSlot() async {
@@ -317,8 +316,8 @@ class _TimeSlotState extends State<TimeSlot> {
                     return SlotCard(
                         slotTime: slotAvailable[index],
                         color: sport[slotAvailable[index]] > 0
-                            ? theme.checkTheme(Colors.green,
-                                Colors.green.shade600, context)
+                            ? theme.checkTheme(
+                                Colors.green, Colors.green.shade600, context)
                             : Colors.grey,
                         slotAvailable: sport[slotAvailable[index]]);
                   }),
