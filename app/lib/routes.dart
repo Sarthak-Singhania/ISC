@@ -8,6 +8,7 @@ class AppRoutes {
   static const studentTime = 'student_time';
   static const studentDetail = 'student_detail';
   static const profileScreen = 'profile_page';
+  static const emailVerification = 'email_verfication';
   static const settingScreen = 'setting_screen';
   static const bookingsScreen = 'booking_screen';
   static const ticketScreen = 'ticket_screen';

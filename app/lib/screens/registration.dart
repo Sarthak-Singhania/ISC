@@ -33,8 +33,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   final confirmPasswordController = new TextEditingController();
 
   void signUp(String email, String password, String name) async {
-    bool hasInternet = await InternetConnectionChecker().hasConnection;
-    if (hasInternet) {
+  
       if (_formKey.currentState!.validate()) {
         try {
           await _auth
@@ -48,9 +47,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           final emailData = {'Name': name};
 
           await docUser.set(emailData);
-
-          Fluttertoast.showToast(msg: "Registered Successfully");
-          Navigator.pushReplacementNamed(context, AppRoutes.homeScreen);
+          Navigator.pushReplacementNamed(context, AppRoutes.emailVerification);
         } on FirebaseAuthException catch (error) {
           switch (error.code) {
             case "invalid-email":
@@ -78,10 +75,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           Fluttertoast.showToast(msg: errorMessage!);
           print(error.code);
         }
+        catch (e) {
+        print(e);
       }
-    } else {
-      Fluttertoast.showToast(msg: "Please check your internet connection");
-    }
+      }
+  
   }
 
   @override

@@ -36,57 +36,62 @@ class _LoginScreenState extends State<LoginScreen> {
   String? errorMessage;
 
   void signIn(String email, String password) async {
-    bool hasInternet = await InternetConnectionChecker().hasConnection;
-    if (hasInternet) {
-      if (_formKey.currentState!.validate()) {
-        try {
-          final snapShot = await FirebaseFirestore.instance
-              .collection('admin-users')
-              .doc(email)
-              .get();
+    if (_formKey.currentState!.validate()) {
+      try {
+        final snapShot = await FirebaseFirestore.instance
+            .collection('admin-users')
+            .doc(email)
+            .get();
 
-          if (snapShot.exists) {
-            StudentInfo.isAdmin = true;
-          } else {
-            StudentInfo.isAdmin = false;
-          }
-          await _auth
-              .signInWithEmailAndPassword(email: email, password: password)
-              .then((uid) => {
-                    Fluttertoast.showToast(msg: "Login Successful"),
-                    Navigator.pushNamed(context, AppRoutes.eventScreen)
-                  });
-        } on FirebaseAuthException catch (error) {
-          switch (error.code) {
-            case "invalid-email":
-              errorMessage = "Your email address appears to be malformed.";
-
-              break;
-            case "wrong-password":
-              errorMessage = "Your password is wrong.";
-              break;
-            case "user-not-found":
-              errorMessage = "User with this email doesn't exist.";
-              break;
-            case "user-disabled":
-              errorMessage = "User with this email has been disabled.";
-              break;
-            case "too-many-requests":
-              errorMessage = "Too many requests";
-              break;
-            case "operation-not-allowed":
-              errorMessage =
-                  "Signing in with Email and Password is not enabled.";
-              break;
-            default:
-              errorMessage = "An undefined Error happened.";
-          }
-          Fluttertoast.showToast(msg: errorMessage!);
-          print(error.code);
+        if (snapShot.exists) {
+          StudentInfo.isAdmin = true;
+        } else {
+          StudentInfo.isAdmin = false;
         }
+        bool userVerified;
+        await _auth
+            .signInWithEmailAndPassword(email: email, password: password)
+            .then((uid) => {
+                  userVerified = _auth.currentUser!.emailVerified,
+                  if (userVerified)
+                    {
+                      Fluttertoast.showToast(msg: "Login Successful"),
+                      Navigator.pushReplacementNamed(context, AppRoutes.eventScreen)
+                    }
+                  else
+                    {
+                    Navigator.pushReplacementNamed(context,AppRoutes.emailVerification )
+                    }
+                });
+      } on FirebaseAuthException catch (error) {
+        switch (error.code) {
+          case "invalid-email":
+            errorMessage = "Your email address appears to be malformed.";
+
+            break;
+          case "wrong-password":
+            errorMessage = "Your password is wrong.";
+            break;
+          case "user-not-found":
+            errorMessage = "User with this email doesn't exist.";
+            break;
+          case "user-disabled":
+            errorMessage = "User with this email has been disabled.";
+            break;
+          case "too-many-requests":
+            errorMessage = "Too many requests";
+            break;
+          case "operation-not-allowed":
+            errorMessage = "Signing in with Email and Password is not enabled.";
+            break;
+          default:
+            errorMessage = "An undefined Error happened.";
+        }
+        Fluttertoast.showToast(msg: errorMessage!);
+        print(error.code);
+      } catch (e) {
+        print(e);
       }
-    } else {
-      Fluttertoast.showToast(msg: "Pleas check your internet connection");
     }
   }
 

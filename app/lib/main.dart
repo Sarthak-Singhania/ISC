@@ -7,6 +7,7 @@ import 'package:isc/routes.dart';
 import 'package:isc/screens/admin_slot_screen.dart';
 import 'package:isc/screens/booking_screen.dart';
 import 'package:isc/screens/detail_screen.dart';
+import 'package:isc/screens/email_verfification.dart';
 import 'package:isc/screens/event_screen.dart';
 import 'package:isc/screens/login_screen.dart';
 import 'package:isc/screens/notification_screen.dart';
@@ -91,6 +92,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                     bookingId: ModalRoute.of(context)!.settings.arguments,
                   ),
               AppRoutes.settingScreen: (context) => SettingScreen(),
+              AppRoutes.emailVerification:(context)=>EmailVerification(),
               AppRoutes.notificationScreen: (context) => NotificationScreen(
                   ),
               AppRoutes.profileScreen: (context) => ProfileScreen(),
