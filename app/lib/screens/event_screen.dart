@@ -30,6 +30,7 @@ class _EventScreenState extends State<EventScreen> {
   List imgUri = [];
   bool isInternet = true;
   bool circP = true;
+  late bool tapToRefresh;
   int notificationListLength = 0;
   @override
   void initState() {
@@ -73,8 +74,12 @@ class _EventScreenState extends State<EventScreen> {
         imgUri.add(v);
       });
       circP = false;
+      tapToRefresh = false;
       setState(() {});
     } catch (e) {
+      circP = false;
+      tapToRefresh = true;
+      setState(() {});
       print(e);
     }
   }
@@ -83,103 +88,137 @@ class _EventScreenState extends State<EventScreen> {
   Widget build(BuildContext context) {
     //getData();
     Size size = MediaQuery.of(context).size;
-    return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: 80.0,
-        automaticallyImplyLeading: false,
-       actions:[
-
-         !StudentInfo.isAdmin? Container(
-            child: Stack(
-              children: [
-                Center(
-                  child: IconButton(
-                    color: Colors.white,
-                    onPressed: () {
-                      Navigator.pushNamed(
-                          context, AppRoutes.notificationScreen);
-                    },
-                    icon: Icon(
-                      Icons.notifications,
-                      size: 30,
-                    ),
+    return circP
+        ? Scaffold(
+            body: Center(
+                child: CircularProgressIndicator(
+            color: Colors.blue,
+          )))
+        : tapToRefresh
+            ? Scaffold(
+                body: GestureDetector(
+                  onTap: () async {
+                    if (!(await InternetConnectionChecker().hasConnection)) {
+                      Fluttertoast.showToast(
+                          msg: "Please check your internet connection");
+                    } else {
+                      circP = true;
+                      tapToRefresh = false;
+                      setState(() {});
+                      getData();
+                    }
+                  },
+                  child: Container(
+                      color: Colors.white,
+                      width: double.infinity,
+                      height: double.infinity,
+                      child: Center(
+                          child: Text(
+                        "Tap To Refresh",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ))),
+                ),
+              )
+            : Scaffold(
+                appBar: AppBar(
+                  toolbarHeight: 80.0,
+                  automaticallyImplyLeading: false,
+                  actions: [
+                    !StudentInfo.isAdmin
+                        ? Container(
+                            child: Stack(
+                              children: [
+                                Center(
+                                  child: IconButton(
+                                    color: Colors.white,
+                                    onPressed: () {
+                                      Navigator.pushNamed(context,
+                                          AppRoutes.notificationScreen);
+                                    },
+                                    icon: Icon(
+                                      Icons.notifications,
+                                      size: 30,
+                                    ),
+                                  ),
+                                ),
+                                notificationListLength > 0
+                                    ? Positioned(
+                                        top: 20,
+                                        right: 9,
+                                        child: Container(
+                                          width: 20,
+                                          height: 20,
+                                          decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              color: Colors.red),
+                                          child: Center(
+                                            child: Text(
+                                              '$notificationListLength',
+                                              style: TextStyle(fontSize: 10),
+                                            ),
+                                          ),
+                                        ))
+                                    : Container()
+                              ],
+                            ),
+                          )
+                        : Container()
+                  ],
+                  elevation: 0,
+                  backgroundColor: Colors.purple[600],
+                  centerTitle: true,
+                  title: Text(
+                    "SELECT YOUR SPORT",
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 25,
+                        fontWeight: FontWeight.bold),
                   ),
                 ),
-                notificationListLength > 0
-                    ? Positioned(
-                        top: 20,
-                        right: 9,
-                        child: Container(
-                          width: 20,
-                          height: 20,
-                          decoration: BoxDecoration(
-                              shape: BoxShape.circle, color: Colors.red),
-                          child: Center(
-                            child: Text(
-                              '$notificationListLength',
-                              style: TextStyle(fontSize: 10),
+                body: SingleChildScrollView(
+                  child: Stack(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(color: Colors.purple[600]),
+                        width: size.width,
+                        height: size.height * 0.2,
+                      ),
+                      SafeArea(
+                        child: Column(
+                          children: [
+                            SizedBox(
+                              height: size.height * 0.04,
                             ),
-                          ),
-                        ))
-                    : Container()
-              ],
-            ),
-          ):Container()
-        ],
-        elevation: 0,
-        backgroundColor: Colors.purple[600],
-        centerTitle: true,
-        title: Text(
-          "SELECT YOUR SPORT",
-          style: TextStyle(
-              color: Colors.white, fontSize: 25, fontWeight: FontWeight.bold),
-        ),
-      ),
-      body: circP
-          ? Center(
-              child: CircularProgressIndicator(
-              color: Colors.blue,
-            ))
-          : SingleChildScrollView(
-              child: Stack(
-                children: [
-                  Container(
-                    decoration: BoxDecoration(color: Colors.purple[600]),
-                    width: size.width,
-                    height: size.height * 0.2,
-                  ),
-                  SafeArea(
-                    child: Column(
-                      children: [
-                        SizedBox(
-                          height: size.height * 0.04,
+                            GridView.builder(
+                              physics: ScrollPhysics(),
+                              shrinkWrap: true,
+                              gridDelegate:
+                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                      childAspectRatio:
+                                          StudentInfo.isAdmin ? 0.79 : 1,
+                                      crossAxisCount: 2),
+                              itemCount: sports.length,
+                              itemBuilder: (context, index) {
+                                return StudentInfo.isAdmin
+                                    ? AdminEventCard(
+                                        title: sports[index],
+                                        uri: imgUri[index])
+                                    : EventCard(
+                                        title: sports[index],
+                                        uri: imgUri[index],
+                                      );
+                              },
+                            )
+                          ],
                         ),
-                        GridView.builder(
-                          physics: ScrollPhysics(),
-                          shrinkWrap: true,
-                          gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
-                                  childAspectRatio:
-                                      StudentInfo.isAdmin ? 0.79 : 1,
-                                  crossAxisCount: 2),
-                          itemCount: sports.length,
-                          itemBuilder: (context, index) {
-                            return StudentInfo.isAdmin
-                                ? AdminEventCard(
-                                    title: sports[index], uri: imgUri[index])
-                                : EventCard(
-                                    title: sports[index],
-                                    uri: imgUri[index],
-                                  );
-                          },
-                        )
-                      ],
-                    ),
-                  )
-                ],
-              ),
-            ),
-      bottomNavigationBar: BottomNaviBar('event'),
-    );
+                      )
+                    ],
+                  ),
+                ),
+                bottomNavigationBar: BottomNaviBar('event'),
+              );
   }
 }

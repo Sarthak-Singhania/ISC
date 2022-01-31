@@ -25,7 +25,9 @@ class _TicketScreenState extends State<TicketScreen> {
   late String currEmail;
   late String jwtToken;
   bool circP = true;
+  bool secondCircP = false;
   late bool hasInternet;
+  late bool tapToRefresh;
   var response;
   var sNo;
   var nameList;
@@ -40,20 +42,27 @@ class _TicketScreenState extends State<TicketScreen> {
   void getData() async {
     currEmail = StudentInfo.emailId;
     jwtToken = StudentInfo.jwtToken;
-    print(currEmail);
-    var json = await http.get(
-        Uri.parse(
-            kIpAddress + '/get_bookings/${currEmail}/${widget.bookingId}'),
-        headers: {"x-access-token": jwtToken});
-    response = jsonDecode(json.body);
-    var list = response['name'];
-    for (var i = 0; i < list.length; i++) {
-      nameList[i] = list[i];
-      sNo[i] = '${i + 1}';
+    try {
+      var json = await http.get(
+          Uri.parse(
+              kIpAddress + '/get_bookings/$currEmail/${widget.bookingId}'),
+          headers: {"x-access-token": jwtToken});
+      response = jsonDecode(json.body);
+      var list = response['name'];
+      for (var i = 0; i < list.length; i++) {
+        nameList[i] = list[i];
+        sNo[i] = '${i + 1}';
+      }
+      circP = false;
+      tapToRefresh = false;
+      print(response);
+      setState(() {});
+    } catch (e) {
+      circP = false;
+      tapToRefresh = true;
+      setState(() {});
+      print(e);
     }
-    circP = false;
-    print(response);
-    setState(() {});
   }
 
   void acceptResponse() async {
@@ -73,12 +82,21 @@ class _TicketScreenState extends State<TicketScreen> {
       );
 
       print(acceptResponse.body);
+      secondCircP = false;
       Fluttertoast.showToast(msg: "BOOKING CONFIRMED");
       setState(() {
         getData();
       });
     } catch (e) {
+      secondCircP = false;
+      bool hasInternet = await InternetConnectionChecker().hasConnection;
+      if (!hasInternet) {
+        Fluttertoast.showToast(msg: "Please check your internet connection");
+      } else {
+        Fluttertoast.showToast(msg: "Something went wrong.Please retry.");
+      }
       print(e);
+      setState(() {});
     }
   }
 
@@ -98,11 +116,20 @@ class _TicketScreenState extends State<TicketScreen> {
         body: body,
       );
       print(acceptResponse.body);
+      secondCircP = false;
       Fluttertoast.showToast(msg: "BOOKING CANCELLED");
 
       Navigator.of(context).pop();
     } catch (e) {
+      secondCircP = false;
+      bool hasInternet = await InternetConnectionChecker().hasConnection;
+      if (!hasInternet) {
+        Fluttertoast.showToast(msg: "Please check your internet connection");
+      } else {
+        Fluttertoast.showToast(msg: "Something went wrong.Please retry.");
+      }
       print(e);
+      setState(() {});
     }
   }
 
@@ -123,10 +150,19 @@ class _TicketScreenState extends State<TicketScreen> {
       );
 
       print(acceptResponse.body);
+      secondCircP = false;
       Fluttertoast.showToast(msg: "BOOKING REQUEST REJECTED");
       Navigator.pop(context);
     } catch (e) {
+      secondCircP = false;
+      bool hasInternet = await InternetConnectionChecker().hasConnection;
+      if (!hasInternet) {
+        Fluttertoast.showToast(msg: "Please check your internet connection");
+      } else {
+        Fluttertoast.showToast(msg: "Something went wrong.Please retry.");
+      }
       print(e);
+      setState(() {});
     }
   }
 
@@ -225,17 +261,11 @@ class _TicketScreenState extends State<TicketScreen> {
                             child: Text('No'),
                           ),
                           TextButton(
-                            onPressed: () async {
-                              hasInternet = await InternetConnectionChecker()
-                                  .hasConnection;
-                              if (hasInternet) {
-                                Navigator.of(context).pop();
-                                cancelResponse();
-                              } else {
-                                Fluttertoast.showToast(
-                                    msg:
-                                        "Please check your internet connection");
-                              }
+                            onPressed: () {
+                              secondCircP = true;
+                              setState(() {});
+                              Navigator.of(context).pop();
+                              cancelResponse();
                             },
                             child: Text('Yes'),
                           ),
@@ -273,13 +303,9 @@ class _TicketScreenState extends State<TicketScreen> {
           Expanded(
             child: GestureDetector(
               onTap: () async {
-                hasInternet = await InternetConnectionChecker().hasConnection;
-                if (hasInternet) {
-                  rejectResponse();
-                } else {
-                  Fluttertoast.showToast(
-                      msg: "Please check your internet connection");
-                }
+                secondCircP = true;
+                setState(() {});
+                rejectResponse();
               },
               child: Container(
                 height: size.height * 0.08,
@@ -306,14 +332,9 @@ class _TicketScreenState extends State<TicketScreen> {
           Expanded(
             child: GestureDetector(
               onTap: () async {
-                bool hasInternet =
-                    await InternetConnectionChecker().hasConnection;
-                if (hasInternet) {
-                  acceptResponse();
-                } else {
-                  Fluttertoast.showToast(
-                      msg: "Please check your internet connection");
-                }
+                secondCircP = true;
+                setState(() {});
+                acceptResponse();
               },
               child: Container(
                 height: size.height * 0.08,
@@ -353,169 +374,224 @@ class _TicketScreenState extends State<TicketScreen> {
                 child: CircularProgressIndicator(
             color: Colors.blue,
           )))
-        : Scaffold(
-            appBar: AppBar(
-              centerTitle: true,
-              leading: response['confirm'] == 1
-                  ? BackButton(
-                      color: Color(0xff289800),
-                    )
-                  : BackButton(
-                      color: Color(0xffFF6109),
-                    ),
-              title: response['confirm'] == 1
-                  ? Text(
-                      'Confirmed',
-                      style: TextStyle(color: Color(0xff289800), fontSize: 25),
-                    )
-                  : Text(
-                      'Pending',
-                      style: TextStyle(color: Color(0xffFF6109), fontSize: 25),
-                    ),
-              backgroundColor:
-                  theme.checkTheme(Colors.white, Colors.black, context),
-            ),
-            body: Container(
-              child: Column(
-                children: [
-                  Container(
-                    padding: EdgeInsets.all(8),
-                    margin: EdgeInsets.fromLTRB(0, 60, 0, 8),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Booking Id: ${widget.bookingId}",
-                          style: TextStyle(color: Colors.grey, fontSize: 18),
+        : tapToRefresh
+            ? Scaffold(
+                body: GestureDetector(
+                  onTap: () async {
+                    if (!(await InternetConnectionChecker().hasConnection)) {
+                      Fluttertoast.showToast(
+                          msg: "Please check your internet connection");
+                    } else {
+                      circP = true;
+                      tapToRefresh = false;
+                      setState(() {});
+                      getData();
+                    }
+                  },
+                  child: Container(
+                      color: Colors.white,
+                      width: double.infinity,
+                      height: double.infinity,
+                      child: Center(
+                          child: Text(
+                        "Tap To Refresh",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
                         ),
-                        Spacer(),
-                        Text(
-                          "Date:${response['date']}",
-                          style: TextStyle(color: Colors.grey, fontSize: 18),
+                      ))),
+                ),
+              )
+            : Scaffold(
+                appBar: AppBar(
+                  centerTitle: true,
+                  leading: response['confirm'] == 1
+                      ? BackButton(
+                          color: Color(0xff289800),
+                        )
+                      : BackButton(
+                          color: Color(0xffFF6109),
                         ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    padding: EdgeInsets.all(8),
-                    margin: EdgeInsets.fromLTRB(0, 15, 0, 8),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Text(
-                          '${response['game']}',
-                          style: TextStyle(fontSize: 20),
+                  title: response['confirm'] == 1
+                      ? Text(
+                          'Confirmed',
+                          style:
+                              TextStyle(color: Color(0xff289800), fontSize: 25),
+                        )
+                      : Text(
+                          'Pending',
+                          style:
+                              TextStyle(color: Color(0xffFF6109), fontSize: 25),
                         ),
-                        Spacer(),
-                        FadeInImage.memoryNetwork(
-                          image: '${response['url']}',
-                          placeholder: kTransparentImage,
-                        ),
-                        Text(
-                          "${response['slot']}".toUpperCase(),
-                          style: TextStyle(fontSize: 20),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                  backgroundColor:
+                      theme.checkTheme(Colors.white, Colors.black, context),
+                ),
+                body: Stack(
+                  children: [
+                    Container(
+                      child: Column(
                         children: [
                           Container(
-                            height: size.height * 0.1,
-                            width: size.width * 0.2,
-                            child: Center(
-                                child: Text(
-                              'S No.',
-                              style: TextStyle(fontSize: 20),
-                            )),
-                            decoration: BoxDecoration(
-                                border: Border.all(
-                                    color: theme.checkTheme(
-                                        Colors.black, Colors.white, context),
-                                    width: 1),
-                                borderRadius: BorderRadius.only(
-                                    topLeft: Radius.circular(15))),
-                          ),
-                          Container(
-                            child: Center(
-                                child: Text(
-                              'Name',
-                              style: TextStyle(fontSize: 20),
-                            )),
-                            height: size.height * 0.1,
-                            width: size.width * 0.7,
-                            decoration: BoxDecoration(
-                                border: Border.all(
-                                    color: theme.checkTheme(
-                                        Colors.black, Colors.white, context),
-                                    width: 1),
-                                borderRadius: BorderRadius.only(
-                                    topRight: Radius.circular(15))),
-                          )
-                        ],
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            padding: EdgeInsets.all(8),
+                            margin: EdgeInsets.fromLTRB(0, 60, 0, 8),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
                               children: [
-                                Text(sNo[0], style: TextStyle(fontSize: 20)),
-                                Text(sNo[1], style: TextStyle(fontSize: 20)),
-                                Text(sNo[2], style: TextStyle(fontSize: 20)),
-                                Text(sNo[3], style: TextStyle(fontSize: 20)),
+                                Text(
+                                  "Booking Id: ${widget.bookingId}",
+                                  style: TextStyle(
+                                      color: Colors.grey, fontSize: 18),
+                                ),
+                                Spacer(),
+                                Text(
+                                  "Date:${response['date']}",
+                                  style: TextStyle(
+                                      color: Colors.grey, fontSize: 18),
+                                ),
                               ],
                             ),
-                            height: size.height * 0.35,
-                            width: size.width * 0.2,
-                            decoration: BoxDecoration(
-                                border: Border.all(
-                                    color: theme.checkTheme(
-                                        Colors.black, Colors.white, context),
-                                    width: 1),
-                                borderRadius: BorderRadius.only(
-                                    bottomLeft: Radius.circular(15))),
                           ),
                           Container(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            padding: EdgeInsets.all(8),
+                            margin: EdgeInsets.fromLTRB(0, 15, 0, 8),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
                               children: [
-                                Text(nameList[0],
-                                    style: TextStyle(fontSize: 20)),
-                                Text(nameList[1],
-                                    style: TextStyle(fontSize: 20)),
-                                Text(nameList[2],
-                                    style: TextStyle(fontSize: 20)),
-                                Text(nameList[3],
-                                    style: TextStyle(fontSize: 20)),
+                                Text(
+                                  '${response['game']}',
+                                  style: TextStyle(fontSize: 20),
+                                ),
+                                Spacer(),
+                                FadeInImage.memoryNetwork(
+                                  image: '${response['url']}',
+                                  placeholder: kTransparentImage,
+                                ),
+                                Text(
+                                  "${response['slot']}".toUpperCase(),
+                                  style: TextStyle(fontSize: 20),
+                                ),
                               ],
                             ),
-                            height: size.height * 0.35,
-                            width: size.width * 0.7,
-                            decoration: BoxDecoration(
-                                border: Border.all(
-                                    color: theme.checkTheme(
-                                        Colors.black, Colors.white, context),
-                                    width: 1),
-                                borderRadius: BorderRadius.only(
-                                    bottomRight: Radius.circular(15))),
-                          )
+                          ),
+                          Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    height: size.height * 0.1,
+                                    width: size.width * 0.2,
+                                    child: Center(
+                                        child: Text(
+                                      'S No.',
+                                      style: TextStyle(fontSize: 20),
+                                    )),
+                                    decoration: BoxDecoration(
+                                        border: Border.all(
+                                            color: theme.checkTheme(
+                                                Colors.black,
+                                                Colors.white,
+                                                context),
+                                            width: 1),
+                                        borderRadius: BorderRadius.only(
+                                            topLeft: Radius.circular(15))),
+                                  ),
+                                  Container(
+                                    child: Center(
+                                        child: Text(
+                                      'Name',
+                                      style: TextStyle(fontSize: 20),
+                                    )),
+                                    height: size.height * 0.1,
+                                    width: size.width * 0.7,
+                                    decoration: BoxDecoration(
+                                        border: Border.all(
+                                            color: theme.checkTheme(
+                                                Colors.black,
+                                                Colors.white,
+                                                context),
+                                            width: 1),
+                                        borderRadius: BorderRadius.only(
+                                            topRight: Radius.circular(15))),
+                                  )
+                                ],
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        Text(sNo[0],
+                                            style: TextStyle(fontSize: 20)),
+                                        Text(sNo[1],
+                                            style: TextStyle(fontSize: 20)),
+                                        Text(sNo[2],
+                                            style: TextStyle(fontSize: 20)),
+                                        Text(sNo[3],
+                                            style: TextStyle(fontSize: 20)),
+                                      ],
+                                    ),
+                                    height: size.height * 0.35,
+                                    width: size.width * 0.2,
+                                    decoration: BoxDecoration(
+                                        border: Border.all(
+                                            color: theme.checkTheme(
+                                                Colors.black,
+                                                Colors.white,
+                                                context),
+                                            width: 1),
+                                        borderRadius: BorderRadius.only(
+                                            bottomLeft: Radius.circular(15))),
+                                  ),
+                                  Container(
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        Text(nameList[0],
+                                            style: TextStyle(fontSize: 20)),
+                                        Text(nameList[1],
+                                            style: TextStyle(fontSize: 20)),
+                                        Text(nameList[2],
+                                            style: TextStyle(fontSize: 20)),
+                                        Text(nameList[3],
+                                            style: TextStyle(fontSize: 20)),
+                                      ],
+                                    ),
+                                    height: size.height * 0.35,
+                                    width: size.width * 0.7,
+                                    decoration: BoxDecoration(
+                                        border: Border.all(
+                                            color: theme.checkTheme(
+                                                Colors.black,
+                                                Colors.white,
+                                                context),
+                                            width: 1),
+                                        borderRadius: BorderRadius.only(
+                                            bottomRight: Radius.circular(15))),
+                                  )
+                                ],
+                              ),
+                            ],
+                          ),
+                          secondLast(context),
+                          SizedBox(
+                            height: size.height * 0.01,
+                          ),
+                          lastWidget(context),
                         ],
                       ),
-                    ],
-                  ),
-                  secondLast(context),
-                  SizedBox(
-                    height: size.height * 0.01,
-                  ),
-                  lastWidget(context),
-                ],
-              ),
-            ),
-          );
+                    ),
+                    secondCircP == true
+                        ? Center(
+                            child: CircularProgressIndicator(
+                            color: Colors.blue,
+                          ))
+                        : Container()
+                  ],
+                ));
   }
 }

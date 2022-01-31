@@ -18,11 +18,8 @@ class BottomNaviBar extends StatelessWidget {
           children: [
             IconButton(
               onPressed: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => EventScreen(
-                            )));
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => EventScreen()));
               },
               icon: Icon(
                 Icons.home,

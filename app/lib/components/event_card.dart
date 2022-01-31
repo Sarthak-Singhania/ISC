@@ -44,8 +44,7 @@ class _EventCardState extends State<EventCard> {
     dynamic theme = Provider.of<ThemeProvider>(context);
     return GestureDetector(
             onTap: ()  {
-             
-                StudentInfo.gameChoosen = widget.title;
+               StudentInfo.gameChoosen = widget.title;
                 Navigator.pushNamed(context, AppRoutes.studentTime);
             },
             child: Container(

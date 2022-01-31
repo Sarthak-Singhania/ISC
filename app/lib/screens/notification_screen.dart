@@ -90,6 +90,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                           getData();
                         }
                       },
+                      
                       child: Container(
                           color: Colors.white,
                           width: double.infinity,

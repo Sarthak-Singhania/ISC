@@ -20,13 +20,8 @@ class NotificationCard extends StatelessWidget {
     Size size = MediaQuery.of(context).size;
     return GestureDetector(
       onTap: () async {
-        bool hasInternet = await InternetConnectionChecker().hasConnection;
-        if (hasInternet) {
           Navigator.pushReplacementNamed(context, AppRoutes.ticketScreen,
               arguments: bookingId);
-        } else {
-          Fluttertoast.showToast(msg: "Please check your internet connection");
-        }
       },
       child: Container(
         margin: EdgeInsets.all(10),

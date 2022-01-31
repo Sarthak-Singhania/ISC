@@ -44,80 +44,82 @@ class _DetailScreenState extends State<DetailScreen> {
   }
 
   void postData() async {
-    bool hasInternet = await InternetConnectionChecker().hasConnection;
-    if (hasInternet) {
-      String JWTtoken = StudentInfo.jwtToken;
-      Map<String, dynamic> mp = {};
-      mp.putIfAbsent(firstNameController!.text, () => currEmail);
-      for (var i = 0; i < (length * 2) - 2; i = i + 2) {
-        mp.putIfAbsent(_controller[i].text, () => _controller[i + 1].text);
-      }
+    String JWTtoken = StudentInfo.jwtToken;
+    Map<String, dynamic> mp = {};
+    mp.putIfAbsent(firstNameController!.text, () => currEmail);
+    for (var i = 0; i < (length * 2) - 2; i = i + 2) {
+      mp.putIfAbsent(_controller[i].text, () => _controller[i + 1].text);
+    }
 
-      var body = jsonEncode({
-        "sports_name": StudentInfo.gameChoosen,
-        "date": StudentInfo.dateChoosen,
-        "slot": StudentInfo.slotChoosen,
-        "student_details": mp,
+    var body = jsonEncode({
+      "sports_name": StudentInfo.gameChoosen,
+      "date": StudentInfo.dateChoosen,
+      "slot": StudentInfo.slotChoosen,
+      "student_details": mp,
+    });
+
+    print(body);
+    try {
+      final response = await http.post(
+        Uri.parse(kIpAddress + '/book'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': '*/*',
+          'Accept-Encoding': 'gzip, deflate, br',
+          'Access-Control-Allow-Origin': ' *',
+          "x-access-token": JWTtoken,
+        },
+        body: body,
+      );
+      print("Hello ${response.statusCode}");
+      Map jsonData = await jsonDecode(response.body);
+      print("details");
+      print(jsonData);
+      circP = false;
+      setState(() {});
+      if (jsonData['status'] == 'confirmed') {
+        Fluttertoast.showToast(msg: "YOUR DETAILS HAS BEEN SUBMITTED ");
+        showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                content: Text('Do you want to book more slots this sport?'),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      Navigator.pushReplacementNamed(
+                          context, AppRoutes.bookingsScreen);
+                    },
+                    child: Text('No'),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      Navigator.pushReplacementNamed(
+                          context, AppRoutes.studentTime);
+                    },
+                    child: Text('Yes'),
+                  ),
+                ],
+              );
+            });
+      } else if (jsonData['status'] == 'duplicate') {
+        Fluttertoast.showToast(msg: "YOU HAVE ALREADY A BOOKING FOR THIS GAME");
+      } else {
+        Fluttertoast.showToast(msg: "YOU HAVE BEEN BLACKLISTED FOR THIS GAME");
+      }
+    } catch (e) {
+      circP = false;
+      bool hasInternet = await InternetConnectionChecker().hasConnection;
+      if (!hasInternet) {
+        Fluttertoast.showToast(msg: "Please check your internet connection");
+      } else {
+        Fluttertoast.showToast(msg: "Something went wrong.Please retry;");
+      }
+      print(e);
+      setState(() {
       });
-
-      print(body);
-      try {
-        final response = await http.post(
-          Uri.parse(kIpAddress + '/book'),
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': '*/*',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Access-Control-Allow-Origin': ' *',
-            "x-access-token": JWTtoken,
-          },
-          body: body,
-        );
-        print("Hello ${response.statusCode}");
-        Map jsonData = await jsonDecode(response.body);
-        print("details");
-        print(jsonData);
-        if (jsonData['status'] == 'confirmed') {
-          Fluttertoast.showToast(msg: "YOUR DETAILS HAS BEEN SUBMITTED ");
-          showDialog(
-              context: context,
-              builder: (context) {
-                return AlertDialog(
-                  content: Text('Do you want to book more slots this sport?'),
-                  actions: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        Navigator.pushReplacementNamed(
-                            context, AppRoutes.bookingsScreen);
-                      },
-                      child: Text('No'),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        Navigator.pushReplacementNamed(
-                            context, AppRoutes.studentTime);
-                      },
-                      child: Text('Yes'),
-                    ),
-                  ],
-                );
-              });
-        } else if (jsonData['status'] == 'duplicate') {
-          Fluttertoast.showToast(
-              msg: "YOU HAVE ALREADY A BOOKING FOR THIS GAME");
-        } else {
-          Fluttertoast.showToast(
-              msg: "YOU HAVE BEEN BLACKLISTED FOR THIS GAME");
-        }
-      } catch (e) {
-        circP = false;
-        print('error');
-        print(e);
-      }
-    } else {
-      Fluttertoast.showToast(msg: "Please check your internet connection");
     }
   }
 
@@ -191,82 +193,87 @@ class _DetailScreenState extends State<DetailScreen> {
               child: Icon(Icons.add)),
           centerTitle: true,
         ),
-        body: circP == true
+        body: Stack(
+          children:[ ListView(
+                  children: [
+                    Container(
+                      margin: EdgeInsets.all(10),
+                      child: TextFormField(
+                        readOnly: true,
+                        controller: firstNameController,
+                        decoration: InputDecoration(
+                          labelText: 'First Student Name',
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(15),
+                            borderSide:
+                                BorderSide(color: Colors.greenAccent, width: 5.0),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide:
+                                BorderSide(color: Colors.blue, width: 3.0),
+                          ),
+                        ),
+                        onSaved: (value) {
+                          firstNameController!.text = value!;
+                        },
+                      ),
+                    ),
+                    Container(
+                      margin: EdgeInsets.all(10),
+                      child: TextFormField(
+                        readOnly: true,
+                        controller: firstEmailController,
+                        decoration: InputDecoration(
+                          labelText: 'SNU ID',
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(15),
+                            borderSide:
+                                BorderSide(color: Colors.greenAccent, width: 5.0),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide:
+                                BorderSide(color: Colors.blue, width: 3.0),
+                          ),
+                        ),
+                        // onSaved: (value) {
+                        //   firstName.text = value!;
+                        // },
+                      ),
+                    ),
+                    Form(
+                      key: _formKey,
+                      child: ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: (length * 2) - 2,
+                          itemBuilder: (context, index) {
+                            return StudentDetail(
+                                title: sNames[index],
+                                controller: _controller[index],
+                                index: index);
+                          }),
+                    ),
+                    RoundedButton(
+                        s: 'SUBMIT',
+                        color: Colors.green,
+                        tcolor: Colors.white,
+                        size: size * 0.7,
+                        func: () {
+                          if (_formKey.currentState!.validate()) {
+                            circP = true;
+                            setState(() {});
+                            postData();
+                          }
+                        })
+                  ],
+                ),
+                circP == true
             ? Center(
                 child: CircularProgressIndicator(
                 color: Colors.blue,
-              ))
-            : ListView(
-                children: [
-                  Container(
-                    margin: EdgeInsets.all(10),
-                    child: TextFormField(
-                      readOnly: true,
-                      controller: firstNameController,
-                      decoration: InputDecoration(
-                        labelText: 'First Student Name',
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
-                          borderSide:
-                              BorderSide(color: Colors.greenAccent, width: 5.0),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide:
-                              BorderSide(color: Colors.blue, width: 3.0),
-                        ),
-                      ),
-                      onSaved: (value) {
-                        firstNameController!.text = value!;
-                      },
-                    ),
-                  ),
-                  Container(
-                    margin: EdgeInsets.all(10),
-                    child: TextFormField(
-                      readOnly: true,
-                      controller: firstEmailController,
-                      decoration: InputDecoration(
-                        labelText: 'SNU ID',
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
-                          borderSide:
-                              BorderSide(color: Colors.greenAccent, width: 5.0),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide:
-                              BorderSide(color: Colors.blue, width: 3.0),
-                        ),
-                      ),
-                      // onSaved: (value) {
-                      //   firstName.text = value!;
-                      // },
-                    ),
-                  ),
-                  Form(
-                    key: _formKey,
-                    child: ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: (length * 2) - 2,
-                        itemBuilder: (context, index) {
-                          return StudentDetail(
-                              title: sNames[index],
-                              controller: _controller[index],
-                              index: index);
-                        }),
-                  ),
-                  RoundedButton(
-                      s: 'SUBMIT',
-                      color: Colors.green,
-                      tcolor: Colors.white,
-                      size: size * 0.7,
-                      func: () {
-                        if (_formKey.currentState!.validate()) {
-                          postData();
-                        }
-                      })
-                ],
-              ));
+              )):Container()
+              ]
+        ));
   }
 }
