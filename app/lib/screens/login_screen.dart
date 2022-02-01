@@ -56,11 +56,13 @@ class _LoginScreenState extends State<LoginScreen> {
                   if (userVerified)
                     {
                       Fluttertoast.showToast(msg: "Login Successful"),
-                      Navigator.pushReplacementNamed(context, AppRoutes.eventScreen)
+                      Navigator.pushReplacementNamed(
+                          context, AppRoutes.eventScreen)
                     }
                   else
                     {
-                    Navigator.pushReplacementNamed(context,AppRoutes.emailVerification )
+                      Navigator.pushReplacementNamed(
+                          context, AppRoutes.emailVerification)
                     }
                 });
       } on FirebaseAuthException catch (error) {
@@ -202,6 +204,43 @@ class _LoginScreenState extends State<LoginScreen> {
                       func: () {
                         signIn(emailController.text, passwordController.text);
                       }),
+                  SizedBox(
+                    height: size.height * 0.02,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      GestureDetector(
+                        onTap: () async {
+                          if (emailController.text.isEmpty) {
+                            Fluttertoast.showToast(
+                                msg: "Please enter your email id");
+                          } else {
+                            try {
+                              await _auth.sendPasswordResetEmail(
+                                  email: emailController.text);
+                              Fluttertoast.showToast(
+                                  msg:
+                                      "Passsword reset link has been sent to ${emailController.text}",
+                                  toastLength: Toast.LENGTH_LONG);
+                            } catch (e) {
+                              print(e);
+                            }
+                          }
+                        },
+                        child: Text(
+                          "Forgot your password?",
+                          style: TextStyle(
+                              color: Colors.redAccent,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15),
+                        ),
+                      )
+                    ],
+                  ),
+                  SizedBox(
+                    height: size.height * 0.02,
+                  ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[

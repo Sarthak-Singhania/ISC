@@ -118,6 +118,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                             .hasMatch(value)) {
                           return ("Please Enter a valid email");
                         }
+                       if(!RegExp("\b*@snu\.edu.in\$",caseSensitive: false).hasMatch(value))
+                        {return ("Please enter your SNU email id");}
                         return null;
                       },
                       onSaved: (value) {
