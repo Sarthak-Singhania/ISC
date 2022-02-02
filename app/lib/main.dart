@@ -16,6 +16,7 @@ import 'package:isc/screens/registration.dart';
 import 'package:isc/screens/setting_screen.dart';
 import 'package:isc/screens/ticket_screen.dart';
 import 'package:isc/screens/time_slot.dart';
+import 'package:isc/screens/user_time_slot.dart';
 import 'package:isc/screens/welcome_screen.dart';
 import 'package:provider/provider.dart';
 
@@ -85,7 +86,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               AppRoutes.eventScreen: (context) => EventScreen(),
               AppRoutes.adminTime: (context) => TimeSlot(),
               AppRoutes.adminSlot: (context) => AdminSlotScreen(),
-              AppRoutes.studentTime: (context) => TimeSlot(),
+              AppRoutes.studentTime: (context) => UserTimeSlot(),
               AppRoutes.studentDetail: (context) => DetailScreen(),
               AppRoutes.bookingsScreen: (context) => BookingScreen(),
               AppRoutes.ticketScreen: (context) => TicketScreen(

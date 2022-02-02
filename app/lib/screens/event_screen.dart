@@ -16,7 +16,6 @@ import 'package:isc/constants.dart';
 import 'package:isc/routes.dart';
 import 'package:isc/user-info.dart';
 
-import 'notification_screen.dart';
 
 class EventScreen extends StatefulWidget {
   EventScreen();
@@ -26,9 +25,8 @@ class EventScreen extends StatefulWidget {
 }
 
 class _EventScreenState extends State<EventScreen> {
-  List sports = [];
-  List imgUri = [];
   bool isInternet = true;
+  late final jsonData;
   bool circP = true;
   late bool tapToRefresh;
   int notificationListLength = 0;
@@ -50,29 +48,36 @@ class _EventScreenState extends State<EventScreen> {
       Map<String, dynamic>? data = docSnapshot.data();
       StudentInfo.name = data?['Name'];
     }
-    // String adminheader;
-    // if (StudentInfo.isAdmin) {
-    //   adminheader = 'YES';
-    // } else {
-    //   adminheader = 'NO';
-    // }
-
+    String adminheader;
+    if (StudentInfo.isAdmin) {
+      adminheader = 'yes';
+    } else {
+      adminheader = 'no';
+    }
+    print(adminheader);
     try {
       var response = await http.get(Uri.parse(kIpAddress + '/games'), headers: {
         "x-access-token": StudentInfo.jwtToken,
-        "admin-header": "YES"
+        "admin-header": adminheader
       });
+      print(response.statusCode);
+      jsonData = (await jsonDecode(response.body))['message'];
+      print(jsonData);
       var notificationResponse = await http.get(
           Uri.parse(kIpAddress + '/pending/${StudentInfo.emailId}'),
           headers: {"x-access-token": StudentInfo.jwtToken});
       var notificationJsonData = await jsonDecode(notificationResponse.body);
       notificationListLength = notificationJsonData["message"].length;
-      Map<String, dynamic> jsonData = await jsonDecode(response.body);
-      print(response.statusCode);
-      jsonData.forEach((k, v) {
-        sports.add(k);
-        imgUri.add(v);
-      });
+      
+      
+      for (var i = 0; i < jsonData.length; i++) {
+        print(jsonData[i]['game']);
+        print(jsonData[i]['url']);
+      }
+      // jsonData.forEach((k, v) {
+      //   sports.add(k);
+      //   imgUri.add(v);
+      // });
       circP = false;
       tapToRefresh = false;
       setState(() {});
@@ -200,16 +205,17 @@ class _EventScreenState extends State<EventScreen> {
                                       childAspectRatio:
                                           StudentInfo.isAdmin ? 0.79 : 1,
                                       crossAxisCount: 2),
-                              itemCount: sports.length,
+                              itemCount: jsonData.length,
                               itemBuilder: (context, index) {
                                 return StudentInfo.isAdmin
                                     ? AdminEventCard(
-                                        title: sports[index],
-                                        uri: imgUri[index])
+                                        title: jsonData[index]['game'],
+                                        uri: jsonData[index]['url'],
+                                        isEnabled: jsonData[index]['isEnabled'],
+                                      )
                                     : EventCard(
-                                        title: sports[index],
-                                        uri: imgUri[index],
-                                      );
+                                        title: jsonData[index]['game'],
+                                        uri: jsonData[index]['url']);
                               },
                             )
                           ],

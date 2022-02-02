@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:isc/constants.dart';
-import 'package:isc/components/slot.dart';
+import 'package:isc/components/slot_card.dart';
 import 'package:http/http.dart' as http;
 import 'package:isc/provider/theme_provider.dart';
 import 'package:isc/user-info.dart';
@@ -28,10 +28,9 @@ class _TimeSlotState extends State<TimeSlot> {
   Response? oldResponse;
   bool _decideWhichDayToEnable(DateTime day) {
     if ((day.isAfter(DateTime.now().subtract(Duration(days: 1))) &&
-        day.isBefore(
-            DateTime.now().add(Duration(days: 7 - calendarRange ))))) {
+        day.isBefore(DateTime.now().add(Duration(days: 7 - calendarRange))))) {
       return true;
-    } 
+    }
     return false;
   }
 
@@ -157,7 +156,10 @@ class _TimeSlotState extends State<TimeSlot> {
     //print(JWTtoken);
     response = await http.get(
         Uri.parse(kIpAddress + '/slots' + '/' + StudentInfo.gameChoosen),
-        headers: {"x-access-token": StudentInfo.jwtToken});
+        headers: {
+          "x-access-token": StudentInfo.jwtToken,
+          "admin-header": StudentInfo.isAdmin ? "yes" : "no"
+        });
     jsonData = await jsonDecode(response!.body);
     oldResponse = response;
   }
@@ -270,13 +272,7 @@ class _TimeSlotState extends State<TimeSlot> {
                               await enableSlot();
                               isDisabled = true;
                             }
-                            response = await http.get(
-                                Uri.parse(
-                                    kIpAddress + '/slots' + '/' + gameChoosen),
-                                headers: {
-                                  "x-access-token": StudentInfo.jwtToken
-                                });
-                            jsonData = await jsonDecode(response!.body);
+                            getData();
 
                             print("latest");
                             print(jsonData);

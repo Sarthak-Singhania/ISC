@@ -20,8 +20,10 @@ import '../constants.dart';
 class AdminEventCard extends StatefulWidget {
   String title;
   String uri;
+  bool isEnabled;
 
-  AdminEventCard({required this.title, required this.uri});
+  AdminEventCard(
+      {required this.title, required this.uri, required this.isEnabled});
 
   @override
   _AdminEventCardState createState() => _AdminEventCardState();
@@ -31,13 +33,19 @@ class _AdminEventCardState extends State<AdminEventCard> {
   double opacity = 0.5;
   String JWTtoken = '';
   //String game = '';
-  bool toggleValue = false;
+  late bool toggleValue;
   late bool hasInternet;
-
   double spreadRadius = 5;
   bool value = true;
 
   double blurRadius = 7;
+
+  @override
+  void initState() {
+    super.initState();
+    toggleValue = !widget.isEnabled;
+  }
+
   void disbaleSlot() async {
     JWTtoken = await FirebaseAuth.instance.currentUser!.getIdToken();
     final slotResponse = await http.get(
@@ -139,9 +147,9 @@ class _AdminEventCardState extends State<AdminEventCard> {
     dynamic theme = Provider.of<ThemeProvider>(context);
     return GestureDetector(
       onLongPress: () {},
-      onTap: (){
-           StudentInfo.gameChoosen = widget.title;
-          Navigator.pushNamed(context, AppRoutes.studentTime);
+      onTap: () {
+        StudentInfo.gameChoosen = widget.title;
+        Navigator.pushNamed(context, AppRoutes.studentTime);
       },
       child: Container(
         height: MediaQuery.of(context).size.height * 0.7,

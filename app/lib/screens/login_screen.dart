@@ -3,19 +3,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:isc/constants.dart';
 import 'package:isc/components/roundedbutton.dart';
 import 'package:isc/provider/theme_provider.dart';
 import 'package:isc/routes.dart';
 
-import 'package:isc/screens/registration.dart';
-import 'package:isc/screens/time_day_slot.dart';
-
 import 'package:isc/user-info.dart';
 import 'package:provider/provider.dart';
 
-import 'event_screen.dart';
+
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -57,7 +53,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     {
                       Fluttertoast.showToast(msg: "Login Successful"),
                       Navigator.pushReplacementNamed(
-                          context, AppRoutes.eventScreen)
+                          context, AppRoutes.studentTime)
                     }
                   else
                     {

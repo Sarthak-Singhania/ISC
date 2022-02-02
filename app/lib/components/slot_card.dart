@@ -9,7 +9,7 @@ class SlotCard extends StatelessWidget {
   Color? color;
   var slotAvailable;
 
-  SlotCard({required this.slotTime, this.color, this.slotAvailable});
+  SlotCard({required this.slotTime, required this.color,required this.slotAvailable});
 
   static int maxSlot = 0;
 
@@ -23,7 +23,7 @@ class SlotCard extends StatelessWidget {
         if (StudentInfo.isAdmin) {
           Navigator.pushReplacementNamed(context, AppRoutes.adminSlot);
         } else {
-           Navigator.pushReplacementNamed(context, AppRoutes.studentDetail);
+          Navigator.pushReplacementNamed(context, AppRoutes.studentDetail);
         }
       },
       child: Container(
@@ -37,30 +37,12 @@ class SlotCard extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(30),
             color: color,
-            // boxShadow: [
-            //   BoxShadow(
-            //     color: Colors.white70.withOpacity(0.5),
-            //     spreadRadius: 5,
-            //     blurRadius: 50,
-            //     offset: Offset(0, 17), // changes position of shadow
-            //   ),
-            // ],
           ),
-          child: Row(
-            children: [
-              Spacer(
-                flex: 1,
-              ),
-              Text(
-                slotTime.toUpperCase(),
-                style: TextStyle(color: Colors.white, fontSize: 25),
-              ),
-              Spacer(),
-              Icon(
-                Icons.navigate_next,
-                color: Colors.white,
-              )
-            ],
+          child: Center(
+            child: Text(
+              slotTime.toUpperCase(),
+              style: TextStyle(color: Colors.white, fontSize: 25),
+            ),
           )),
     );
   }

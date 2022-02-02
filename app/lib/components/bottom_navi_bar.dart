@@ -18,7 +18,7 @@ class BottomNaviBar extends StatelessWidget {
           children: [
             IconButton(
               onPressed: () {
-                Navigator.push(context,
+                Navigator.pushReplacement(context,
                     MaterialPageRoute(builder: (context) => EventScreen()));
               },
               icon: Icon(
@@ -29,7 +29,7 @@ class BottomNaviBar extends StatelessWidget {
             ),
             IconButton(
               onPressed: () {
-                Navigator.push(context,
+                Navigator.pushReplacement(context,
                     MaterialPageRoute(builder: (context) => ProfileScreen()));
               },
               icon: Icon(
