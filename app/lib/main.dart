@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:isc/components/bottom_navi_bar.dart';
 import 'package:isc/constants.dart';
 import 'package:isc/provider/theme_provider.dart';
@@ -24,6 +25,7 @@ import 'package:provider/provider.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  
   runApp(MyApp());
 }
 
@@ -90,14 +92,13 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               AppRoutes.studentTime: (context) => UserTimeSlot(),
               AppRoutes.studentDetail: (context) => DetailScreen(),
               AppRoutes.bookingsScreen: (context) => BookingScreen(),
-              AppRoutes.bottomNavigationScreen:(context)=>BottomNaviBar(),
+              AppRoutes.bottomNavigationScreen: (context) => BottomNaviBar(),
               AppRoutes.ticketScreen: (context) => TicketScreen(
                     bookingId: ModalRoute.of(context)!.settings.arguments,
                   ),
               AppRoutes.settingScreen: (context) => SettingScreen(),
-              AppRoutes.emailVerification:(context)=>EmailVerification(),
-              AppRoutes.notificationScreen: (context) => NotificationScreen(
-                  ),
+              AppRoutes.emailVerification: (context) => EmailVerification(),
+              AppRoutes.notificationScreen: (context) => NotificationScreen(),
               AppRoutes.profileScreen: (context) => ProfileScreen(),
             },
           );
