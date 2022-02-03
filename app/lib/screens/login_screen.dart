@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:isc/components/bottom_navi_bar.dart';
 import 'package:isc/constants.dart';
 import 'package:isc/components/roundedbutton.dart';
 import 'package:isc/provider/theme_provider.dart';
@@ -10,8 +11,6 @@ import 'package:isc/routes.dart';
 
 import 'package:isc/user-info.dart';
 import 'package:provider/provider.dart';
-
-
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -52,8 +51,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   if (userVerified)
                     {
                       Fluttertoast.showToast(msg: "Login Successful"),
-                      Navigator.pushReplacementNamed(
-                          context, AppRoutes.studentTime)
+                      // Navigator.pushReplacementNamed(
+                      //     context, AppRoutes.eventScreen)
+                      Navigator.pushReplacementNamed(context,AppRoutes.bottomNavigationScreen),
+                      
                     }
                   else
                     {

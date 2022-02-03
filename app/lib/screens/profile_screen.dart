@@ -64,7 +64,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         centerTitle: true,
         title: Text("Profile", style: TextStyle(color: kPrimaryColor)),
       ),
-      bottomNavigationBar: BottomNaviBar('profile'),
+     // bottomNavigationBar: BottomNaviBar('profile'),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,

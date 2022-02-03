@@ -27,11 +27,42 @@ var detail = {
   'W': false,
   'Th': false,
   'F': false,
-  'St': false
+  'St': false,
+  'S': false,
 };
-var list1 = ['M', 'W', 'F'];
-var list2 = ['T', 'Th', 'St'];
+var list1 = ['M', 'W', 'F', 'T', 'Th', 'St', 'S'];
+var list2 = ['M', 'W', 'F', 'T', 'Th', 'St', 'S'];
 var selected = [];
+
+void showInfo(BuildContext context) {
+  showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          child: Container(
+            padding: EdgeInsets.all(10),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Some info',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                Text(
+                    "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem"),
+                ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text('Close'))
+              ],
+            ),
+          ),
+        );
+      });
+}
 
 class _UserTimeSlotState extends State<UserTimeSlot> {
   @override
@@ -46,10 +77,16 @@ class _UserTimeSlotState extends State<UserTimeSlot> {
           style: TextStyle(
               color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
         ),
+        actions: [
+          IconButton(
+              onPressed: () {
+                showInfo(context);
+              },
+              icon: Icon(Icons.info_outline))
+        ],
       ),
       body: Center(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Padding(
               padding: const EdgeInsets.all(8.0),
@@ -64,52 +101,23 @@ class _UserTimeSlotState extends State<UserTimeSlot> {
                           TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     Spacer(),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Weekday(
-                          weekday: 'M',
-                          isSelected: detail['M']!,
-                          func: () {
-            setState(() {});      //PASSING SET STATE
-          }),
-                        
-                        Weekday(
-                          weekday: 'T',
-                          isSelected: detail['T']!,
-                          func: () {
-            setState(() {});      //PASSING SET STATE
-          }
-                        ),
-                        Weekday(
-                          weekday: 'W',
-                          isSelected: detail['W']!,
-                          func: () {
-            setState(() {});      //PASSING SET STATE
-          }
-                        ),
-                        Weekday(
-                          weekday: 'Th',
-                          isSelected: detail['Th']!,
-                          func: () {
-            setState(() {});      //PASSING SET STATE
-          }
-                        ),
-                        Weekday(
-                          weekday: 'F',
-                          isSelected: detail['F']!,
-                          func: () {
-            setState(() {});      //PASSING SET STATE
-          }
-                        ),
-                        Weekday(
-                          weekday: 'St',
-                          isSelected: detail['St']!,
-                          func: () {
-            setState(() {});      //PASSING SET STATE
-          }
-                        ),
-                      ],
+                    Container(
+                      // width: size.width * 1,
+                      height: size.height * 0.1,
+                      child: Center(
+                        child: ListView.builder(
+                            shrinkWrap: true,
+                            scrollDirection: Axis.horizontal,
+                            itemCount: detail.length,
+                            itemBuilder: (context, index) {
+                              return Weekday(
+                                  weekday: detail.keys.elementAt(index),
+                                  isSelected: detail.values.elementAt(index),
+                                  func: () {
+                                    setState(() {}); //PASSING SET STATE
+                                  });
+                            }),
+                      ),
                     ),
                     Spacer(),
                     Container(
@@ -194,33 +202,36 @@ class Weekday extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-          func();
-          if (!detail[weekday]!) {
+        func();
+        if (!detail[weekday]!) {
           if (selected.length == 0) {
-          selected.insert(0, weekday);
-          detail[weekday] = true;
-        } else {
-          var alreadySelectedDay = selected[0];
-          if(list1.contains(alreadySelectedDay)&&list1.contains(weekday)){
             selected.insert(0, weekday);
             detail[weekday] = true;
+          } else {
+            var alreadySelectedDay = selected[0];
+            if (list1.contains(alreadySelectedDay) && list1.contains(weekday)) {
+              selected.insert(0, weekday);
+              detail[weekday] = true;
+            } else if (list2.contains(alreadySelectedDay) &&
+                list2.contains(weekday)) {
+              selected.insert(0, weekday);
+              detail[weekday] = true;
+            }
           }
-          else if(list2.contains(alreadySelectedDay)&&list2.contains(weekday)){
-            selected.insert(0, weekday);
-            detail[weekday] = true;
-          }
-        }
         } else {
           detail[weekday] = false;
           selected.remove(weekday);
         }
-        
       },
-      child: CircleAvatar(
-        backgroundColor: isSelected ? Colors.purple.shade800 : Colors.purple,
-        child: Text(
-          weekday,
-          style: TextStyle(color: Colors.white, fontSize: 20),
+      child: Container(
+        margin: EdgeInsets.all(5),
+        child: CircleAvatar(
+          radius: 20,
+          backgroundColor: isSelected ? Colors.green : Colors.purple,
+          child: Text(
+            weekday,
+            style: TextStyle(color: Colors.white, fontSize: 20),
+          ),
         ),
       ),
     );

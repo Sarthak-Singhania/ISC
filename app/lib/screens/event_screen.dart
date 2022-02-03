@@ -13,9 +13,10 @@ import 'package:isc/components/admin_eventcard.dart';
 import 'package:isc/components/bottom_navi_bar.dart';
 import 'package:isc/components/event_card.dart';
 import 'package:isc/constants.dart';
+import 'package:isc/provider/theme_provider.dart';
 import 'package:isc/routes.dart';
 import 'package:isc/user-info.dart';
-
+import 'package:provider/provider.dart';
 
 class EventScreen extends StatefulWidget {
   EventScreen();
@@ -68,8 +69,7 @@ class _EventScreenState extends State<EventScreen> {
           headers: {"x-access-token": StudentInfo.jwtToken});
       var notificationJsonData = await jsonDecode(notificationResponse.body);
       notificationListLength = notificationJsonData["message"].length;
-      
-      
+
       for (var i = 0; i < jsonData.length; i++) {
         print(jsonData[i]['game']);
         print(jsonData[i]['url']);
@@ -92,6 +92,7 @@ class _EventScreenState extends State<EventScreen> {
   @override
   Widget build(BuildContext context) {
     //getData();
+    final theme = Provider.of<ThemeProvider>(context);
     Size size = MediaQuery.of(context).size;
     return circP
         ? Scaffold(
@@ -100,31 +101,28 @@ class _EventScreenState extends State<EventScreen> {
             color: Colors.blue,
           )))
         : tapToRefresh
-            ? Scaffold(
-                body: GestureDetector(
-                  onTap: () async {
-                    if (!(await InternetConnectionChecker().hasConnection)) {
-                      Fluttertoast.showToast(
-                          msg: "Please check your internet connection");
-                    } else {
-                      circP = true;
-                      tapToRefresh = false;
-                      setState(() {});
-                      getData();
-                    }
-                  },
-                  child: Container(
-                      color: Colors.white,
-                      width: double.infinity,
-                      height: double.infinity,
+            ? GestureDetector(
+                onTap: () async {
+                  if (!(await InternetConnectionChecker().hasConnection)) {
+                    Fluttertoast.showToast(
+                        msg: "Please check your internet connection");
+                  } else {
+                    circP = true;
+                    tapToRefresh = false;
+                    setState(() {});
+                    getData();
+                  }
+                },
+                child: Scaffold(
+                  body: Container(
                       child: Center(
                           child: Text(
-                        "Tap To Refresh",
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ))),
+                    "Tap To Refresh",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ))),
                 ),
               )
             : Scaffold(
@@ -224,7 +222,7 @@ class _EventScreenState extends State<EventScreen> {
                     ],
                   ),
                 ),
-                bottomNavigationBar: BottomNaviBar('event'),
+                // bottomNavigationBar: BottomNaviBar('event'),
               );
   }
 }

@@ -151,15 +151,15 @@ class _AdminSlotScreenState extends State<AdminSlotScreen> {
       if (pendingList.length == 0) {
         circP = false;
         emptyList = true;
-         tapToRefresh = false;
+        tapToRefresh = false;
         setState(() {});
       } else {
         circP = false;
-         tapToRefresh = false;
+        tapToRefresh = false;
         setState(() {});
       }
     } catch (e) {
-        circP = false;
+      circP = false;
       tapToRefresh = true;
       setState(() {});
       print(e);
@@ -181,135 +181,141 @@ class _AdminSlotScreenState extends State<AdminSlotScreen> {
                     child: CircularProgressIndicator(
                     color: Colors.blue,
                   ))
-                :tapToRefresh?GestureDetector(
-                      onTap: () async {
-                        if (!(await InternetConnectionChecker()
-                            .hasConnection)) {
-                          Fluttertoast.showToast(
-                              msg: "Please check your internet connection");
-                        } else {
-                          circP = true;
-                          tapToRefresh = false;
-                          setState(() {});
-                          getData();
-                        }
-                      },
-                      
-                      child: Container(
-                          color: Colors.white,
-                          width: double.infinity,
-                          height: double.infinity,
-                          child: Center(
-                              child: Text(
-                            "Tap To Refresh",
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ))),
-                    )
-                : RefreshIndicator(
-                  onRefresh: getData,
-                  child: Column(
-                      children: [
-                        SizedBox(height: size.height * 0.03),
-                        Row(
+                : tapToRefresh
+                    ? GestureDetector(
+                        onTap: () async {
+                          if (!(await InternetConnectionChecker()
+                              .hasConnection)) {
+                            Fluttertoast.showToast(
+                                msg: "Please check your internet connection");
+                          } else {
+                            circP = true;
+                            tapToRefresh = false;
+                            setState(() {});
+                            getData();
+                          }
+                        },
+                        child: Container(
+                            color: Colors.white,
+                            width: double.infinity,
+                            height: double.infinity,
+                            child: Center(
+                                child: Text(
+                              "Tap To Refresh",
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ))),
+                      )
+                    : RefreshIndicator(
+                        onRefresh: getData,
+                        child: Column(
                           children: [
-                            Spacer(),
-                            Container(
-                              width: size.width * 0.25,
-                              height: size.width * 0.15,
-                              child: TextFormField(
-                                  controller: slotNumberController,
-                                  decoration: InputDecoration(
-                                    focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(15),
-                                      borderSide: BorderSide(
-                                          color: Colors.purple, width: 1.5),
-                                    ),
-                                    enabledBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(10),
-                                      borderSide: BorderSide(
-                                          color: Colors.purple, width: 1.5),
-                                    ),
-                                    contentPadding: EdgeInsets.only(
-                                        left: 20), // add padding to adjust text
-                                    suffixIcon: Icon(
-                                      Icons.edit,
-                                      color: Colors.black,
-                                    ),
-                                  )),
-                            ),
-                            Spacer(
-                              flex: 5,
-                            ),
-                            FlutterSwitch(
-                              width: 70.0,
-                              height: 35.0,
-                              activeColor: Colors.red,
-                              inactiveColor: Colors.green,
-                              activeIcon: Icon(
-                                Icons.lock_outlined,
-                                size: 30,
-                                color: Colors.red,
-                              ),
-                              inactiveIcon: Icon(
-                                Icons.lock_outlined,
-                                size: 30,
-                                color: Colors.green,
-                              ),
-                              toggleSize: 25.0,
-                              value: toggleValue,
-                              borderRadius: 30.0,
-                              padding: 5.0,
-                              showOnOff: false,
-                              onToggle: (state) async {
-                                hasInternet = await InternetConnectionChecker()
-                                    .hasConnection;
-                                if (hasInternet) {
-                                  setState(() {
-                                    if (state) {
-                                      disbaleSlot();
+                            SizedBox(height: size.height * 0.03),
+                            Row(
+                              children: [
+                                Spacer(),
+                                Container(
+                                  width: size.width * 0.25,
+                                  height: size.width * 0.15,
+                                  child: TextFormField(
+                                      controller: slotNumberController,
+                                      decoration: InputDecoration(
+                                        focusedBorder: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(15),
+                                          borderSide: BorderSide(
+                                              color: Colors.purple, width: 1.5),
+                                        ),
+                                        enabledBorder: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                          borderSide: BorderSide(
+                                              color: Colors.purple, width: 1.5),
+                                        ),
+                                        contentPadding: EdgeInsets.only(
+                                            left:
+                                                20), // add padding to adjust text
+                                        suffixIcon: Icon(
+                                          Icons.edit,
+                                          color: Colors.black,
+                                        ),
+                                      )),
+                                ),
+                                Spacer(
+                                  flex: 5,
+                                ),
+                                FlutterSwitch(
+                                  width: 70.0,
+                                  height: 35.0,
+                                  activeColor: Colors.red,
+                                  inactiveColor: Colors.green,
+                                  activeIcon: Icon(
+                                    Icons.lock_outlined,
+                                    size: 30,
+                                    color: Colors.red,
+                                  ),
+                                  inactiveIcon: Icon(
+                                    Icons.lock_outlined,
+                                    size: 30,
+                                    color: Colors.green,
+                                  ),
+                                  toggleSize: 25.0,
+                                  value: toggleValue,
+                                  borderRadius: 30.0,
+                                  padding: 5.0,
+                                  showOnOff: false,
+                                  onToggle: (state) async {
+                                    hasInternet =
+                                        await InternetConnectionChecker()
+                                            .hasConnection;
+                                    if (hasInternet) {
+                                      setState(() {
+                                        if (state) {
+                                          disbaleSlot();
+                                          getData();
+                                        } else {
+                                          enableSlot();
+                                          getData();
+                                        }
+                                      });
                                     } else {
-                                      enableSlot();
+                                      Fluttertoast.showToast(
+                                          msg:
+                                              "Please check your internet connection");
                                     }
-                                  });
-                                } else {
-                                  Fluttertoast.showToast(
-                                      msg:
-                                          "Please check your internet connection");
-                                }
-                              },
+                                  },
+                                ),
+                                Spacer(),
+                              ],
                             ),
-                            Spacer(),
+                            SizedBox(height: size.height * 0.03),
+                            emptyList == true
+                                ? Center(
+                                    child: Text(
+                                    'No bookings',
+                                    style: TextStyle(fontSize: 20),
+                                  ))
+                                : Expanded(
+                                    child: ListView.builder(
+                                        physics: ScrollPhysics(),
+                                        shrinkWrap: true,
+                                        itemCount: pendingList.length,
+                                        itemBuilder: (context, index) {
+                                          return AdminSlotCard(
+                                            size: size,
+                                            bookingId: pendingList[index]
+                                                ['Booking_ID'],
+                                            studentName: pendingList[index]
+                                                ['Student_Name'],
+                                            snuId: pendingList[index]['SNU_ID'],
+                                          );
+                                        }),
+                                  ),
                           ],
                         ),
-                        SizedBox(height: size.height * 0.03),
-                        emptyList == true
-                            ? Center( 
-                                child: Text(
-                                'No bookings',
-                                style: TextStyle(fontSize: 20),
-                              ))
-                            : Expanded(
-                                child: ListView.builder(
-                                    physics: ScrollPhysics(),
-                                    shrinkWrap: true,
-                                    itemCount: pendingList.length,
-                                    itemBuilder: (context, index) {
-                                      return AdminSlotCard(
-                                        size: size,
-                                        bookingId: pendingList[index]
-                                            ['Booking_ID'],
-                                        studentName: pendingList[index]
-                                            ['Student_Name'],
-                                        snuId: pendingList[index]['SNU_ID'],
-                                      );
-                                    }),
-                              ),
-                      ],
-                    ),
-                ),
+                      ),
           ),
         ));
   }
