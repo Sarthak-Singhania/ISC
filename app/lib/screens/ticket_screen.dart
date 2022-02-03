@@ -375,31 +375,28 @@ class _TicketScreenState extends State<TicketScreen> {
             color: Colors.blue,
           )))
         : tapToRefresh
-            ? Scaffold(
-                body: GestureDetector(
-                  onTap: () async {
-                    if (!(await InternetConnectionChecker().hasConnection)) {
-                      Fluttertoast.showToast(
-                          msg: "Please check your internet connection");
-                    } else {
-                      circP = true;
-                      tapToRefresh = false;
-                      setState(() {});
-                      getData();
-                    }
-                  },
-                  child: Container(
-                      color: Colors.white,
-                      width: double.infinity,
-                      height: double.infinity,
+            ? GestureDetector(
+                onTap: () async {
+                  if (!(await InternetConnectionChecker().hasConnection)) {
+                    Fluttertoast.showToast(
+                        msg: "Please check your internet connection");
+                  } else {
+                    circP = true;
+                    tapToRefresh = false;
+                    setState(() {});
+                    getData();
+                  }
+                },
+                child: Scaffold(
+                  body: Container(
                       child: Center(
                           child: Text(
-                        "Tap To Refresh",
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ))),
+                    "Tap To Refresh",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ))),
                 ),
               )
             : Scaffold(

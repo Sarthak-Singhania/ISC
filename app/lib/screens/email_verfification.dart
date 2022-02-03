@@ -38,7 +38,8 @@ class _EmailVerificationState extends State<EmailVerification> {
     if (user.emailVerified) {
       timer.cancel();
       Fluttertoast.showToast(msg: "Registered Successfully");
-      Navigator.pushReplacementNamed(context, AppRoutes.bottomNavigationScreen);
+      Navigator.pushNamedAndRemoveUntil(
+          context, AppRoutes.bottomNavigationScreen, (route) => false);
     }
   }
 

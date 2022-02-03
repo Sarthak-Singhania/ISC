@@ -53,7 +53,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       Fluttertoast.showToast(msg: "Login Successful"),
                       // Navigator.pushReplacementNamed(
                       //     context, AppRoutes.eventScreen)
-                      Navigator.pushReplacementNamed(context,AppRoutes.bottomNavigationScreen),
+                      Navigator.pushNamedAndRemoveUntil(context, AppRoutes.bottomNavigationScreen, (route) => false)
                       
                     }
                   else

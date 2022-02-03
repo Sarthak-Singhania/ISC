@@ -77,33 +77,30 @@ class _NotificationScreenState extends State<NotificationScreen> {
                   child: CircularProgressIndicator(
                   color: Colors.blue,
                 ))
-          :tapToRefresh?GestureDetector(
-                      onTap: () async {
-                        if (!(await InternetConnectionChecker()
-                            .hasConnection)) {
-                          Fluttertoast.showToast(
-                              msg: "Please check your internet connection");
-                        } else {
-                          circP = true;
-                          tapToRefresh = false;
-                          setState(() {});
-                          getData();
-                        }
-                      },
-                      
-                      child: Container(
-                          color: Colors.white,
-                          width: double.infinity,
-                          height: double.infinity,
-                          child: Center(
-                              child: Text(
-                            "Tap To Refresh",
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ))),
-                    )
+          :tapToRefresh
+            ? GestureDetector(
+                onTap: () async {
+                  if (!(await InternetConnectionChecker().hasConnection)) {
+                    Fluttertoast.showToast(
+                        msg: "Please check your internet connection");
+                  } else {
+                    circP = true;
+                    tapToRefresh = false;
+                    setState(() {});
+                    getData();
+                  }
+                },
+                child:  Container(
+                      child: Center(
+                          child: Text(
+                    "Tap To Refresh",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ))),
+                
+              )
               : RefreshIndicator(
                 onRefresh: getData,
                 child: ListView.builder(
