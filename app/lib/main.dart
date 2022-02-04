@@ -6,7 +6,7 @@ import 'package:isc/components/bottom_navi_bar.dart';
 import 'package:isc/constants.dart';
 import 'package:isc/provider/theme_provider.dart';
 import 'package:isc/routes.dart';
-import 'package:isc/screens/admin_slot_screen.dart';
+import 'package:isc/screens/admin_detail_screen.dart';
 import 'package:isc/screens/booking_screen.dart';
 import 'package:isc/screens/detail_screen.dart';
 import 'package:isc/screens/email_verfification.dart';
@@ -17,7 +17,7 @@ import 'package:isc/screens/profile_screen.dart';
 import 'package:isc/screens/registration.dart';
 import 'package:isc/screens/setting_screen.dart';
 import 'package:isc/screens/ticket_screen.dart';
-import 'package:isc/screens/time_slot.dart';
+import 'package:isc/screens/admin_time_slot.dart';
 import 'package:isc/screens/user_time_slot.dart';
 import 'package:isc/screens/welcome_screen.dart';
 import 'package:provider/provider.dart';
@@ -88,7 +88,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               AppRoutes.registrationScreen: (context) => RegistrationScreen(),
               AppRoutes.eventScreen: (context) => EventScreen(),
               AppRoutes.adminTime: (context) => TimeSlot(),
-              AppRoutes.adminSlot: (context) => AdminSlotScreen(),
+              AppRoutes.adminDetail: (context) => AdminSlotScreen(),
               AppRoutes.studentTime: (context) => UserTimeSlot(),
               AppRoutes.studentDetail: (context) => DetailScreen(),
               AppRoutes.bookingsScreen: (context) => BookingScreen(),

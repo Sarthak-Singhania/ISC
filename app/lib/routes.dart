@@ -4,7 +4,7 @@ class AppRoutes {
   static const registrationScreen = 'registration_screen';
   static const eventScreen = 'event_page';
   static const adminTime = 'admin_time';
-  static const adminSlot = 'admin_screen';
+  static const adminDetail = 'admin_screen';
   static const studentTime = 'student_time';
   static const studentDetail = 'student_detail';
   static const profileScreen = 'profile_page';

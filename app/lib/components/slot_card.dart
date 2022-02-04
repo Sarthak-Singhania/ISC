@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:isc/routes.dart';
-import 'package:isc/screens/admin_slot_screen.dart';
+import 'package:isc/screens/admin_detail_screen.dart';
 import 'package:isc/screens/detail_screen.dart';
 import 'package:isc/user-info.dart';
 
 class SlotCard extends StatelessWidget {
   String slotTime;
   Color? color;
-  var slotAvailable;
 
-  SlotCard({required this.slotTime, required this.color,required this.slotAvailable});
+  SlotCard({required this.slotTime, required this.color});
 
-  static int maxSlot = 0;
+  //static int maxSlot = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -19,9 +18,8 @@ class SlotCard extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         StudentInfo.slotChoosen = slotTime;
-        maxSlot = slotAvailable;
         if (StudentInfo.isAdmin) {
-          Navigator.pushReplacementNamed(context, AppRoutes.adminSlot);
+          Navigator.pushReplacementNamed(context, AppRoutes.adminDetail);
         } else {
           Navigator.pushReplacementNamed(context, AppRoutes.studentDetail);
         }

@@ -8,7 +8,7 @@ import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:isc/provider/theme_provider.dart';
 import 'package:isc/routes.dart';
 
-import 'package:isc/screens/time_slot.dart';
+import 'package:isc/screens/admin_time_slot.dart';
 import 'package:http/http.dart' as http;
 import 'package:isc/user-info.dart';
 import 'package:provider/provider.dart';

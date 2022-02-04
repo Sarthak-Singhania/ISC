@@ -5,7 +5,7 @@ import 'package:flutter_switch/flutter_switch.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:internet_connection_checker/internet_connection_checker.dart';
-import 'package:isc/components/admin_slotcard.dart';
+import 'package:isc/components/admin_detail_card.dart';
 
 import 'package:isc/user-info.dart';
 // import 'package:switcher/core/switcher_size.dart';
@@ -23,7 +23,7 @@ class _AdminSlotScreenState extends State<AdminSlotScreen> {
   dynamic pendingList = [];
   bool emptyList = false;
   bool circP = true;
-  bool toggleValue = false;
+  late bool toggleValue;
   late bool hasInternet;
   late bool tapToRefresh;
 
@@ -147,7 +147,7 @@ class _AdminSlotScreenState extends State<AdminSlotScreen> {
       var jsonData = await jsonDecode(response.body);
       print(jsonData);
       pendingList = jsonData["message"];
-
+      toggleValue = !jsonData["isEnabled"];
       if (pendingList.length == 0) {
         circP = false;
         emptyList = true;
@@ -182,29 +182,29 @@ class _AdminSlotScreenState extends State<AdminSlotScreen> {
                     color: Colors.blue,
                   ))
                 : tapToRefresh
-            ? GestureDetector(
-                onTap: () async {
-                  if (!(await InternetConnectionChecker().hasConnection)) {
-                    Fluttertoast.showToast(
-                        msg: "Please check your internet connection");
-                  } else {
-                    circP = true;
-                    tapToRefresh = false;
-                    setState(() {});
-                    getData();
-                  }
-                },
-                child:  Container(
-                      child: Center(
-                          child: Text(
-                    "Tap To Refresh",
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ))),
-                
-              )
+                    ? GestureDetector(
+                        onTap: () async {
+                          if (!(await InternetConnectionChecker()
+                              .hasConnection)) {
+                            Fluttertoast.showToast(
+                                msg: "Please check your internet connection");
+                          } else {
+                            circP = true;
+                            tapToRefresh = false;
+                            setState(() {});
+                            getData();
+                          }
+                        },
+                        child: Container(
+                            child: Center(
+                                child: Text(
+                          "Tap To Refresh",
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ))),
+                      )
                     : RefreshIndicator(
                         onRefresh: getData,
                         child: Column(

@@ -152,39 +152,44 @@ class _TimeSlotState extends State<TimeSlot> {
     }
   }
 
-  void getData() async {
+  Future<void> getData() async {
     //print(JWTtoken);
-    response = await http.get(
-        Uri.parse(kIpAddress + '/slots' + '/' + StudentInfo.gameChoosen),
-        headers: {
-          "x-access-token": StudentInfo.jwtToken,
-          "admin-header": StudentInfo.isAdmin ? "yes" : "no"
-        });
-    jsonData = await jsonDecode(response!.body);
-    oldResponse = response;
+    try {
+      response = await http.get(
+          Uri.parse(kIpAddress + '/slots' + '?game=' + StudentInfo.gameChoosen),
+          headers: {
+            "x-access-token": StudentInfo.jwtToken,
+            "admin-header": "yes"
+          });
+      jsonData = await jsonDecode(response!.body);
+      print(jsonData);
+    } catch (e) {
+      print(e);
+    }
+    // oldResponse = response;
   }
 
   Future<void> getSlot(String day) async {
     print(jsonData);
     print("game name=" + gameChoosen);
     sport = jsonData[gameChoosen][day];
+    isDisabled = jsonData['isEnabled'][day];
     print(response!.statusCode);
     print(sport);
     slotAvailable.clear();
-    bool isAllSlotZero = true;
+    // bool isAllSlotZero = true;
     sport.forEach((k, v) {
       slotAvailable.add(k);
-      if (v > 0) {
-        isAllSlotZero = false;
-      }
     });
 
-    if (isAllSlotZero) {
-      isDisabled = false;
-    } else {
-      isDisabled = true;
-    }
-    setState(() {});
+    // if (isAllSlotZero) {
+    //   isDisabled = false;
+    // } else {
+    //   isDisabled = true;
+    // }
+    setState(() {
+      print('setState called');
+    });
   }
 
   selectDate(context) async {
@@ -272,11 +277,9 @@ class _TimeSlotState extends State<TimeSlot> {
                               await enableSlot();
                               isDisabled = true;
                             }
-                            getData();
-
+                            await getData();
                             print("latest");
-                            print(jsonData);
-                            getSlot(weekDays[selectedDate!.weekday - 1]);
+                            await getSlot(weekDays[selectedDate!.weekday - 1]);
                           }
                         },
                         child: Container(
@@ -315,7 +318,7 @@ class _TimeSlotState extends State<TimeSlot> {
                             ? theme.checkTheme(
                                 Colors.green, Colors.green.shade600, context)
                             : Colors.grey,
-                        slotAvailable: sport[slotAvailable[index]]);
+                        );
                   }),
             )
           ],

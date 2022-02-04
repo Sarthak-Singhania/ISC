@@ -1,10 +1,12 @@
+import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:isc/components/roundedbutton.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:isc/components/slot_card.dart';
-
+import 'package:http/http.dart' as http;
 import '../constants.dart';
+import '../user-info.dart';
 
 class UserTimeSlot extends StatefulWidget {
   const UserTimeSlot({Key? key}) : super(key: key);
@@ -13,27 +15,15 @@ class UserTimeSlot extends StatefulWidget {
   _UserTimeSlotState createState() => _UserTimeSlotState();
 }
 
-final timeSlots = [
-  '1:00-3:00',
-  '2:00-3:00',
-  '2:00-3:00',
-  '2:00-3:00',
-  '2:00-3:00',
-  '2:00-3:00'
-];
-var detail = {
-  'M': false,
-  'T': false,
-  'W': false,
-  'Th': false,
-  'F': false,
-  'St': false,
-  'S': false,
+var intials = {
+  'Monday': 'M',
+  'Tuesday': 'T',
+  'Wednesday': 'W',
+  'Thursday': 'Th',
+  'Friday': 'F',
+  'Saturday': 'St',
+  'Sunday': 'S',
 };
-var list1 = ['M', 'W', 'F', 'T', 'Th', 'St', 'S'];
-var list2 = ['M', 'W', 'F', 'T', 'Th', 'St', 'S'];
-var selected = [];
-
 void showInfo(BuildContext context) {
   showDialog(
       context: context,
@@ -65,6 +55,90 @@ void showInfo(BuildContext context) {
 }
 
 class _UserTimeSlotState extends State<UserTimeSlot> {
+  final timeSlots = [
+    '1:00-3:00',
+    '2:00-3:00',
+    '2:00-3:00',
+    '2:00-3:00',
+    '2:00-3:00',
+    '2:00-3:00'
+  ];
+  var daysAvailable = {}; //API
+
+  var isDaySelected = {
+    'Monday': false,
+    'Tuesday': false,
+    'Wednesday': false,
+    'Thursday': false,
+    'Friday': false,
+    'Saturday': false,
+    'Sunday': false,
+  };
+  var daySelected = [];
+  int maxDaysAllowed = 7;
+  final slotAvailable = [];
+  bool circP = true;
+  bool secondCircp = false;
+  @override
+  void initState() {
+    super.initState();
+    getData();
+  }
+
+  Future<void> getData() async {
+    //print(JWTtoken);
+    try {
+      final response = await http.get(
+          Uri.parse(kIpAddress +
+              "/slots" +
+              "?game=${StudentInfo.gameChoosen}" +
+              "&pos=1"),
+          headers: {
+            "x-access-token": StudentInfo.jwtToken,
+            "admin-header": "no"
+          });
+      final jsonData = await jsonDecode(response.body);
+      daysAvailable = jsonData["isEnabled"];
+      maxDaysAllowed = jsonData["max_days"];
+      print(jsonData);
+      circP = false;
+      setState(() {});
+    } catch (e) {
+      print(e);
+      circP = false;
+      setState(() {});
+    }
+    // oldResponse = response;
+  }
+
+  Future<void> getSlot() async {
+    // print(selected.toString());
+    StudentInfo.dayChoosen = daySelected;
+    try {
+      final response = await http.get(
+          Uri.parse(kIpAddress +
+              "/slots" +
+              "?game=${StudentInfo.gameChoosen}" +
+              "&pos=2" +
+              "&days=${daySelected.toString()}"),
+          headers: {
+            "x-access-token": StudentInfo.jwtToken,
+            "admin-header": "no"
+          });
+      final jsonData = await jsonDecode(response.body);
+      final sport = jsonData[StudentInfo.gameChoosen][daySelected[0]];
+      StudentInfo.gameData = jsonData[StudentInfo.gameChoosen];
+      sport.forEach((k, v) {
+        slotAvailable.add(k);
+      });
+      print(jsonData);
+      secondCircp = false;
+      setState(() {});
+    } catch (e) {
+      print(e);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
@@ -86,102 +160,115 @@ class _UserTimeSlotState extends State<UserTimeSlot> {
         ],
       ),
       body: Center(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Container(
-                height: size.height * 0.22,
-                child: Column(
-                  children: [
-                    Spacer(),
-                    Text(
-                      'Please select your days',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    Spacer(),
-                    Container(
-                      // width: size.width * 1,
-                      height: size.height * 0.1,
-                      child: Center(
-                        child: ListView.builder(
-                            shrinkWrap: true,
-                            scrollDirection: Axis.horizontal,
-                            itemCount: detail.length,
-                            itemBuilder: (context, index) {
-                              return Weekday(
-                                  weekday: detail.keys.elementAt(index),
-                                  isSelected: detail.values.elementAt(index),
-                                  func: () {
-                                    setState(() {}); //PASSING SET STATE
-                                  });
-                            }),
+        child: Stack(children: [
+         !circP? Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Container(
+                  height: size.height * 0.22,
+                  child: Column(
+                    children: [
+                      Spacer(),
+                      Text(
+                        'Please select your days',
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
                       ),
-                    ),
-                    Spacer(),
-                    Container(
-                      width: size.width * 0.5,
-                      height: size.height * 0.05,
-                      decoration: BoxDecoration(
-                          color: kPrimaryColor,
-                          borderRadius: BorderRadius.circular(10)),
-                      child: Center(
-                        child: Text(
-                          'Show Results',
-                          style: TextStyle(color: Colors.white, fontSize: 20),
+                      Spacer(),
+                      Container(
+                        // width: size.width * 1,
+                        height: size.height * 0.1,
+                        child: Center(
+                          child: ListView.builder(
+                              shrinkWrap: true,
+                              scrollDirection: Axis.horizontal,
+                              itemCount: daysAvailable.length,
+                              itemBuilder: (context, index) {
+                                return Weekday(
+                                  weekday: daysAvailable.keys.elementAt(index),
+                                  isEnabled:
+                                      daysAvailable.values.elementAt(index),
+                                  func: () {
+                                    setState(() {});
+                                  },
+                                  isDaySelected: isDaySelected,
+                                  maxDaysAllowed: maxDaysAllowed,
+                                  daySelected: daySelected,
+                                );
+                              }),
                         ),
                       ),
-                    )
-                  ],
+                      Spacer(),
+                      GestureDetector(
+                        onTap: () async {
+                          if (daySelected.length > 0) {
+                            secondCircp = true;
+                            setState(() {});
+                            await getSlot();
+                          } else {
+                            Fluttertoast.showToast(
+                                msg: "Please select atleast one day");
+                          }
+                        },
+                        child: Container(
+                          width: size.width * 0.5,
+                          height: size.height * 0.05,
+                          decoration: BoxDecoration(
+                              color: kPrimaryColor,
+                              borderRadius: BorderRadius.circular(10)),
+                          child: Center(
+                            child: Text(
+                              'Show Results',
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 20),
+                            ),
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
                 ),
               ),
-            ),
-            Expanded(
-              child: Container(
-                  // margin: EdgeInsets.only(top: size.height * 0.05),
-                  child: Column(
-                children: [
-                  // Row(
-                  //   children: [
-                  //     Spacer(flex: 1),
-                  //     Icon(Icons.arrow_left_outlined),
-                  //     Spacer(flex: 1),
-                  //     Text("Monday", style: TextStyle(fontSize: 20)),
-                  //     Spacer(flex: 1),
-                  //     Icon(Icons.arrow_right_outlined),
-                  //     Spacer(flex: 1),
-                  //   ],
-                  // ),
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: timeSlots.length,
-                      itemBuilder: (context, index) {
-                        return SlotCard(
-                          slotTime: timeSlots[index],
-                          color: Colors.green,
-                          slotAvailable: 20,
-                        );
-                      },
+              Expanded(
+                child: Container(
+                    // margin: EdgeInsets.only(top: size.height * 0.05),
+                    child: Column(
+                  children: [
+                    // Row(
+                    //   children: [
+                    //     Spacer(flex: 1),
+                    //     Icon(Icons.arrow_left_outlined),
+                    //     Spacer(flex: 1),
+                    //     Text("Monday", style: TextStyle(fontSize: 20)),
+                    //     Spacer(flex: 1),
+                    //     Icon(Icons.arrow_right_outlined),
+                    //     Spacer(flex: 1),
+                    //   ],
+                    // ),
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: slotAvailable.length,
+                        itemBuilder: (context, index) {
+                          return SlotCard(
+                            slotTime: slotAvailable[index],
+                            color: Colors.green,
+                          );
+                        },
+                      ),
                     ),
-                  ),
-                  // Container(
-                  //   width: size.width * 0.8,
-                  //   height: size.height * 0.07,
-                  //   child: Center(
-                  //     child: Text("Confirm",
-                  //         style:
-                  //             TextStyle(color: Colors.white, fontSize: 20)),
-                  //   ),
-                  //   decoration: BoxDecoration(
-                  //       color: kPrimaryColor,
-                  //       borderRadius: BorderRadius.circular(20)),
-                  // ),
-                ],
-              )),
-            )
-          ],
-        ),
+                  ],
+                )),
+              )
+            ],
+          ):Container(),
+          circP ||secondCircp
+              ? Center(
+                  child: CircularProgressIndicator(
+                  color: Colors.blue,
+                ))
+              : Container()
+        ]),
       ),
     );
   }
@@ -191,45 +278,50 @@ class Weekday extends StatelessWidget {
   const Weekday({
     Key? key,
     required this.weekday,
-    required this.isSelected,
+    required this.isEnabled,
     required this.func,
+    required this.daySelected,
+    required this.maxDaysAllowed,
+    required this.isDaySelected,
   }) : super(key: key);
   final weekday;
-  final bool isSelected;
+  final bool isEnabled;
   final Function func;
+  final daySelected;
+  final maxDaysAllowed;
+  final isDaySelected;
   // final List selected;
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        func();
-        if (!detail[weekday]!) {
-          if (selected.length == 0) {
-            selected.insert(0, weekday);
-            detail[weekday] = true;
+        if (isEnabled) {
+          if (daySelected.contains(weekday)) {
+            isDaySelected[weekday] = false;
+            daySelected.remove(weekday);
           } else {
-            var alreadySelectedDay = selected[0];
-            if (list1.contains(alreadySelectedDay) && list1.contains(weekday)) {
-              selected.insert(0, weekday);
-              detail[weekday] = true;
-            } else if (list2.contains(alreadySelectedDay) &&
-                list2.contains(weekday)) {
-              selected.insert(0, weekday);
-              detail[weekday] = true;
+            if (daySelected.length < maxDaysAllowed) {
+              isDaySelected[weekday] = true;
+              daySelected.insert(0, weekday);
+            } else {
+              Fluttertoast.showToast(
+                  msg: "You cannot select more than $maxDaysAllowed days");
             }
           }
-        } else {
-          detail[weekday] = false;
-          selected.remove(weekday);
+          func();
         }
       },
       child: Container(
         margin: EdgeInsets.all(5),
         child: CircleAvatar(
           radius: 20,
-          backgroundColor: isSelected ? Colors.green : Colors.purple,
+          backgroundColor: !isEnabled
+              ? Colors.grey
+              : isDaySelected[weekday]!
+                  ? Colors.green
+                  : Colors.purple,
           child: Text(
-            weekday,
+            intials[weekday] ?? " ",
             style: TextStyle(color: Colors.white, fontSize: 20),
           ),
         ),

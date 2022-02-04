@@ -14,7 +14,7 @@ import 'package:isc/user-info.dart';
 import 'booking_screen.dart';
 
 import 'package:http/http.dart' as http;
-import 'time_slot.dart';
+import 'admin_time_slot.dart';
 
 class DetailScreen extends StatefulWidget {
   @override
@@ -32,22 +32,23 @@ class _DetailScreenState extends State<DetailScreen> {
   int? maxLength;
   dynamic rollNo;
   String date = '';
-  List<TextEditingController> _controller =
-      List.generate(6, (i) => TextEditingController());
+  List<TextEditingController> _controller = List.generate(
+      8,
+      (i) =>
+          TextEditingController()); //TODO: dynamica krna acooridng to sum of max slots allowed
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     getData();
-    print(SlotCard.maxSlot);
   }
 
   void postData() async {
     String JWTtoken = StudentInfo.jwtToken;
     Map<String, dynamic> mp = {};
     mp.putIfAbsent(firstNameController!.text, () => currEmail);
-    for (var i = 0; i < (length * 2) - 2; i = i + 2) {
+    for (var i = 0; i < (length * 2); i = i + 2) {
       mp.putIfAbsent(_controller[i].text, () => _controller[i + 1].text);
     }
 
@@ -79,34 +80,8 @@ class _DetailScreenState extends State<DetailScreen> {
       setState(() {});
       if (jsonData['status'] == 'confirmed') {
         Fluttertoast.showToast(msg: "YOUR DETAILS HAS BEEN SUBMITTED ");
-        Future.delayed(Duration(milliseconds: 2000), () {
-        });
+        Future.delayed(Duration(milliseconds: 2000), () {});
         Navigator.pushReplacementNamed(context, AppRoutes.bookingsScreen);
-        // showDialog(
-        //     context: context,
-        //     builder: (context) {
-        //       return AlertDialog(
-        //         content: Text('Do you want to book more slots this sport?'),
-        //         actions: [
-        //           TextButton(
-        //             onPressed: () {
-        //               Navigator.of(context).pop();
-        //               Navigator.pushReplacementNamed(
-        //                   context, AppRoutes.bookingsScreen);
-        //             },
-        //             child: Text('No'),
-        //           ),
-        //           TextButton(
-        //             onPressed: () {
-        //               Navigator.of(context).pop();
-        //               Navigator.pushReplacementNamed(
-        //                   context, AppRoutes.studentTime);
-        //             },
-        //             child: Text('Yes'),
-        //           ),
-        //         ],
-        //       );
-        //     });
       } else if (jsonData['status'] == 'duplicate') {
         Fluttertoast.showToast(msg: "YOU HAVE ALREADY A BOOKING FOR THIS GAME");
       } else {
@@ -127,7 +102,10 @@ class _DetailScreenState extends State<DetailScreen> {
 
   void getData() async {
     var response = await http.get(Uri.parse(kIpAddress + '/max-person'));
-
+    print(StudentInfo.dayChoosen);
+    for (var item in StudentInfo.dayChoosen) {
+      print(StudentInfo.gameData[item][StudentInfo.slotChoosen]);
+    }
     currEmail = StudentInfo.emailId;
     firstName = StudentInfo.name;
 
@@ -141,8 +119,8 @@ class _DetailScreenState extends State<DetailScreen> {
   }
 
   final sNames = [
-    // 'First Student Name',
-    // 'SNU ID',
+    'First Student Name',
+    'SNU ID',
     'Second Student Name',
     'SNU ID',
     'Third Student Name',
@@ -181,7 +159,8 @@ class _DetailScreenState extends State<DetailScreen> {
           title: Text('Please fill in your details'),
           leading: GestureDetector(
               onTap: () {
-                if (length == SlotCard.maxSlot) {
+                if (length == 4) {
+                  //change this
                   Fluttertoast.showToast(msg: "No more slots available");
                 } else if (length == maxLength) {
                   Fluttertoast.showToast(
@@ -198,55 +177,11 @@ class _DetailScreenState extends State<DetailScreen> {
         body: Stack(children: [
           ListView(
             children: [
-              Container(
-                margin: EdgeInsets.all(10),
-                child: TextFormField(
-                  readOnly: true,
-                  controller: firstNameController,
-                  decoration: InputDecoration(
-                    labelText: 'First Student Name',
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15),
-                      borderSide:
-                          BorderSide(color: Colors.greenAccent, width: 5.0),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: Colors.blue, width: 3.0),
-                    ),
-                  ),
-                  onSaved: (value) {
-                    firstNameController!.text = value!;
-                  },
-                ),
-              ),
-              Container(
-                margin: EdgeInsets.all(10),
-                child: TextFormField(
-                  readOnly: true,
-                  controller: firstEmailController,
-                  decoration: InputDecoration(
-                    labelText: 'SNU ID',
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15),
-                      borderSide:
-                          BorderSide(color: Colors.greenAccent, width: 5.0),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: Colors.blue, width: 3.0),
-                    ),
-                  ),
-                  // onSaved: (value) {
-                  //   firstName.text = value!;
-                  // },
-                ),
-              ),
               Form(
                 key: _formKey,
                 child: ListView.builder(
                     shrinkWrap: true,
-                    itemCount: (length * 2) - 2,
+                    itemCount: (length * 2),
                     itemBuilder: (context, index) {
                       return StudentDetail(
                           title: sNames[index],
