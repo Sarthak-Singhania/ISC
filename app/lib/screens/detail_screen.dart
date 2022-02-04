@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -28,14 +29,19 @@ class _DetailScreenState extends State<DetailScreen> {
   bool circP = true;
   TextEditingController? firstEmailController;
   String currEmail = '';
-  int length = 1;
-  int? maxLength;
+  late int maxLength;
   dynamic rollNo;
   String date = '';
-  List<TextEditingController> _controller = List.generate(
-      8,
-      (i) =>
-          TextEditingController()); //TODO: dynamica krna acooridng to sum of max slots allowed
+  var _controller = List.generate(StudentInfo.dayChoosen.length,
+      (i) => List.generate(8, (j) => TextEditingController()),
+      growable: false);
+  var length = List<int>.filled(StudentInfo.dayChoosen.length, 1);
+  var slotsRemaining = List<int>.filled(StudentInfo.dayChoosen.length, 0);
+  var downArrow = List<bool>.filled(StudentInfo.dayChoosen.length, true);
+  // List<TextEditingController> _controller = List.generate(
+  //     8,
+  //     (i) =>
+  //         TextEditingController()); //TODO: dynamica krna acooridng to sum of max slots allowed
 
   @override
   void initState() {
@@ -45,66 +51,75 @@ class _DetailScreenState extends State<DetailScreen> {
   }
 
   void postData() async {
-    String JWTtoken = StudentInfo.jwtToken;
-    Map<String, dynamic> mp = {};
-    mp.putIfAbsent(firstNameController!.text, () => currEmail);
-    for (var i = 0; i < (length * 2); i = i + 2) {
-      mp.putIfAbsent(_controller[i].text, () => _controller[i + 1].text);
+    for (var i = 0; i < length.length; i++) {
+      for (var j = 0; j < length[j] * 2; j++) {
+        print(_controller[i][j].text);
+        print(_controller[i][j + 1].text);
+      }
     }
 
-    var body = jsonEncode({
-      "sports_name": StudentInfo.gameChoosen,
-      "date": StudentInfo.dateChoosen,
-      "slot": StudentInfo.slotChoosen,
-      "student_details": mp,
-    });
+    // String JWTtoken = StudentInfo.jwtToken;
+    // Map<String, dynamic> mp = {};
+    // mp.putIfAbsent(firstNameController!.text, () => currEmail);
+    // for (var i = 0; i < (length * 2); i = i + 2) {
+    //   mp.putIfAbsent(_controller[i].text, () => _controller[i + 1].text);
+    // }
 
-    print(body);
-    try {
-      final response = await http.post(
-        Uri.parse(kIpAddress + '/book'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': '*/*',
-          'Accept-Encoding': 'gzip, deflate, br',
-          'Access-Control-Allow-Origin': ' *',
-          "x-access-token": JWTtoken,
-        },
-        body: body,
-      );
-      print("Hello ${response.statusCode}");
-      Map jsonData = await jsonDecode(response.body);
-      print("details");
-      print(jsonData);
-      circP = false;
-      setState(() {});
-      if (jsonData['status'] == 'confirmed') {
-        Fluttertoast.showToast(msg: "YOUR DETAILS HAS BEEN SUBMITTED ");
-        Future.delayed(Duration(milliseconds: 2000), () {});
-        Navigator.pushReplacementNamed(context, AppRoutes.bookingsScreen);
-      } else if (jsonData['status'] == 'duplicate') {
-        Fluttertoast.showToast(msg: "YOU HAVE ALREADY A BOOKING FOR THIS GAME");
-      } else {
-        Fluttertoast.showToast(msg: "YOU HAVE BEEN BLACKLISTED FOR THIS GAME");
-      }
-    } catch (e) {
-      circP = false;
-      bool hasInternet = await InternetConnectionChecker().hasConnection;
-      if (!hasInternet) {
-        Fluttertoast.showToast(msg: "Please check your internet connection");
-      } else {
-        Fluttertoast.showToast(msg: "Something went wrong.Please retry;");
-      }
-      print(e);
-      setState(() {});
-    }
+    // var body = jsonEncode({
+    //   "sports_name": StudentInfo.gameChoosen,
+    //   "date": StudentInfo.dateChoosen,
+    //   "slot": StudentInfo.slotChoosen,
+    //   "student_details": mp,
+    // });
+
+    // print(body);
+    // try {
+    //   final response = await http.post(
+    //     Uri.parse(kIpAddress + '/book'),
+    //     headers: {
+    //       'Content-Type': 'application/json',
+    //       'Accept': '*/*',
+    //       'Accept-Encoding': 'gzip, deflate, br',
+    //       'Access-Control-Allow-Origin': ' *',
+    //       "x-access-token": JWTtoken,
+    //     },
+    //     body: body,
+    //   );
+    //   print("Hello ${response.statusCode}");
+    //   Map jsonData = await jsonDecode(response.body);
+    //   print("details");
+    //   print(jsonData);
+    //   circP = false;
+    //   setState(() {});
+    //   if (jsonData['status'] == 'confirmed') {
+    //     Fluttertoast.showToast(msg: "YOUR DETAILS HAS BEEN SUBMITTED ");
+    //     Future.delayed(Duration(milliseconds: 2000), () {});
+    //     Navigator.pushReplacementNamed(context, AppRoutes.bookingsScreen);
+    //   } else if (jsonData['status'] == 'duplicate') {
+    //     Fluttertoast.showToast(msg: "YOU HAVE ALREADY A BOOKING FOR THIS GAME");
+    //   } else {
+    //     Fluttertoast.showToast(msg: "YOU HAVE BEEN BLACKLISTED FOR THIS GAME");
+    //   }
+    // } catch (e) {
+    //   circP = false;
+    //   bool hasInternet = await InternetConnectionChecker().hasConnection;
+    //   if (!hasInternet) {
+    //     Fluttertoast.showToast(msg: "Please check your internet connection");
+    //   } else {
+    //     Fluttertoast.showToast(msg: "Something went wrong.Please retry;");
+    //   }
+    //   print(e);
+    //   setState(() {});
+    // }
   }
 
   void getData() async {
     var response = await http.get(Uri.parse(kIpAddress + '/max-person'));
     print(StudentInfo.dayChoosen);
+    int i = 0;
     for (var item in StudentInfo.dayChoosen) {
-      print(StudentInfo.gameData[item][StudentInfo.slotChoosen]);
+      slotsRemaining[i] = StudentInfo.gameData[item][StudentInfo.slotChoosen];
+      i++;
     }
     currEmail = StudentInfo.emailId;
     firstName = StudentInfo.name;
@@ -129,79 +144,143 @@ class _DetailScreenState extends State<DetailScreen> {
     'SNU ID'
   ];
 
-  String? valueChoose;
-
-  String username = '';
-
   @override
   Widget build(BuildContext context) {
     print(currEmail);
     Size size = MediaQuery.of(context).size;
     return Scaffold(
         appBar: AppBar(
-          actions: [
-            Padding(
-              padding: const EdgeInsets.only(right: 8.0),
-              child: GestureDetector(
-                  onTap: () {
-                    if (length == 1) {
-                      Fluttertoast.showToast(
-                          msg:
-                              "Atleast one student credentials should be there");
-                    } else {
-                      length--;
-                    }
-                    setState(() {});
-                  },
-                  child: Icon(Icons.remove)),
-            ),
-          ],
           title: Text('Please fill in your details'),
-          leading: GestureDetector(
-              onTap: () {
-                if (length == 4) {
-                  //change this
-                  Fluttertoast.showToast(msg: "No more slots available");
-                } else if (length == maxLength) {
-                  Fluttertoast.showToast(
-                      msg: "You have reached maximum no. of people");
-                } else {
-                  length++;
-                }
-
-                setState(() {});
-              },
-              child: Icon(Icons.add)),
           centerTitle: true,
         ),
         body: Stack(children: [
-          ListView(
-            children: [
-              Form(
-                key: _formKey,
-                child: ListView.builder(
+          SingleChildScrollView(
+            child: Column(
+              children: [
+                SizedBox(
+                  height: size.height * 0.01,
+                ),
+                Form(
+                  key: _formKey,
+                  child: ListView.builder(
+                    physics: NeverScrollableScrollPhysics(),
                     shrinkWrap: true,
-                    itemCount: (length * 2),
-                    itemBuilder: (context, index) {
-                      return StudentDetail(
-                          title: sNames[index],
-                          controller: _controller[index],
-                          index: index);
-                    }),
-              ),
-              RoundedButton(
-                  s: 'SUBMIT',
-                  color: Colors.green,
-                  tcolor: Colors.white,
-                  size: size * 0.7,
-                  func: () {
+                    itemCount: (StudentInfo.dayChoosen.length),
+                    itemBuilder: (context, i) {
+                      return Column(
+                        children: [
+                          Row(
+                            children: [
+                              SizedBox(
+                                width: size.width * 0.02,
+                              ),
+                              IconButton(
+                                  onPressed: () {
+                                    downArrow[i] = !downArrow[i];
+                                    setState(() {});
+                                  },
+                                  icon: Icon(
+                                    downArrow[i]
+                                        ? Icons.keyboard_arrow_down
+                                        : Icons.keyboard_arrow_right,
+                                    size: 30,
+                                  )),
+                              SizedBox(
+                                width: size.width * 0.03,
+                              ),
+                              Text(
+                                StudentInfo.dayChoosen[i],
+                                style: TextStyle(
+                                    fontSize: 20, fontWeight: FontWeight.bold),
+                              ),
+                              Spacer(),
+                              IconButton(
+                                  onPressed: () {
+                                    if (length == slotsRemaining[i]) {
+                                      Fluttertoast.showToast(
+                                          msg:
+                                              "Sorry no more slots are available");
+                                    } else if (length == maxLength) {
+                                      Fluttertoast.showToast(
+                                          msg:
+                                              "Sorry you cannot book more than $length slots for this game");
+                                    } else {
+                                      length[i]++;
+                                      setState(() {});
+                                    }
+                                  },
+                                  icon: Icon(
+                                    Icons.add,
+                                    size: 30,
+                                  )),
+                              SizedBox(
+                                width: size.width * 0.08,
+                              ),
+                              IconButton(
+                                  onPressed: () {
+                                    if (length[i] == 1) {
+                                      Fluttertoast.showToast(
+                                          msg:
+                                              "Minimum 1 student credetials should be there");
+                                    } else {
+                                      length[i]--;
+                                      setState(() {});
+                                    }
+                                  },
+                                  icon: Icon(
+                                    Icons.remove,
+                                    size: 30,
+                                  )),
+                              SizedBox(
+                                width: size.width * 0.05,
+                              ),
+                            ],
+                          ),
+                          downArrow[i]
+                              ? ListView.builder(
+                                  shrinkWrap: true,
+                                  physics: NeverScrollableScrollPhysics(),
+                                  itemCount: (length[i]) * 2,
+                                  itemBuilder: (context, j) {
+                                    return StudentDetail(
+                                        title: sNames[j],
+                                        controller: _controller[i][j],
+                                        index: j);
+                                  })
+                              : Container(),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+                SizedBox(
+                  height: size.height * 0.03,
+                ),
+                GestureDetector(
+                  onTap: () {
                     if (_formKey.currentState!.validate()) {
-                      circP = true;
-                      setState(() {});
                       postData();
                     }
-                  })
-            ],
+                  },
+                  child: Container(
+                    width: size.width * 0.9,
+                    height: size.height * 0.05,
+                    decoration: BoxDecoration(
+                        color: Colors.purple,
+                        borderRadius: BorderRadius.circular(10)),
+                    child: Center(
+                      child: Text(
+                        "SUBMIT",
+                        style: TextStyle(color: Colors.white, fontSize: 20),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: size.height * 0.01,
+                ),
+              ],
+            ),
           ),
           circP == true
               ? Center(

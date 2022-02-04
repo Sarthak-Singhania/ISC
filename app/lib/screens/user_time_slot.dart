@@ -113,6 +113,7 @@ class _UserTimeSlotState extends State<UserTimeSlot> {
 
   Future<void> getSlot() async {
     // print(selected.toString());
+    slotAvailable.clear();
     StudentInfo.dayChoosen = daySelected;
     try {
       final response = await http.get(
@@ -161,108 +162,111 @@ class _UserTimeSlotState extends State<UserTimeSlot> {
       ),
       body: Center(
         child: Stack(children: [
-         !circP? Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
-                  height: size.height * 0.22,
-                  child: Column(
-                    children: [
-                      Spacer(),
-                      Text(
-                        'Please select your days',
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                      Spacer(),
-                      Container(
-                        // width: size.width * 1,
-                        height: size.height * 0.1,
-                        child: Center(
-                          child: ListView.builder(
-                              shrinkWrap: true,
-                              scrollDirection: Axis.horizontal,
-                              itemCount: daysAvailable.length,
-                              itemBuilder: (context, index) {
-                                return Weekday(
-                                  weekday: daysAvailable.keys.elementAt(index),
-                                  isEnabled:
-                                      daysAvailable.values.elementAt(index),
-                                  func: () {
-                                    setState(() {});
-                                  },
-                                  isDaySelected: isDaySelected,
-                                  maxDaysAllowed: maxDaysAllowed,
-                                  daySelected: daySelected,
-                                );
-                              }),
-                        ),
-                      ),
-                      Spacer(),
-                      GestureDetector(
-                        onTap: () async {
-                          if (daySelected.length > 0) {
-                            secondCircp = true;
-                            setState(() {});
-                            await getSlot();
-                          } else {
-                            Fluttertoast.showToast(
-                                msg: "Please select atleast one day");
-                          }
-                        },
-                        child: Container(
-                          width: size.width * 0.5,
-                          height: size.height * 0.05,
-                          decoration: BoxDecoration(
-                              color: kPrimaryColor,
-                              borderRadius: BorderRadius.circular(10)),
-                          child: Center(
-                            child: Text(
-                              'Show Results',
-                              style:
-                                  TextStyle(color: Colors.white, fontSize: 20),
-                            ),
-                          ),
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-              ),
-              Expanded(
-                child: Container(
-                    // margin: EdgeInsets.only(top: size.height * 0.05),
-                    child: Column(
+          !circP
+              ? Column(
                   children: [
-                    // Row(
-                    //   children: [
-                    //     Spacer(flex: 1),
-                    //     Icon(Icons.arrow_left_outlined),
-                    //     Spacer(flex: 1),
-                    //     Text("Monday", style: TextStyle(fontSize: 20)),
-                    //     Spacer(flex: 1),
-                    //     Icon(Icons.arrow_right_outlined),
-                    //     Spacer(flex: 1),
-                    //   ],
-                    // ),
-                    Expanded(
-                      child: ListView.builder(
-                        itemCount: slotAvailable.length,
-                        itemBuilder: (context, index) {
-                          return SlotCard(
-                            slotTime: slotAvailable[index],
-                            color: Colors.green,
-                          );
-                        },
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Container(
+                        height: size.height * 0.22,
+                        child: Column(
+                          children: [
+                            Spacer(),
+                            Text(
+                              'Please select your days',
+                              style: TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.bold),
+                            ),
+                            Spacer(),
+                            Container(
+                              // width: size.width * 1,
+                              height: size.height * 0.1,
+                              child: Center(
+                                child: ListView.builder(
+                                    shrinkWrap: true,
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount: daysAvailable.length,
+                                    itemBuilder: (context, index) {
+                                      return Weekday(
+                                        weekday:
+                                            daysAvailable.keys.elementAt(index),
+                                        isEnabled: daysAvailable.values
+                                            .elementAt(index),
+                                        func: () {
+                                          setState(() {});
+                                        },
+                                        isDaySelected: isDaySelected,
+                                        maxDaysAllowed: maxDaysAllowed,
+                                        daySelected: daySelected,
+                                      );
+                                    }),
+                              ),
+                            ),
+                            Spacer(),
+                            GestureDetector(
+                              onTap: () async {
+                                if (daySelected.length > 0) {
+                                  secondCircp = true;
+                                  setState(() {});
+                                  await getSlot();
+                                } else {
+                                  Fluttertoast.showToast(
+                                      msg: "Please select atleast one day");
+                                }
+                              },
+                              child: Container(
+                                width: size.width * 0.5,
+                                height: size.height * 0.05,
+                                decoration: BoxDecoration(
+                                    color: kPrimaryColor,
+                                    borderRadius: BorderRadius.circular(10)),
+                                child: Center(
+                                  child: Text(
+                                    'Show Results',
+                                    style: TextStyle(
+                                        color: Colors.white, fontSize: 20),
+                                  ),
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
                       ),
                     ),
+                    Expanded(
+                      child: Container(
+                          // margin: EdgeInsets.only(top: size.height * 0.05),
+                          child: Column(
+                        children: [
+                          // Row(
+                          //   children: [
+                          //     Spacer(flex: 1),
+                          //     Icon(Icons.arrow_left_outlined),
+                          //     Spacer(flex: 1),
+                          //     Text("Monday", style: TextStyle(fontSize: 20)),
+                          //     Spacer(flex: 1),
+                          //     Icon(Icons.arrow_right_outlined),
+                          //     Spacer(flex: 1),
+                          //   ],
+                          // ),
+                          Expanded(
+                            child: ListView.builder(
+                              itemCount: slotAvailable.length,
+                              itemBuilder: (context, index) {
+                                return SlotCard(
+                                  slotTime: slotAvailable[index],
+                                  color: Colors.green,
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      )),
+                    )
                   ],
-                )),
-              )
-            ],
-          ):Container(),
-          circP ||secondCircp
+                )
+              : Container(),
+          circP || secondCircp
               ? Center(
                   child: CircularProgressIndicator(
                   color: Colors.blue,
@@ -302,7 +306,7 @@ class Weekday extends StatelessWidget {
           } else {
             if (daySelected.length < maxDaysAllowed) {
               isDaySelected[weekday] = true;
-              daySelected.insert(0, weekday);
+              daySelected.add(weekday);
             } else {
               Fluttertoast.showToast(
                   msg: "You cannot select more than $maxDaysAllowed days");

@@ -26,7 +26,7 @@ class StudentDetail extends StatelessWidget {
                         if (value!.isEmpty) {
                           return ("Please Enter Your Name");
                         }
-                        if (!RegExp('[a-zA-Z]' + ' ').hasMatch(value)) {
+                        if (!RegExp(r"^\s*([A-Za-z]{1,}([\.,] |[-']| ))+[A-Za-z]+\.?\s*$").hasMatch(value)) {
                           return ("Please Enter a valid name");
                         }
                         return null;
