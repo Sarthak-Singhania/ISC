@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
@@ -61,7 +62,7 @@ class AdminSlotCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
+              AutoSizeText(
                 'Student Name : $studentName',
                 style: TextStyle(fontSize: 15),
               ),
@@ -78,7 +79,7 @@ class AdminSlotCard extends StatelessWidget {
                         msg: "Please check your internet connection");
                   }
                 },
-                child: Text(
+                child: AutoSizeText(
                   'Present',
                   style: TextStyle(fontSize: 15, color: Colors.green),
                 ),
@@ -88,7 +89,7 @@ class AdminSlotCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
+              AutoSizeText(
                 'SNU ID: $snuId',
                 style: TextStyle(fontSize: 15),
               ),
@@ -105,7 +106,7 @@ class AdminSlotCard extends StatelessWidget {
                         msg: "Please check your internet connection");
                   }
                 },
-                child: Text(
+                child: AutoSizeText(
                   'Absent',
                   style: TextStyle(fontSize: 15, color: Colors.red),
                 ),

@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
@@ -8,7 +9,6 @@ import 'package:flutter_custom_clippers/flutter_custom_clippers.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:isc/constants.dart';
 import 'package:isc/provider/theme_provider.dart';
-import 'package:isc/routes.dart';
 import 'package:isc/user-info.dart';
 import 'package:provider/provider.dart';
 import 'package:transparent_image/transparent_image.dart';
@@ -179,7 +179,7 @@ class _TicketScreenState extends State<TicketScreen> {
               SizedBox(
                 width: size.width * 0.05,
               ),
-              Text(
+              AutoSizeText(
                 '       ',
                 style: TextStyle(
                   fontSize: size.height * 0.03,
@@ -208,7 +208,7 @@ class _TicketScreenState extends State<TicketScreen> {
                       borderRadius:
                           BorderRadius.all(Radius.elliptical(10, 10))),
                   child: Center(
-                    child: Text(
+                    child: AutoSizeText(
                       '${nameList[0]} has added you to the booking',
                       style: TextStyle(
                           color: Colors.white,
@@ -276,7 +276,7 @@ class _TicketScreenState extends State<TicketScreen> {
               child: Container(
                 height: size.height * 0.08,
                 child: Center(
-                  child: Text(
+                  child: AutoSizeText(
                     'Cancel',
                     textAlign: TextAlign.center,
                     style: TextStyle(color: Colors.white, fontSize: 25),
@@ -310,7 +310,7 @@ class _TicketScreenState extends State<TicketScreen> {
               child: Container(
                 height: size.height * 0.08,
                 child: Center(
-                  child: Text(
+                  child: AutoSizeText(
                     'Deny',
                     textAlign: TextAlign.center,
                     style: TextStyle(color: Colors.white, fontSize: 25),
@@ -339,7 +339,7 @@ class _TicketScreenState extends State<TicketScreen> {
               child: Container(
                 height: size.height * 0.08,
                 child: Center(
-                  child: Text(
+                  child: AutoSizeText(
                     'Accept',
                     textAlign: TextAlign.center,
                     style: TextStyle(color: Colors.white, fontSize: 25),
@@ -390,7 +390,7 @@ class _TicketScreenState extends State<TicketScreen> {
                 child: Scaffold(
                   body: Container(
                       child: Center(
-                          child: Text(
+                          child: AutoSizeText(
                     "Tap To Refresh",
                     style: TextStyle(
                       fontSize: 20,
@@ -410,12 +410,12 @@ class _TicketScreenState extends State<TicketScreen> {
                           color: Color(0xffFF6109),
                         ),
                   title: response['confirm'] == 1
-                      ? Text(
+                      ? AutoSizeText(
                           'Confirmed',
                           style:
                               TextStyle(color: Color(0xff289800), fontSize: 25),
                         )
-                      : Text(
+                      : AutoSizeText(
                           'Pending',
                           style:
                               TextStyle(color: Color(0xffFF6109), fontSize: 25),
@@ -434,13 +434,13 @@ class _TicketScreenState extends State<TicketScreen> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.start,
                               children: [
-                                Text(
+                                AutoSizeText(
                                   "Booking Id: ${widget.bookingId}",
                                   style: TextStyle(
                                       color: Colors.grey, fontSize: 18),
                                 ),
                                 Spacer(),
-                                Text(
+                                AutoSizeText(
                                   "Date:${response['date']}",
                                   style: TextStyle(
                                       color: Colors.grey, fontSize: 18),
@@ -454,7 +454,7 @@ class _TicketScreenState extends State<TicketScreen> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.start,
                               children: [
-                                Text(
+                                AutoSizeText(
                                   '${response['game']}',
                                   style: TextStyle(fontSize: 20),
                                 ),
@@ -463,7 +463,7 @@ class _TicketScreenState extends State<TicketScreen> {
                                   image: '${response['url']}',
                                   placeholder: kTransparentImage,
                                 ),
-                                Text(
+                                AutoSizeText(
                                   "${response['slot']}".toUpperCase(),
                                   style: TextStyle(fontSize: 20),
                                 ),
@@ -479,7 +479,7 @@ class _TicketScreenState extends State<TicketScreen> {
                                     height: size.height * 0.1,
                                     width: size.width * 0.2,
                                     child: Center(
-                                        child: Text(
+                                        child: AutoSizeText(
                                       'S No.',
                                       style: TextStyle(fontSize: 20),
                                     )),
@@ -495,7 +495,7 @@ class _TicketScreenState extends State<TicketScreen> {
                                   ),
                                   Container(
                                     child: Center(
-                                        child: Text(
+                                        child: AutoSizeText(
                                       'Name',
                                       style: TextStyle(fontSize: 20),
                                     )),
@@ -521,13 +521,13 @@ class _TicketScreenState extends State<TicketScreen> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceEvenly,
                                       children: [
-                                        Text(sNo[0],
+                                        AutoSizeText(sNo[0],
                                             style: TextStyle(fontSize: 20)),
-                                        Text(sNo[1],
+                                        AutoSizeText(sNo[1],
                                             style: TextStyle(fontSize: 20)),
-                                        Text(sNo[2],
+                                        AutoSizeText(sNo[2],
                                             style: TextStyle(fontSize: 20)),
-                                        Text(sNo[3],
+                                        AutoSizeText(sNo[3],
                                             style: TextStyle(fontSize: 20)),
                                       ],
                                     ),
@@ -548,13 +548,13 @@ class _TicketScreenState extends State<TicketScreen> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceEvenly,
                                       children: [
-                                        Text(nameList[0],
+                                        AutoSizeText(nameList[0],
                                             style: TextStyle(fontSize: 20)),
-                                        Text(nameList[1],
+                                        AutoSizeText(nameList[1],
                                             style: TextStyle(fontSize: 20)),
-                                        Text(nameList[2],
+                                        AutoSizeText(nameList[2],
                                             style: TextStyle(fontSize: 20)),
-                                        Text(nameList[3],
+                                        AutoSizeText(nameList[3],
                                             style: TextStyle(fontSize: 20)),
                                       ],
                                     ),

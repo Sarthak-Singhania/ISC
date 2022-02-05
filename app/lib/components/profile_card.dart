@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:isc/provider/theme_provider.dart';
 import 'package:provider/provider.dart';
@@ -45,7 +46,7 @@ class ProfileCard extends StatelessWidget {
           Expanded(
             child: Container(
                 margin: EdgeInsets.fromLTRB(20, 0, 20, 0),
-                child: Text(
+                child: AutoSizeText(
                   text,
                   style: TextStyle(
                       fontSize: 20,

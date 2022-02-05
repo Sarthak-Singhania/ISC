@@ -3,16 +3,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:isc/constants.dart';
-import 'package:isc/components/roundedbutton.dart';
 import 'package:isc/provider/theme_provider.dart';
 import 'package:isc/routes.dart';
-import 'package:isc/screens/event_screen.dart';
-import 'package:isc/screens/welcome_screen.dart';
 import 'package:provider/provider.dart';
 
-import 'login_screen.dart';
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({Key? key}) : super(key: key);

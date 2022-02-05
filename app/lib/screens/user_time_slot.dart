@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:ui';
 
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:isc/components/slot_card.dart';
@@ -147,7 +148,7 @@ class _UserTimeSlotState extends State<UserTimeSlot> {
       appBar: AppBar(
         backgroundColor: kPrimaryColor,
         centerTitle: true,
-        title: Text(
+        title: AutoSizeText(
           "Select your timeslot",
           style: TextStyle(
               color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
@@ -172,7 +173,7 @@ class _UserTimeSlotState extends State<UserTimeSlot> {
                         child: Column(
                           children: [
                             Spacer(),
-                            Text(
+                            AutoSizeText(
                               'Please select your days',
                               style: TextStyle(
                                   fontSize: 18, fontWeight: FontWeight.bold),
@@ -221,7 +222,7 @@ class _UserTimeSlotState extends State<UserTimeSlot> {
                                     color: kPrimaryColor,
                                     borderRadius: BorderRadius.circular(10)),
                                 child: Center(
-                                  child: Text(
+                                  child: AutoSizeText(
                                     'Show Results',
                                     style: TextStyle(
                                         color: Colors.white, fontSize: 20),
@@ -324,7 +325,7 @@ class Weekday extends StatelessWidget {
               : isDaySelected[weekday]!
                   ? Colors.green
                   : Colors.purple,
-          child: Text(
+          child: AutoSizeText(
             intials[weekday] ?? " ",
             style: TextStyle(color: Colors.white, fontSize: 20),
           ),

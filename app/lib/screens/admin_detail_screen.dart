@@ -1,15 +1,13 @@
 import 'dart:convert';
 
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:isc/components/admin_detail_card.dart';
-
 import 'package:isc/user-info.dart';
-// import 'package:switcher/core/switcher_size.dart';
-// import 'package:switcher/switcher.dart';
 import '../constants.dart';
 
 class AdminSlotScreen extends StatefulWidget {
@@ -197,7 +195,7 @@ class _AdminSlotScreenState extends State<AdminSlotScreen> {
                         },
                         child: Container(
                             child: Center(
-                                child: Text(
+                                child: AutoSizeText(
                           "Tap To Refresh",
                           style: TextStyle(
                             fontSize: 20,
@@ -290,7 +288,7 @@ class _AdminSlotScreenState extends State<AdminSlotScreen> {
                             SizedBox(height: size.height * 0.03),
                             emptyList == true
                                 ? Center(
-                                    child: Text(
+                                    child: AutoSizeText(
                                     'No bookings',
                                     style: TextStyle(fontSize: 20),
                                   ))

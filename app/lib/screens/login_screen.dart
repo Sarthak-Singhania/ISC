@@ -1,9 +1,9 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:isc/components/bottom_navi_bar.dart';
 import 'package:isc/constants.dart';
 import 'package:isc/components/roundedbutton.dart';
 import 'package:isc/provider/theme_provider.dart';
@@ -231,7 +231,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               }
                             }
                           },
-                          child: Text(
+                          child: AutoSizeText(
                             "Forgot your password?",
                             style: TextStyle(
                                 color: Colors.redAccent,

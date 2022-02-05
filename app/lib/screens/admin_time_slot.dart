@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:isc/constants.dart';
@@ -219,7 +220,7 @@ class _TimeSlotState extends State<TimeSlot> {
         appBar: AppBar(
           backgroundColor: kPrimaryColor,
           centerTitle: true,
-          title: Text(
+          title: AutoSizeText(
             "Select your timeslot",
             style: TextStyle(
                 color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
@@ -238,7 +239,7 @@ class _TimeSlotState extends State<TimeSlot> {
                       margin: EdgeInsets.only(top: 5),
                       padding: EdgeInsets.all(15),
                       decoration: BoxDecoration(color: kPrimaryColor),
-                      child: Text(
+                      child: AutoSizeText(
                         selectedDate == null
                             ? "CHOOSE YOUR DATE"
                             : '${selectedDate!.day}-${selectedDate!.month}-${selectedDate!.year}',
@@ -259,7 +260,7 @@ class _TimeSlotState extends State<TimeSlot> {
                           margin: EdgeInsets.only(top: 5),
                           padding: EdgeInsets.all(15),
                           decoration: BoxDecoration(color: kPrimaryColor),
-                          child: Text(
+                          child: AutoSizeText(
                             selectedDate == null
                                 ? "CHOOSE YOUR DATE"
                                 : '${selectedDate!.day}-${selectedDate!.month}-${selectedDate!.year}',
@@ -291,12 +292,12 @@ class _TimeSlotState extends State<TimeSlot> {
                               ? BoxDecoration(color: Colors.red)
                               : BoxDecoration(color: Colors.green),
                           child: isDisabled
-                              ? Text(
+                              ? AutoSizeText(
                                   'Disable',
                                   style: TextStyle(
                                       color: Colors.white, fontSize: 14),
                                 )
-                              : Text(
+                              : AutoSizeText(
                                   'Enable',
                                   style: TextStyle(
                                       color: Colors.white, fontSize: 14),

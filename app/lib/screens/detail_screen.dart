@@ -1,21 +1,11 @@
 import 'dart:convert';
-import 'dart:math';
-
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:internet_connection_checker/internet_connection_checker.dart';
-
-import 'package:isc/components/roundedbutton.dart';
-import 'package:isc/components/slot_card.dart';
 import 'package:isc/components/student_detail.dart';
 import 'package:isc/constants.dart';
-import 'package:isc/routes.dart';
-
 import 'package:isc/user-info.dart';
-import 'booking_screen.dart';
-
 import 'package:http/http.dart' as http;
-import 'admin_time_slot.dart';
 
 class DetailScreen extends StatefulWidget {
   @override
@@ -183,12 +173,12 @@ class _DetailScreenState extends State<DetailScreen> {
                                     downArrow[i]
                                         ? Icons.keyboard_arrow_down
                                         : Icons.keyboard_arrow_right,
-                                    size: 30,
+                                    size: size.width * 0.07,
                                   )),
                               SizedBox(
                                 width: size.width * 0.03,
                               ),
-                              Text(
+                              AutoSizeText(
                                 StudentInfo.dayChoosen[i],
                                 style: TextStyle(
                                     fontSize: 20, fontWeight: FontWeight.bold),
@@ -211,10 +201,10 @@ class _DetailScreenState extends State<DetailScreen> {
                                   },
                                   icon: Icon(
                                     Icons.add,
-                                    size: 30,
+                                    size: size.width * 0.07,
                                   )),
                               SizedBox(
-                                width: size.width * 0.08,
+                                width: size.width * 0.06,
                               ),
                               IconButton(
                                   onPressed: () {
@@ -229,7 +219,7 @@ class _DetailScreenState extends State<DetailScreen> {
                                   },
                                   icon: Icon(
                                     Icons.remove,
-                                    size: 30,
+                                    size: size.width * 0.07,
                                   )),
                               SizedBox(
                                 width: size.width * 0.05,
@@ -269,7 +259,7 @@ class _DetailScreenState extends State<DetailScreen> {
                         color: Colors.purple,
                         borderRadius: BorderRadius.circular(10)),
                     child: Center(
-                      child: Text(
+                      child: AutoSizeText(
                         "SUBMIT",
                         style: TextStyle(color: Colors.white, fontSize: 20),
                       ),

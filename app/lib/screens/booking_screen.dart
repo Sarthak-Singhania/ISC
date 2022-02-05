@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
@@ -66,7 +67,7 @@ class _BookingScreenState extends State<BookingScreen> {
       ),
       body: emptyList == true
           ? Center(
-              child: Text(
+              child: AutoSizeText(
               'No Booking found',
               style: TextStyle(fontSize: 20),
             ))
@@ -90,7 +91,7 @@ class _BookingScreenState extends State<BookingScreen> {
                 },
                 child: Container(
                       child: Center(
-                          child: Text(
+                          child: AutoSizeText(
                     "Tap To Refresh",
                     style: TextStyle(
                       fontSize: 20,

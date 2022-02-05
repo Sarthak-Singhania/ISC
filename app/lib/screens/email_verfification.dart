@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -51,7 +52,7 @@ class _EmailVerificationState extends State<EmailVerification> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(
+          AutoSizeText(
             "A verification link has been sent to ${user.email}, please verify it.",
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 20),
@@ -71,7 +72,7 @@ class _EmailVerificationState extends State<EmailVerification> {
                   color: kPrimaryColor,
                 ),
                 child: Center(
-                  child: Text(
+                  child: AutoSizeText(
                     'Send another link',
                     style: TextStyle(
                         fontWeight: FontWeight.bold,

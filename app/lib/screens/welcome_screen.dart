@@ -13,13 +13,6 @@ class WelcomeScreen extends StatelessWidget {
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
       systemNavigationBarColor:
           themeProvider.checkTheme(Color(0xFFF2F2F2), Colors.black, context),
-      // systemNavigationBarColor: themeProvider.checkTheme(
-      //     Colors.white, Colors.grey, context), // navigation bar color
-      // statusBarColor: Colors.pink, // status bar color
-      // statusBarBrightness: Brightness.dark,//status bar brigtness
-      // statusBarIconBrightness:Brightness.dark , //status barIcon Brightness
-      // systemNavigationBarDividerColor: Colors.greenAccent,//Navigation bar divider color
-      // systemNavigationBarIconBrightness: Brightness.dark, //navigation bar icon
     ));
     Size size = MediaQuery.of(context).size;
     return Scaffold(

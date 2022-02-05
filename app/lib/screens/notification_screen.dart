@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -7,7 +8,6 @@ import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:isc/components/notification_card.dart';
 import 'package:isc/constants.dart';
 import 'package:http/http.dart' as http;
-import 'package:isc/screens/ticket_screen.dart';
 import 'package:isc/user-info.dart';
 
 class NotificationScreen extends StatefulWidget {
@@ -68,7 +68,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
       ),
       body: emptyList == true
           ? Center(
-              child: Text(
+              child: AutoSizeText(
               'No new notifications',
               style: TextStyle(fontSize: 20),
             ))
@@ -92,7 +92,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                 },
                 child:  Container(
                       child: Center(
-                          child: Text(
+                          child: AutoSizeText(
                     "Tap To Refresh",
                     style: TextStyle(
                       fontSize: 20,

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 //import 'package:firebase_auth/firebase_auth.dart';
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -9,8 +10,6 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:isc/components/admin_eventcard.dart';
-
-import 'package:isc/components/bottom_navi_bar.dart';
 import 'package:isc/components/event_card.dart';
 import 'package:isc/constants.dart';
 import 'package:isc/provider/theme_provider.dart';
@@ -116,7 +115,7 @@ class _EventScreenState extends State<EventScreen> {
                 child: Scaffold(
                   body: Container(
                       child: Center(
-                          child: Text(
+                          child: AutoSizeText(
                     "Tap To Refresh",
                     style: TextStyle(
                       fontSize: 20,
@@ -143,7 +142,7 @@ class _EventScreenState extends State<EventScreen> {
                                     },
                                     icon: Icon(
                                       Icons.notifications,
-                                      size: 30,
+                                      size: size.width * 0.07,
                                     ),
                                   ),
                                 ),
@@ -158,7 +157,7 @@ class _EventScreenState extends State<EventScreen> {
                                               shape: BoxShape.circle,
                                               color: Colors.red),
                                           child: Center(
-                                            child: Text(
+                                            child: AutoSizeText(
                                               '$notificationListLength',
                                               style: TextStyle(fontSize: 10),
                                             ),
@@ -173,7 +172,7 @@ class _EventScreenState extends State<EventScreen> {
                   elevation: 0,
                   backgroundColor: Colors.purple[600],
                   centerTitle: true,
-                  title: Text(
+                  title: AutoSizeText(
                     "SELECT YOUR SPORT",
                     style: TextStyle(
                         color: Colors.white,

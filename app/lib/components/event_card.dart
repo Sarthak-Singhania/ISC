@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_switch/flutter_switch.dart';
@@ -71,7 +72,7 @@ class _EventCardState extends State<EventCard> {
                       placeholder: kTransparentImage,
                     ),
                   ),
-                  Text(
+                  AutoSizeText(
                     widget.title,
                     textAlign: TextAlign.center,
                     style: TextStyle(

@@ -1,9 +1,7 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:isc/provider/theme_provider.dart';
 import 'package:isc/routes.dart';
-import 'package:isc/screens/ticket_screen.dart';
 import 'package:provider/provider.dart';
 
 import '../constants.dart';
@@ -28,7 +26,7 @@ class NotificationCard extends StatelessWidget {
         width: size.width * 0.8,
         height: size.height * 0.09,
         child: Center(
-            child: Text(
+            child: AutoSizeText(
           '$username has invited you to play $game',
           style: TextStyle(
             fontSize: 15,

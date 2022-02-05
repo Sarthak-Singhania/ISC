@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
@@ -50,12 +51,12 @@ class BookingCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             isConfirm == 1
-                ? Text(
+                ? AutoSizeText(
                     "CONFIRMED",
                     style: TextStyle(
                         color: Colors.green, fontWeight: FontWeight.bold),
                   )
-                : Text(
+                : AutoSizeText(
                     "PENDING",
                     style: TextStyle(
                         color: Colors.orange, fontWeight: FontWeight.bold),
@@ -63,11 +64,11 @@ class BookingCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
+                AutoSizeText(
                   "Booking Id: $bookingId",
                   style: TextStyle(color: Colors.grey),
                 ),
-                Text(
+                AutoSizeText(
                   "Date: $date",
                   style: TextStyle(color: Colors.grey),
                 ),
@@ -76,7 +77,7 @@ class BookingCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
+                AutoSizeText(
                   sportName,
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
@@ -84,7 +85,7 @@ class BookingCard extends StatelessWidget {
                           kPrimaryColor, Colors.white, context), //kPrimaryColor
                       fontSize: 17),
                 ),
-                Text(
+                AutoSizeText(
                   slotTime,
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
@@ -97,7 +98,7 @@ class BookingCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
+                AutoSizeText(
                   totalCount == 1
                       ? "$studentName"
                       : totalCount == 2
