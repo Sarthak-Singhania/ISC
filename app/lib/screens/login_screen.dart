@@ -19,7 +19,7 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-
+  bool circP = false;
   // editing controller
   final TextEditingController emailController = new TextEditingController();
   final TextEditingController passwordController = new TextEditingController();
@@ -30,7 +30,7 @@ class _LoginScreenState extends State<LoginScreen> {
   // string for displaying the error Message
   String? errorMessage;
 
-  void signIn(String email, String password) async {
+  Future<void> signIn(String email, String password) async {
     if (_formKey.currentState!.validate()) {
       try {
         final snapShot = await FirebaseFirestore.instance
@@ -53,8 +53,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       Fluttertoast.showToast(msg: "Login Successful"),
                       // Navigator.pushReplacementNamed(
                       //     context, AppRoutes.eventScreen)
-                      Navigator.pushNamedAndRemoveUntil(context, AppRoutes.bottomNavigationScreen, (route) => false)
-                      
+                      Navigator.pushNamedAndRemoveUntil(context,
+                          AppRoutes.bottomNavigationScreen, (route) => false)
                     }
                   else
                     {
@@ -101,167 +101,180 @@ class _LoginScreenState extends State<LoginScreen> {
 
     return Scaffold(
       body: Container(
-        child: Center(
-          child: Form(
-            key: _formKey,
-            child: AutofillGroup(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    margin: EdgeInsets.all(10),
-                    padding: EdgeInsets.all(10),
-                    width: size.width * 0.8,
-                    decoration: BoxDecoration(
-                      color: theme.checkTheme(
-                          kPrimaryLightColor, Colors.purple.shade300, context),
-                      borderRadius: BorderRadius.circular(30),
+        child: Stack(children: [
+          Center(
+            child: Form(
+              key: _formKey,
+              child: AutofillGroup(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      margin: EdgeInsets.all(10),
+                      padding: EdgeInsets.all(10),
+                      width: size.width * 0.8,
+                      decoration: BoxDecoration(
+                        color: theme.checkTheme(kPrimaryLightColor,
+                            Colors.purple.shade300, context),
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      child: TextFormField(
+                          autofocus: false,
+                          controller: emailController,
+                          keyboardType: TextInputType.emailAddress,
+                          autofillHints: [AutofillHints.email],
+                          validator: (value) {
+                            if (value!.isEmpty) {
+                              return ("Please Enter Your Email");
+                            }
+                            if (!RegExp(
+                                    "^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+.[a-z]")
+                                .hasMatch(value)) {
+                              return ("Please Enter a valid email");
+                            }
+                            return null;
+                          },
+                          onSaved: (value) {
+                            emailController.text = value!;
+                          },
+                          textInputAction: TextInputAction.next,
+                          decoration: InputDecoration(
+                            border: InputBorder.none,
+                            prefixIcon: Icon(Icons.mail),
+                            contentPadding: EdgeInsets.fromLTRB(20, 15, 20, 15),
+                            hintText: "Email",
+                          )),
                     ),
-                    child: TextFormField(
+                    Container(
+                      margin: EdgeInsets.all(10),
+                      padding: EdgeInsets.all(10),
+                      width: size.width * 0.8,
+                      decoration: BoxDecoration(
+                        color: theme.checkTheme(kPrimaryLightColor,
+                            Colors.purple.shade300, context),
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      child: TextFormField(
                         autofocus: false,
-                        controller: emailController,
-                        keyboardType: TextInputType.emailAddress,
-                        autofillHints: [AutofillHints.email],
+                        controller: passwordController,
+                        obscureText: !passwordVisible,
+                        autofillHints: [AutofillHints.password],
+                        onEditingComplete: () {
+                          TextInput.finishAutofillContext();
+                        },
                         validator: (value) {
+                          RegExp regex = new RegExp(r'^.{6,}$');
                           if (value!.isEmpty) {
-                            return ("Please Enter Your Email");
+                            return ("Password is required for login");
                           }
-                          if (!RegExp("^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+.[a-z]")
-                              .hasMatch(value)) {
-                            return ("Please Enter a valid email");
+                          if (!regex.hasMatch(value)) {
+                            return ("Enter Valid Password(Min. 6 Character)");
                           }
-                          return null;
                         },
                         onSaved: (value) {
-                          emailController.text = value!;
+                          passwordController.text = value!;
                         },
-                        textInputAction: TextInputAction.next,
+                        textInputAction: TextInputAction.done,
                         decoration: InputDecoration(
                           border: InputBorder.none,
-                          prefixIcon: Icon(Icons.mail),
+                          prefixIcon: Icon(Icons.lock),
                           contentPadding: EdgeInsets.fromLTRB(20, 15, 20, 15),
-                          hintText: "Email",
-                        )),
-                  ),
-                  Container(
-                    margin: EdgeInsets.all(10),
-                    padding: EdgeInsets.all(10),
-                    width: size.width * 0.8,
-                    decoration: BoxDecoration(
-                      color: theme.checkTheme(
-                          kPrimaryLightColor, Colors.purple.shade300, context),
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    child: TextFormField(
-                      autofocus: false,
-                      controller: passwordController,
-                      obscureText: !passwordVisible,
-                      autofillHints: [AutofillHints.password],
-                      onEditingComplete: () {
-                        TextInput.finishAutofillContext();
-                      },
-                      validator: (value) {
-                        RegExp regex = new RegExp(r'^.{6,}$');
-                        if (value!.isEmpty) {
-                          return ("Password is required for login");
-                        }
-                        if (!regex.hasMatch(value)) {
-                          return ("Enter Valid Password(Min. 6 Character)");
-                        }
-                      },
-                      onSaved: (value) {
-                        passwordController.text = value!;
-                      },
-                      textInputAction: TextInputAction.done,
-                      decoration: InputDecoration(
-                        border: InputBorder.none,
-                        prefixIcon: Icon(Icons.lock),
-                        contentPadding: EdgeInsets.fromLTRB(20, 15, 20, 15),
-                        hintText: "Password",
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            passwordVisible
-                                ? Icons.visibility
-                                : Icons.visibility_off,
+                          hintText: "Password",
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              passwordVisible
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                passwordVisible = !passwordVisible;
+                              });
+                            },
                           ),
-                          onPressed: () {
-                            setState(() {
-                              passwordVisible = !passwordVisible;
-                            });
-                          },
                         ),
                       ),
                     ),
-                  ),
-                  RoundedButton(
-                      s: "LOGIN",
-                      color: kPrimaryColor,
-                      tcolor: Colors.white,
-                      size: size,
-                      func: () {
-                        signIn(emailController.text, passwordController.text);
-                      }),
-                  SizedBox(
-                    height: size.height * 0.02,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      GestureDetector(
-                        onTap: () async {
-                          if (emailController.text.isEmpty) {
-                            Fluttertoast.showToast(
-                                msg: "Please enter your email id");
-                          } else {
-                            try {
-                              await _auth.sendPasswordResetEmail(
-                                  email: emailController.text);
+                    RoundedButton(
+                        s: "LOGIN",
+                        color: kPrimaryColor,
+                        tcolor: Colors.white,
+                        size: size,
+                        func: () async{
+                          circP = true;
+                          setState(() {});
+                          await signIn(emailController.text, passwordController.text);
+                          circP = false;
+                          setState(() {});
+                        }),
+                    SizedBox(
+                      height: size.height * 0.02,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        GestureDetector(
+                          onTap: () async {
+                            if (emailController.text.isEmpty) {
                               Fluttertoast.showToast(
-                                  msg:
-                                      "Passsword reset link has been sent to ${emailController.text}",
-                                  toastLength: Toast.LENGTH_LONG);
-                            } catch (e) {
-                              print(e);
+                                  msg: "Please enter your email id");
+                            } else {
+                              try {
+                                await _auth.sendPasswordResetEmail(
+                                    email: emailController.text);
+                                Fluttertoast.showToast(
+                                    msg:
+                                        "Passsword reset link has been sent to ${emailController.text}",
+                                    toastLength: Toast.LENGTH_LONG);
+                              } catch (e) {
+                                print(e);
+                              }
                             }
-                          }
-                        },
-                        child: Text(
-                          "Forgot your password?",
-                          style: TextStyle(
-                              color: Colors.redAccent,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 15),
-                        ),
-                      )
-                    ],
-                  ),
-                  SizedBox(
-                    height: size.height * 0.02,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Text("Don't have an account? "),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.pushNamed(
-                              context, AppRoutes.registrationScreen);
-                        },
-                        child: Text(
-                          "SignUp",
-                          style: TextStyle(
-                              color: Colors.redAccent,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 15),
-                        ),
-                      )
-                    ],
-                  )
-                ],
+                          },
+                          child: Text(
+                            "Forgot your password?",
+                            style: TextStyle(
+                                color: Colors.redAccent,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15),
+                          ),
+                        )
+                      ],
+                    ),
+                    SizedBox(
+                      height: size.height * 0.02,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Text("Don't have an account? "),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.pushReplacementNamed(
+                                context, AppRoutes.registrationScreen);
+                          },
+                          child: Text(
+                            "SignUp",
+                            style: TextStyle(
+                                color: Colors.redAccent,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15),
+                          ),
+                        )
+                      ],
+                    )
+                  ],
+                ),
               ),
             ),
           ),
-        ),
+          circP
+              ? Center(
+                  child: CircularProgressIndicator(
+                  color: Colors.blue,
+                ))
+              : Container(),
+        ]),
       ),
     );
   }

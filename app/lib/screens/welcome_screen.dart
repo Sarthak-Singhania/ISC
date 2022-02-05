@@ -28,6 +28,17 @@ class WelcomeScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              Spacer(
+                flex: 2,
+              ),
+              Image.asset(
+                'lib/assets/images/runner.png',
+                fit: BoxFit.cover,
+                width: size.width * 0.7,
+              ),
+              SizedBox(
+                height: size.height * 0.1,
+              ),
               RoundedButton(
                   s: "LOGIN",
                   color: kPrimaryColor,
@@ -43,7 +54,10 @@ class WelcomeScreen extends StatelessWidget {
                   size: size,
                   func: () {
                     Navigator.pushNamed(context, AppRoutes.registrationScreen);
-                  })
+                  }),
+              Spacer(
+                flex: 1,
+              ),
             ],
           ),
         ),

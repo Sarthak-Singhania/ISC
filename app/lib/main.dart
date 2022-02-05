@@ -15,7 +15,6 @@ import 'package:isc/screens/login_screen.dart';
 import 'package:isc/screens/notification_screen.dart';
 import 'package:isc/screens/profile_screen.dart';
 import 'package:isc/screens/registration.dart';
-import 'package:isc/screens/setting_screen.dart';
 import 'package:isc/screens/ticket_screen.dart';
 import 'package:isc/screens/admin_time_slot.dart';
 import 'package:isc/screens/user_time_slot.dart';
@@ -25,7 +24,8 @@ import 'package:provider/provider.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  
+  await SystemChrome.setPreferredOrientations(
+      [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
   runApp(MyApp());
 }
 
@@ -96,7 +96,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               AppRoutes.ticketScreen: (context) => TicketScreen(
                     bookingId: ModalRoute.of(context)!.settings.arguments,
                   ),
-              AppRoutes.settingScreen: (context) => SettingScreen(),
               AppRoutes.emailVerification: (context) => EmailVerification(),
               AppRoutes.notificationScreen: (context) => NotificationScreen(),
               AppRoutes.profileScreen: (context) => ProfileScreen(),
