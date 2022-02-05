@@ -33,25 +33,8 @@ class _AdminSlotScreenState extends State<AdminSlotScreen> {
     getData();
   }
 
-  Future<void> disbaleSlot() async {
-    final slotResponse = await http.get(
-        Uri.parse(kIpAddress +
-            "/booking-count?category=slot&game=" +
-            StudentInfo.gameChoosen +
-            "&date=" +
-            StudentInfo.dateChoosen +
-            "&slot=" +
-            StudentInfo.slotChoosen),
-        headers: {"x-access-token": StudentInfo.jwtToken});
-
-    final responseJsonData = await jsonDecode(slotResponse.body);
-    String slotsAvailable = responseJsonData['message'];
-    bool isSlotAvailable = false;
-    print("Sport ke slot = $slotsAvailable");
-    if (slotsAvailable != '0') {
-      isSlotAvailable = true;
-    }
-    await showDialog(
+  Future<void> showConfirmationDialog(isSlotAvailable){
+    return showDialog(
         context: context,
         builder: (context) {
           return AlertDialog(
@@ -74,8 +57,6 @@ class _AdminSlotScreenState extends State<AdminSlotScreen> {
                     "date": StudentInfo.dateChoosen,
                     "slot": StudentInfo.slotChoosen,
                   });
-                  toggleValue = true;
-                  setState(() {});
                   print(body);
                   try {
                     final disableResponse = await http.post(
@@ -90,18 +71,56 @@ class _AdminSlotScreenState extends State<AdminSlotScreen> {
                       },
                       body: body,
                     );
-
+                     Navigator.of(context).pop();
                     print(disableResponse.body);
+                    toggleValue = true;
+                    setState(() {});
                   } catch (e) {
+                    if (!(await InternetConnectionChecker().hasConnection)) {
+                      Fluttertoast.showToast(
+                          msg: "Please check you internet connection");
+                    } else {
+                      Fluttertoast.showToast(msg: "Please try again.");
+                    }
                     print(e);
                   }
-                  Navigator.of(context).pop();
+                
                 },
                 child: Text('Yes'),
               ),
             ],
           );
         });
+  }
+
+  Future<void> disbaleSlot() async {
+   try{ final slotResponse = await http.get(
+        Uri.parse(kIpAddress +
+            "/booking-count?category=slot&game=" +
+            StudentInfo.gameChoosen +
+            "&date=" +
+            StudentInfo.dateChoosen +
+            "&slot=" +
+            StudentInfo.slotChoosen),
+        headers: {"x-access-token": StudentInfo.jwtToken});
+
+    final responseJsonData = await jsonDecode(slotResponse.body);
+    String slotsAvailable = responseJsonData['message'];
+    bool isSlotAvailable = false;
+    print("Sport ke slot = $slotsAvailable");
+    if (slotsAvailable != '0') {
+      isSlotAvailable = true;
+    }
+    await showConfirmationDialog(isSlotAvailable);}
+    catch (e) {
+                    if (!(await InternetConnectionChecker().hasConnection)) {
+                      Fluttertoast.showToast(
+                          msg: "Please check you internet connection");
+                    } else {
+                      Fluttertoast.showToast(msg: "Please try again.");
+                    }
+                    print(e);
+                  }
   }
 
   void enableSlot() async {
@@ -129,6 +148,11 @@ class _AdminSlotScreenState extends State<AdminSlotScreen> {
       toggleValue = false;
       setState(() {});
     } catch (e) {
+      if (!(await InternetConnectionChecker().hasConnection)) {
+        Fluttertoast.showToast(msg: "Please check you internet connection");
+      } else {
+        Fluttertoast.showToast(msg: "Please try again.");
+      }
       print(e);
     }
   }

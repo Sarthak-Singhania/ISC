@@ -44,6 +44,11 @@ class AdminSlotCard extends StatelessWidget {
       );
       print(response.body);
     } catch (e) {
+        if (!(await InternetConnectionChecker().hasConnection)) {
+        Fluttertoast.showToast(msg: "Please check you internet connection");
+      } else {
+        Fluttertoast.showToast(msg: "Please try again.");
+      }
       print(e);
     }
   }

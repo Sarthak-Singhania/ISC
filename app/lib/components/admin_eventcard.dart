@@ -30,7 +30,6 @@ class AdminEventCard extends StatefulWidget {
 
 class _AdminEventCardState extends State<AdminEventCard> {
   double opacity = 0.5;
-  String JWTtoken = '';
   //String game = '';
   late bool toggleValue;
   late bool hasInternet;
@@ -45,21 +44,8 @@ class _AdminEventCardState extends State<AdminEventCard> {
     toggleValue = !widget.isEnabled;
   }
 
-  void disbaleSlot() async {
-    JWTtoken = await FirebaseAuth.instance.currentUser!.getIdToken();
-    final slotResponse = await http.get(
-        Uri.parse(
-            kIpAddress + "/booking-count?category=game&game=" + widget.title),
-        headers: {"x-access-token": JWTtoken});
-
-    final responseJsonData = jsonDecode(slotResponse.body);
-    String slotsAvailable = responseJsonData['message'];
-    bool isSlotAvailable = false;
-    print("Sport ke slot = $slotsAvailable");
-    if (slotsAvailable != '0') {
-      isSlotAvailable = true;
-    }
-    await showDialog(
+  Future<void> showConfirmationDialog(bool isSlotAvailable) {
+    return showDialog(
         context: context,
         builder: (context) {
           return AlertDialog(
@@ -76,13 +62,10 @@ class _AdminEventCardState extends State<AdminEventCard> {
               ),
               TextButton(
                 onPressed: () async {
-                  Navigator.of(context).pop();
                   var body = jsonEncode({
                     "category": "game",
                     "game": widget.title,
                   });
-                  toggleValue = true;
-                  setState(() {});
                   print(body);
                   try {
                     final response = await http.post(
@@ -92,14 +75,22 @@ class _AdminEventCardState extends State<AdminEventCard> {
                         'Accept': '*/*',
                         'Accept-Encoding': 'gzip, deflate, br',
                         'Access-Control-Allow-Origin': ' *',
-                        "x-access-token": JWTtoken,
+                        "x-access-token": StudentInfo.jwtToken,
                         "admin-header": "YES"
                       },
                       body: body,
                     );
-                    print("Disbale ka");
                     print(response.body);
+                    toggleValue = true;
+                    setState(() {});
+                    Navigator.of(context).pop();
                   } catch (e) {
+                    if (!(await InternetConnectionChecker().hasConnection)) {
+                      Fluttertoast.showToast(
+                          msg: "Please check you internet connection");
+                    } else {
+                      Fluttertoast.showToast(msg: "Please try again.");
+                    }
                     print(e);
                   }
                 },
@@ -110,15 +101,37 @@ class _AdminEventCardState extends State<AdminEventCard> {
         });
   }
 
-  void enableSlot() async {
-    JWTtoken = await FirebaseAuth.instance.currentUser!.getIdToken();
+  void disbaleSlot() async {
+   try{ final slotResponse = await http.get(
+        Uri.parse(
+            kIpAddress + "/booking-count?category=game&game=" + widget.title),
+        headers: {"x-access-token": StudentInfo.jwtToken});
 
+    final responseJsonData = jsonDecode(slotResponse.body);
+    String slotsAvailable = responseJsonData['message'];
+    bool isSlotAvailable = false;
+    print("Sport ke slot = $slotsAvailable");
+    if (slotsAvailable != '0') {
+      isSlotAvailable = true;
+    }
+    await showConfirmationDialog(isSlotAvailable);}
+    catch (e) {
+                    if (!(await InternetConnectionChecker().hasConnection)) {
+                      Fluttertoast.showToast(
+                          msg: "Please check you internet connection");
+                    } else {
+                      Fluttertoast.showToast(msg: "Please try again.");
+                    }
+                    print(e);
+                  }
+    
+  }
+
+  void enableSlot() async {
     var body = jsonEncode({
       "category": "game",
       "game": widget.title,
     });
-    toggleValue = false;
-    setState(() {});
 
     print(body);
     try {
@@ -129,14 +142,20 @@ class _AdminEventCardState extends State<AdminEventCard> {
           'Accept': '*/*',
           'Accept-Encoding': 'gzip, deflate, br',
           'Access-Control-Allow-Origin': ' *',
-          "x-access-token": JWTtoken,
+          "x-access-token": StudentInfo.jwtToken,
           "admin-header": "YES"
         },
         body: body,
       );
-      print("Enable ka");
+      toggleValue = false;
+      setState(() {});
       print(response.body);
     } catch (e) {
+      if (!(await InternetConnectionChecker().hasConnection)) {
+        Fluttertoast.showToast(msg: "Please check you internet connection");
+      } else {
+        Fluttertoast.showToast(msg: "Please try again.");
+      }
       print(e);
     }
   }
@@ -191,19 +210,13 @@ class _AdminEventCardState extends State<AdminEventCard> {
               padding: 5.0,
               showOnOff: false,
               onToggle: (state) async {
-                hasInternet = await InternetConnectionChecker().hasConnection;
-                if (hasInternet) {
-                  setState(() {
-                    if (state) {
-                      disbaleSlot();
-                    } else {
-                      enableSlot();
-                    }
-                  });
-                } else {
-                  Fluttertoast.showToast(
-                      msg: "Please check your internet connection");
-                }
+                setState(() {
+                  if (state) {
+                    disbaleSlot();
+                  } else {
+                    enableSlot();
+                  }
+                });
               },
             ),
             Expanded(

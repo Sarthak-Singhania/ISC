@@ -3,7 +3,9 @@ import 'dart:convert';
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:isc/constants.dart';
 import 'package:isc/components/slot_card.dart';
 import 'package:http/http.dart' as http;
@@ -40,6 +42,7 @@ class _TimeSlotState extends State<TimeSlot> {
   final slotAvailable = [];
   Map<String, dynamic> sport = {};
   Map<String, dynamic> jsonData = {};
+  bool tapToRefresh = false;
   Response? response;
   final weekDays = [
     'Monday',
@@ -58,23 +61,8 @@ class _TimeSlotState extends State<TimeSlot> {
     getData();
   }
 
-  Future<void> disbaleSlot() async {
-    final slotResponse = await http.get(
-        Uri.parse(kIpAddress +
-            "/booking-count?category=date&game=" +
-            gameChoosen +
-            "&date=" +
-            StudentInfo.dateChoosen),
-        headers: {"x-access-token": StudentInfo.jwtToken});
-
-    final responseJsonData = await jsonDecode(slotResponse.body);
-    String slotsAvailable = responseJsonData['message'];
-    bool isSlotAvailable = false;
-    print("Sport ke slot = $slotsAvailable");
-    if (slotsAvailable != '0') {
-      isSlotAvailable = true;
-    }
-    await showDialog(
+  Future<void> showConfirmationDialog(isSlotAvailable) {
+    return showDialog(
         context: context,
         builder: (context) {
           return AlertDialog(
@@ -114,6 +102,12 @@ class _TimeSlotState extends State<TimeSlot> {
                     isDisabled = false;
                     print(disableResponse.body);
                   } catch (e) {
+                    if (!(await InternetConnectionChecker().hasConnection)) {
+                      Fluttertoast.showToast(
+                          msg: "Please check you internet connection");
+                    } else {
+                      Fluttertoast.showToast(msg: "Please try again.");
+                    }
                     print(e);
                   }
                   Navigator.of(context).pop();
@@ -123,6 +117,33 @@ class _TimeSlotState extends State<TimeSlot> {
             ],
           );
         });
+  }
+
+  Future<void> disbaleSlot() async {
+    try {
+      final slotResponse = await http.get(
+          Uri.parse(kIpAddress +
+              "/booking-count?category=date&game=" +
+              gameChoosen +
+              "&date=" +
+              StudentInfo.dateChoosen),
+          headers: {"x-access-token": StudentInfo.jwtToken});
+
+      final responseJsonData = await jsonDecode(slotResponse.body);
+      String slotsAvailable = responseJsonData['message'];
+      bool isSlotAvailable = false;
+      if (slotsAvailable != '0') {
+        isSlotAvailable = true;
+      }
+      await showConfirmationDialog(isSlotAvailable);
+    } catch (e) {
+      if (!(await InternetConnectionChecker().hasConnection)) {
+        Fluttertoast.showToast(msg: "Please check you internet connection");
+      } else {
+        Fluttertoast.showToast(msg: "Please try again.");
+      }
+      print(e);
+    }
   }
 
   Future<void> enableSlot() async {
@@ -149,6 +170,12 @@ class _TimeSlotState extends State<TimeSlot> {
 
       print(enableResponse.body);
     } catch (e) {
+      print("hl");
+      if (!(await InternetConnectionChecker().hasConnection)) {
+        Fluttertoast.showToast(msg: "Please check you internet connection");
+      } else {
+        Fluttertoast.showToast(msg: "Please try again.");
+      }
       print(e);
     }
   }
@@ -163,8 +190,12 @@ class _TimeSlotState extends State<TimeSlot> {
             "admin-header": "yes"
           });
       jsonData = await jsonDecode(response!.body);
+      tapToRefresh = false;
       print(jsonData);
+      setState(() {});
     } catch (e) {
+      tapToRefresh = true;
+      setState(() {});
       print(e);
     }
     // oldResponse = response;
@@ -178,16 +209,9 @@ class _TimeSlotState extends State<TimeSlot> {
     print(response!.statusCode);
     print(sport);
     slotAvailable.clear();
-    // bool isAllSlotZero = true;
     sport.forEach((k, v) {
       slotAvailable.add(k);
     });
-
-    // if (isAllSlotZero) {
-    //   isDisabled = false;
-    // } else {
-    //   isDisabled = true;
-    // }
     setState(() {
       print('setState called');
     });
@@ -226,103 +250,127 @@ class _TimeSlotState extends State<TimeSlot> {
                 color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
           ),
         ),
-        body: Column(
-          children: [
-            StudentInfo.isAdmin == false
-                ? GestureDetector(
-                    onTap: () {
-                      selectDate(context);
-                    },
-                    child: Container(
-                      alignment: Alignment.center,
-                      width: size.width * 0.85,
-                      margin: EdgeInsets.only(top: 5),
-                      padding: EdgeInsets.all(15),
-                      decoration: BoxDecoration(color: kPrimaryColor),
-                      child: AutoSizeText(
-                        selectedDate == null
-                            ? "CHOOSE YOUR DATE"
-                            : '${selectedDate!.day}-${selectedDate!.month}-${selectedDate!.year}',
-                        style: TextStyle(color: Colors.white, fontSize: 17),
-                      ),
-                    ),
-                  )
-                : Row(
-                    children: [
-                      Spacer(),
-                      GestureDetector(
-                        onTap: () {
-                          selectDate(context);
-                        },
-                        child: Container(
-                          alignment: Alignment.center,
-                          width: size.width * 0.4,
-                          margin: EdgeInsets.only(top: 5),
-                          padding: EdgeInsets.all(15),
-                          decoration: BoxDecoration(color: kPrimaryColor),
-                          child: AutoSizeText(
-                            selectedDate == null
-                                ? "CHOOSE YOUR DATE"
-                                : '${selectedDate!.day}-${selectedDate!.month}-${selectedDate!.year}',
-                            style: TextStyle(color: Colors.white, fontSize: 13),
-                          ),
-                        ),
-                      ),
-                      Spacer(flex: 4),
-                      GestureDetector(
-                        onTap: () async {
-                          if (isDateChoosen) {
-                            if (isDisabled) {
-                              await disbaleSlot();
-                            } else {
-                              await enableSlot();
-                              isDisabled = true;
-                            }
-                            await getData();
-                            print("latest");
-                            await getSlot(weekDays[selectedDate!.weekday - 1]);
-                          }
-                        },
-                        child: Container(
-                          alignment: Alignment.center,
-                          width: size.width * 0.4,
-                          margin: EdgeInsets.only(top: 5),
-                          padding: EdgeInsets.all(15),
-                          decoration: isDisabled
-                              ? BoxDecoration(color: Colors.red)
-                              : BoxDecoration(color: Colors.green),
-                          child: isDisabled
-                              ? AutoSizeText(
-                                  'Disable',
-                                  style: TextStyle(
-                                      color: Colors.white, fontSize: 14),
-                                )
-                              : AutoSizeText(
-                                  'Enable',
-                                  style: TextStyle(
-                                      color: Colors.white, fontSize: 14),
-                                ),
-                        ),
-                      ),
-                      Spacer(),
-                    ],
+        body: tapToRefresh
+            ? GestureDetector(
+                onTap: () async {
+                  if (!(await InternetConnectionChecker().hasConnection)) {
+                    Fluttertoast.showToast(
+                        msg: "Please check your internet connection");
+                  } else {
+                    tapToRefresh = false;
+                    getData();
+                  }
+                },
+                child: Container(
+                    child: Center(
+                        child: AutoSizeText(
+                  "Tap To Refresh",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
                   ),
-            Expanded(
-              child: ListView.builder(
-                  physics: ScrollPhysics(),
-                  shrinkWrap: true,
-                  itemCount: slotAvailable.length,
-                  itemBuilder: (context, index) {
-                    return SlotCard(
-                        slotTime: slotAvailable[index],
-                        color: sport[slotAvailable[index]] > 0
-                            ? theme.checkTheme(
-                                Colors.green, Colors.green.shade600, context)
-                            : Colors.grey,
-                        );
-                  }),
-            )
-          ],
-        ));
+                ))),
+              )
+            : Column(
+                children: [
+                  StudentInfo.isAdmin == false
+                      ? GestureDetector(
+                          onTap: () {
+                            selectDate(context);
+                          },
+                          child: Container(
+                            alignment: Alignment.center,
+                            width: size.width * 0.85,
+                            margin: EdgeInsets.only(top: 5),
+                            padding: EdgeInsets.all(15),
+                            decoration: BoxDecoration(color: kPrimaryColor),
+                            child: AutoSizeText(
+                              selectedDate == null
+                                  ? "CHOOSE YOUR DATE"
+                                  : '${selectedDate!.day}-${selectedDate!.month}-${selectedDate!.year}',
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 17),
+                            ),
+                          ),
+                        )
+                      : Row(
+                          children: [
+                            Spacer(),
+                            GestureDetector(
+                              onTap: () {
+                                selectDate(context);
+                              },
+                              child: Container(
+                                alignment: Alignment.center,
+                                width: size.width * 0.4,
+                                margin: EdgeInsets.only(top: 5),
+                                padding: EdgeInsets.all(15),
+                                decoration: BoxDecoration(color: kPrimaryColor),
+                                child: AutoSizeText(
+                                  selectedDate == null
+                                      ? "CHOOSE YOUR DATE"
+                                      : '${selectedDate!.day}-${selectedDate!.month}-${selectedDate!.year}',
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 13),
+                                ),
+                              ),
+                            ),
+                            Spacer(flex: 4),
+                            GestureDetector(
+                              onTap: () async {
+                                if (isDateChoosen) {
+                                  if (isDisabled) {
+                                    await disbaleSlot();
+                                  } else {
+                                    await enableSlot();
+                                    isDisabled = true;
+                                  }
+                                  await getData();
+                                  print("latest");
+                                  await getSlot(
+                                      weekDays[selectedDate!.weekday - 1]);
+                                }
+                              },
+                              child: Container(
+                                alignment: Alignment.center,
+                                width: size.width * 0.4,
+                                margin: EdgeInsets.only(top: 5),
+                                padding: EdgeInsets.all(15),
+                                decoration: isDisabled
+                                    ? BoxDecoration(color: Colors.red)
+                                    : BoxDecoration(color: Colors.green),
+                                child: isDisabled
+                                    ? AutoSizeText(
+                                        'Disable',
+                                        style: TextStyle(
+                                            color: Colors.white, fontSize: 14),
+                                      )
+                                    : AutoSizeText(
+                                        'Enable',
+                                        style: TextStyle(
+                                            color: Colors.white, fontSize: 14),
+                                      ),
+                              ),
+                            ),
+                            Spacer(),
+                          ],
+                        ),
+                  Expanded(
+                    child: ListView.builder(
+                        physics: ScrollPhysics(),
+                        shrinkWrap: true,
+                        itemCount: slotAvailable.length,
+                        itemBuilder: (context, index) {
+                          return SlotCard(
+                            slotTime: slotAvailable[index],
+                            color: sport[slotAvailable[index]] > 0
+                                ? theme.checkTheme(Colors.green,
+                                    Colors.green.shade600, context)
+                                : Colors.grey,
+                          );
+                        }),
+                  )
+                ],
+              ));
   }
 }

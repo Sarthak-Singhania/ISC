@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:isc/components/slot_card.dart';
 import 'package:http/http.dart' as http;
 import '../constants.dart';
@@ -77,6 +78,7 @@ class _UserTimeSlotState extends State<UserTimeSlot> {
   };
   var daySelected = [];
   int maxDaysAllowed = 7;
+  bool tapToRefresh = false;
   final slotAvailable = [];
   bool circP = true;
   bool secondCircp = false;
@@ -87,7 +89,6 @@ class _UserTimeSlotState extends State<UserTimeSlot> {
   }
 
   Future<void> getData() async {
-    //print(JWTtoken);
     try {
       final response = await http.get(
           Uri.parse(kIpAddress +
@@ -103,17 +104,18 @@ class _UserTimeSlotState extends State<UserTimeSlot> {
       maxDaysAllowed = jsonData["max_days"];
       print(jsonData);
       circP = false;
+      tapToRefresh = false;
       setState(() {});
     } catch (e) {
       print(e);
       circP = false;
+      tapToRefresh = true;
       setState(() {});
     }
     // oldResponse = response;
   }
 
   Future<void> getSlot() async {
-    // print(selected.toString());
     slotAvailable.clear();
     StudentInfo.dayChoosen = daySelected;
     try {
@@ -135,8 +137,11 @@ class _UserTimeSlotState extends State<UserTimeSlot> {
       });
       print(jsonData);
       secondCircp = false;
+      tapToRefresh = false;
       setState(() {});
     } catch (e) {
+      secondCircp = false;
+      tapToRefresh = true;
       print(e);
     }
   }
@@ -161,120 +166,148 @@ class _UserTimeSlotState extends State<UserTimeSlot> {
               icon: Icon(Icons.info_outline))
         ],
       ),
-      body: Center(
-        child: Stack(children: [
-          !circP
-              ? Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Container(
-                        height: size.height * 0.22,
-                        child: Column(
-                          children: [
-                            Spacer(),
-                            AutoSizeText(
-                              'Please select your days',
-                              style: TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.bold),
-                            ),
-                            Spacer(),
-                            Container(
-                              // width: size.width * 1,
-                              height: size.height * 0.1,
-                              child: Center(
-                                child: ListView.builder(
-                                    shrinkWrap: true,
-                                    scrollDirection: Axis.horizontal,
-                                    itemCount: daysAvailable.length,
-                                    itemBuilder: (context, index) {
-                                      return Weekday(
-                                        weekday:
-                                            daysAvailable.keys.elementAt(index),
-                                        isEnabled: daysAvailable.values
-                                            .elementAt(index),
-                                        func: () {
-                                          setState(() {});
-                                        },
-                                        isDaySelected: isDaySelected,
-                                        maxDaysAllowed: maxDaysAllowed,
-                                        daySelected: daySelected,
-                                      );
-                                    }),
-                              ),
-                            ),
-                            Spacer(),
-                            GestureDetector(
-                              onTap: () async {
-                                if (daySelected.length > 0) {
-                                  secondCircp = true;
-                                  setState(() {});
-                                  await getSlot();
-                                } else {
-                                  Fluttertoast.showToast(
-                                      msg: "Please select atleast one day");
-                                }
-                              },
-                              child: Container(
-                                width: size.width * 0.5,
-                                height: size.height * 0.05,
-                                decoration: BoxDecoration(
-                                    color: kPrimaryColor,
-                                    borderRadius: BorderRadius.circular(10)),
-                                child: Center(
-                                  child: AutoSizeText(
-                                    'Show Results',
-                                    style: TextStyle(
-                                        color: Colors.white, fontSize: 20),
-                                  ),
-                                ),
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: Container(
-                          // margin: EdgeInsets.only(top: size.height * 0.05),
-                          child: Column(
+      body: tapToRefresh
+          ? GestureDetector(
+              onTap: () async {
+                if (!(await InternetConnectionChecker().hasConnection)) {
+                  Fluttertoast.showToast(
+                      msg: "Please check your internet connection");
+                } else {
+                  tapToRefresh = false;
+                  circP = true;
+                  setState(() {
+                  });
+                  getData();
+                }
+              },
+              child: Container(
+                  child: Center(
+                      child: AutoSizeText(
+                "Tap To Refresh",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ))),
+            )
+          : Center(
+              child: Stack(children: [
+                !circP
+                    ? Column(
                         children: [
-                          // Row(
-                          //   children: [
-                          //     Spacer(flex: 1),
-                          //     Icon(Icons.arrow_left_outlined),
-                          //     Spacer(flex: 1),
-                          //     Text("Monday", style: TextStyle(fontSize: 20)),
-                          //     Spacer(flex: 1),
-                          //     Icon(Icons.arrow_right_outlined),
-                          //     Spacer(flex: 1),
-                          //   ],
-                          // ),
-                          Expanded(
-                            child: ListView.builder(
-                              itemCount: slotAvailable.length,
-                              itemBuilder: (context, index) {
-                                return SlotCard(
-                                  slotTime: slotAvailable[index],
-                                  color: Colors.green,
-                                );
-                              },
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Container(
+                              height: size.height * 0.22,
+                              child: Column(
+                                children: [
+                                  Spacer(),
+                                  AutoSizeText(
+                                    'Please select your days',
+                                    style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  Spacer(),
+                                  Container(
+                                    // width: size.width * 1,
+                                    height: size.height * 0.1,
+                                    child: Center(
+                                      child: ListView.builder(
+                                          shrinkWrap: true,
+                                          scrollDirection: Axis.horizontal,
+                                          itemCount: daysAvailable.length,
+                                          itemBuilder: (context, index) {
+                                            return Weekday(
+                                              weekday: daysAvailable.keys
+                                                  .elementAt(index),
+                                              isEnabled: daysAvailable.values
+                                                  .elementAt(index),
+                                              func: () {
+                                                setState(() {});
+                                              },
+                                              isDaySelected: isDaySelected,
+                                              maxDaysAllowed: maxDaysAllowed,
+                                              daySelected: daySelected,
+                                            );
+                                          }),
+                                    ),
+                                  ),
+                                  Spacer(),
+                                  GestureDetector(
+                                    onTap: () async {
+                                      if (daySelected.length > 0) {
+                                        secondCircp = true;
+                                        setState(() {});
+                                        await getSlot();
+                                      } else {
+                                        Fluttertoast.showToast(
+                                            msg:
+                                                "Please select atleast one day");
+                                      }
+                                    },
+                                    child: Container(
+                                      width: size.width * 0.5,
+                                      height: size.height * 0.05,
+                                      decoration: BoxDecoration(
+                                          color: kPrimaryColor,
+                                          borderRadius:
+                                              BorderRadius.circular(10)),
+                                      child: Center(
+                                        child: AutoSizeText(
+                                          'Show Results',
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 20),
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                ],
+                              ),
                             ),
                           ),
+                          Expanded(
+                            child: Container(
+                                // margin: EdgeInsets.only(top: size.height * 0.05),
+                                child: Column(
+                              children: [
+                                // Row(
+                                //   children: [
+                                //     Spacer(flex: 1),
+                                //     Icon(Icons.arrow_left_outlined),
+                                //     Spacer(flex: 1),
+                                //     Text("Monday", style: TextStyle(fontSize: 20)),
+                                //     Spacer(flex: 1),
+                                //     Icon(Icons.arrow_right_outlined),
+                                //     Spacer(flex: 1),
+                                //   ],
+                                // ),
+                                Expanded(
+                                  child: ListView.builder(
+                                    itemCount: slotAvailable.length,
+                                    itemBuilder: (context, index) {
+                                      return SlotCard(
+                                        slotTime: slotAvailable[index],
+                                        color: Colors.green,
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            )),
+                          )
                         ],
-                      )),
-                    )
-                  ],
-                )
-              : Container(),
-          circP || secondCircp
-              ? Center(
-                  child: CircularProgressIndicator(
-                  color: Colors.blue,
-                ))
-              : Container()
-        ]),
-      ),
+                      )
+                    : Container(),
+                circP || secondCircp
+                    ? Center(
+                        child: CircularProgressIndicator(
+                        color: Colors.blue,
+                      ))
+                    : Container()
+              ]),
+            ),
     );
   }
 }

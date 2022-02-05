@@ -4,6 +4,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:isc/constants.dart';
 import 'package:isc/routes.dart';
 
@@ -34,13 +35,17 @@ class _EmailVerificationState extends State<EmailVerification> {
   }
 
   Future<void> checkEmailVerified() async {
-    user = FirebaseAuth.instance.currentUser!;
-    await user.reload();
-    if (user.emailVerified) {
-      timer.cancel();
-      Fluttertoast.showToast(msg: "Registered Successfully");
-      Navigator.pushNamedAndRemoveUntil(
-          context, AppRoutes.bottomNavigationScreen, (route) => false);
+    if (await InternetConnectionChecker().hasConnection) {
+      user = FirebaseAuth.instance.currentUser!;
+      await user.reload();
+      if (user.emailVerified) {
+        timer.cancel();
+        Fluttertoast.showToast(msg: "Registered Successfully");
+        Navigator.pushNamedAndRemoveUntil(
+            context, AppRoutes.bottomNavigationScreen, (route) => false);
+      }
+    } else {
+      Fluttertoast.showToast(msg: "Please check your internet connection");
     }
   }
 

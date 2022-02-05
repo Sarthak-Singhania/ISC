@@ -73,10 +73,6 @@ class _EventScreenState extends State<EventScreen> {
         print(jsonData[i]['game']);
         print(jsonData[i]['url']);
       }
-      // jsonData.forEach((k, v) {
-      //   sports.add(k);
-      //   imgUri.add(v);
-      // });
       circP = false;
       tapToRefresh = false;
       setState(() {});
