@@ -66,7 +66,7 @@ class _UserTimeSlotState extends State<UserTimeSlot> {
     '2:00-3:00'
   ];
   var daysAvailable = {}; //API
-
+  late int weekdayToday;
   var isDaySelected = {
     'Monday': false,
     'Tuesday': false,
@@ -76,6 +76,15 @@ class _UserTimeSlotState extends State<UserTimeSlot> {
     'Saturday': false,
     'Sunday': false,
   };
+  var weekdays = [
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+    'Sunday',
+  ];
   var daySelected = [];
   int maxDaysAllowed = 7;
   bool tapToRefresh = false;
@@ -85,6 +94,7 @@ class _UserTimeSlotState extends State<UserTimeSlot> {
   @override
   void initState() {
     super.initState();
+    weekdayToday = DateTime.now().weekday;
     getData();
   }
 
@@ -102,6 +112,14 @@ class _UserTimeSlotState extends State<UserTimeSlot> {
       final jsonData = await jsonDecode(response.body);
       daysAvailable = jsonData["isEnabled"];
       maxDaysAllowed = jsonData["max_days"];
+      for (var i = 0; i < daysAvailable.length; i++) {
+        if (daysAvailable.values.elementAt(i)) {
+          String day = daysAvailable.keys.elementAt(i);
+          if (weekdays.indexOf(day) < weekdayToday - 1) {
+            daysAvailable[day] = false;
+          }
+        }
+      }
       print(jsonData);
       circP = false;
       tapToRefresh = false;
@@ -175,8 +193,7 @@ class _UserTimeSlotState extends State<UserTimeSlot> {
                 } else {
                   tapToRefresh = false;
                   circP = true;
-                  setState(() {
-                  });
+                  setState(() {});
                   getData();
                 }
               },

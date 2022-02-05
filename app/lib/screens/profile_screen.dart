@@ -51,17 +51,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Container(
-                margin: EdgeInsets.all(size.height * 0.05),
-                child: CircleAvatar(
-                  backgroundColor: Colors.grey,
-                  radius: size.width * 0.15,
-                )),
-            ProfileCard(
-                size: size,
-                text: 'Account',
-                icon: Icons.account_box_outlined,
-                func: () {}),
+            // Container(
+            //     margin: EdgeInsets.all(size.height * 0.05),
+            //     child: CircleAvatar(
+            //       backgroundColor: Colors.grey,
+            //       radius: size.width * 0.15,
+            //     )),
+            // ProfileCard(
+            //     size: size,
+            //     text: 'Account',
+            //     icon: Icons.account_box_outlined,
+            //     func: () {}),
             StudentInfo.isAdmin == false
                 ? ProfileCard(
                     size: size,
