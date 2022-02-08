@@ -39,15 +39,31 @@ void showInfo(BuildContext context) {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Some info',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                  'Important Information',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                 ),
-                Text(
-                    "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem"),
+                Container(
+                  padding: EdgeInsets.all(10),
+                  child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: StudentInfo.gameChoosenInfo.length,
+                      itemBuilder: (context, index) {
+                        return Container(
+                          margin: EdgeInsets.all(5),
+                          child: Text(
+                            "${index + 1}. ${StudentInfo.gameChoosenInfo[index]} ",
+                            style: TextStyle(fontSize: 15),
+                          ),
+                        );
+                      }),
+                ),
                 ElevatedButton(
                     onPressed: () {
                       Navigator.pop(context);
                     },
+                    style: ElevatedButton.styleFrom(
+                      primary: kPrimaryColor,
+                    ),
                     child: Text('Close'))
               ],
             ),

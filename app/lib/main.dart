@@ -75,10 +75,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             theme: ThemeData(
                 primaryColor: kPrimaryColor,
                 scaffoldBackgroundColor: Colors.white,
+                appBarTheme: AppBarTheme(color: kPrimaryColor),
                 brightness: Brightness.light),
             darkTheme: ThemeData(
                 primaryColor: kPrimaryColor,
                 scaffoldBackgroundColor: Colors.black,
+                 appBarTheme: AppBarTheme(color: kPrimaryColor),
                 brightness: Brightness.dark),
             themeMode: themeProvider.themeMode,
             initialRoute: AppRoutes.homeScreen,
