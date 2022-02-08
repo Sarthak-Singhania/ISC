@@ -45,7 +45,7 @@ class _DetailScreenState extends State<DetailScreen> {
 
   void postData() async {
     for (var i = 0; i < length.length; i++) {
-      for (var j = 0; j < length[j] * 2; j++) {
+      for (var j = 0; j < length[i] * 2; j++) {
         print(_controller[i][j].text);
         print(_controller[i][j + 1].text);
       }

@@ -32,7 +32,7 @@ class _TimeSlotState extends State<TimeSlot> {
   Response? oldResponse;
   bool _decideWhichDayToEnable(DateTime day) {
     if ((day.isAfter(DateTime.now().subtract(Duration(days: 1))) &&
-        day.isBefore(DateTime.now().add(Duration(days: 14 - calendarRange))))) {
+        day.isBefore(DateTime.now().add(Duration(days: 7 - calendarRange))))) {
       return true;
     }
     return false;
@@ -261,13 +261,10 @@ class _TimeSlotState extends State<TimeSlot> {
             : tapToRefresh
                 ? GestureDetector(
                     onTap: () async {
-                      if (!(await InternetConnectionChecker().hasConnection)) {
-                        Fluttertoast.showToast(
-                            msg: "Please check your internet connection");
-                      } else {
-                        tapToRefresh = false;
-                        getData();
-                      }
+                      circP = true;
+                      tapToRefresh = false;
+                      setState(() {});
+                      await getData();
                     },
                     child: Container(
                         child: Center(

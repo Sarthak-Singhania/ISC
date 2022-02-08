@@ -7,5 +7,6 @@ class StudentInfo {
   static String dateChoosen = " ";
   static String slotChoosen = " ";
   static List dayChoosen = [];
-  static Map gameData={};
+  static Map gameData = {};
+  static List gameChoosenInfo = [];
 }

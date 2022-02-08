@@ -69,8 +69,8 @@ class _EventScreenState extends State<EventScreen> {
       notificationListLength = notificationJsonData["message"].length;
 
       for (var i = 0; i < jsonData.length; i++) {
-        print(jsonData[i]['game']);
-        print(jsonData[i]['url']);
+        print(jsonData[i]['info']);
+        // print(jsonData[i]['url']);
       }
       circP = false;
       tapToRefresh = false;
@@ -120,71 +120,75 @@ class _EventScreenState extends State<EventScreen> {
                 ),
               )
             : Scaffold(
-                appBar: AppBar(
-                  toolbarHeight: 80.0,
-                  automaticallyImplyLeading: false,
-                  actions: [
-                    !StudentInfo.isAdmin
-                        ? Container(
-                            child: Stack(
-                              children: [
-                                Center(
-                                  child: IconButton(
-                                    color: Colors.white,
-                                    onPressed: () {
-                                      Navigator.pushNamed(context,
-                                          AppRoutes.notificationScreen);
-                                    },
-                                    icon: Icon(
-                                      Icons.notifications,
-                                      size: size.width * 0.07,
+                body: NestedScrollView(
+                  headerSliverBuilder: (context, innerBoxIsScrolled) => [
+                    SliverAppBar(
+                      toolbarHeight: 80.0,
+                      automaticallyImplyLeading: false,
+                      actions: [
+                        !StudentInfo.isAdmin
+                            ? Container(
+                                child: Stack(
+                                  children: [
+                                    Center(
+                                      child: IconButton(
+                                        color: Colors.white,
+                                        onPressed: () {
+                                          Navigator.pushNamed(context,
+                                              AppRoutes.notificationScreen);
+                                        },
+                                        icon: Icon(
+                                          Icons.notifications,
+                                          size: size.width * 0.07,
+                                        ),
+                                      ),
                                     ),
-                                  ),
+                                    notificationListLength > 0
+                                        ? Positioned(
+                                            top: 20,
+                                            right: 9,
+                                            child: Container(
+                                              width: 20,
+                                              height: 20,
+                                              decoration: BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  color: Colors.red),
+                                              child: Center(
+                                                child: AutoSizeText(
+                                                  '$notificationListLength',
+                                                  style:
+                                                      TextStyle(fontSize: 10),
+                                                ),
+                                              ),
+                                            ))
+                                        : Container()
+                                  ],
                                 ),
-                                notificationListLength > 0
-                                    ? Positioned(
-                                        top: 20,
-                                        right: 9,
-                                        child: Container(
-                                          width: 20,
-                                          height: 20,
-                                          decoration: BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              color: Colors.red),
-                                          child: Center(
-                                            child: AutoSizeText(
-                                              '$notificationListLength',
-                                              style: TextStyle(fontSize: 10),
-                                            ),
-                                          ),
-                                        ))
-                                    : Container()
-                              ],
-                            ),
-                          )
-                        : Container()
-                  ],
-                  elevation: 0,
-                  backgroundColor: Colors.purple[600],
-                  centerTitle: true,
-                  title: AutoSizeText(
-                    "SELECT YOUR SPORT",
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 25,
-                        fontWeight: FontWeight.bold),
-                  ),
-                ),
-                body: SingleChildScrollView(
-                  child: Stack(
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(color: Colors.purple[600]),
-                        width: size.width,
-                        height: size.height * 0.2,
+                              )
+                            : Container()
+                      ],
+                      elevation: 0,
+                      backgroundColor: Colors.purple[600],
+                      centerTitle: true,
+                      title: AutoSizeText(
+                        "SELECT YOUR SPORT",
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 25,
+                            fontWeight: FontWeight.bold),
                       ),
-                      SafeArea(
-                        child: Column(
+                    ),
+                  ],
+                  body: SingleChildScrollView(
+                    child: Stack(
+                      children: [
+                        Container(
+                          decoration:
+                              BoxDecoration(color: Colors.purple[600]),
+                          width: size.width,
+                          height: size.height * 0.2,
+                        ),
+                        Column(
                           children: [
                             SizedBox(
                               height: size.height * 0.04,
@@ -203,17 +207,19 @@ class _EventScreenState extends State<EventScreen> {
                                     ? AdminEventCard(
                                         title: jsonData[index]['game'],
                                         uri: jsonData[index]['url'],
-                                        isEnabled: jsonData[index]['isEnabled'],
+                                        isEnabled: jsonData[index]
+                                            ['isEnabled'],
                                       )
                                     : EventCard(
                                         title: jsonData[index]['game'],
-                                        uri: jsonData[index]['url']);
+                                        uri: jsonData[index]['url'],
+                                        info: jsonData[index]['info']);
                               },
                             )
                           ],
-                        ),
-                      )
-                    ],
+                        )
+                      ],
+                    ),
                   ),
                 ),
                 // bottomNavigationBar: BottomNaviBar('event'),

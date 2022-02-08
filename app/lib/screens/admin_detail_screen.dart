@@ -26,12 +26,47 @@ class _AdminSlotScreenState extends State<AdminSlotScreen> {
   late bool hasInternet;
   late bool tapToRefresh;
 
-  late TextEditingController slotNumberController ;
-      
+  late TextEditingController slotNumberController;
+
   @override
   void initState() {
     super.initState();
     getData();
+  }
+
+  Future<void> changeSlot() async {
+    var body = jsonEncode({
+      "game": StudentInfo.gameChoosen,
+      "date": StudentInfo.dateChoosen,
+      "slot": StudentInfo.slotChoosen,
+      "capacity": slotNumberController.text,
+    });
+    print(body);
+    try {
+      final response = await http.post(
+        Uri.parse(kIpAddress + '/slot-capacity-change'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': '*/*',
+          'Accept-Encoding': 'gzip, deflate, br',
+          'Access-Control-Allow-Origin': ' *',
+          "x-access-token": StudentInfo.jwtToken,
+          "admin-header": "YES"
+        },
+        body: body,
+      );
+      final jsonData = jsonDecode(response.body);
+      Fluttertoast.showToast(
+          msg: jsonData["message"], toastLength: Toast.LENGTH_LONG);
+      setState(() {});
+    } catch (e) {
+      if (!(await InternetConnectionChecker().hasConnection)) {
+        Fluttertoast.showToast(msg: "Please check you internet connection");
+      } else {
+        Fluttertoast.showToast(msg: "Please try again.");
+      }
+      print(e);
+    }
   }
 
   Future<void> showConfirmationDialog(isSlotAvailable) {
@@ -178,7 +213,7 @@ class _AdminSlotScreenState extends State<AdminSlotScreen> {
       print(jsonData);
       print(slotData);
       slotNumberController =
-      TextEditingController(text: slotData['message'].toString());
+          TextEditingController(text: slotData['message'].toString());
       pendingList = jsonData["message"];
       toggleValue = !jsonData["isEnabled"];
       if (pendingList.length == 0) {
@@ -245,7 +280,8 @@ class _AdminSlotScreenState extends State<AdminSlotScreen> {
                         )
                       : RefreshIndicator(
                           onRefresh: getData,
-                          child: Column(
+                          child: ListView(
+                            physics: AlwaysScrollableScrollPhysics(),
                             children: [
                               SizedBox(height: size.height * 0.03),
                               Row(
@@ -257,8 +293,9 @@ class _AdminSlotScreenState extends State<AdminSlotScreen> {
                                     child: TextFormField(
                                         controller: slotNumberController,
                                         textInputAction: TextInputAction.done,
-                                        onFieldSubmitted: (value) {
+                                        onFieldSubmitted: (value) async {
                                           print(value);
+                                          await changeSlot();
                                         },
                                         decoration: InputDecoration(
                                           focusedBorder: OutlineInputBorder(
@@ -308,16 +345,14 @@ class _AdminSlotScreenState extends State<AdminSlotScreen> {
                                     padding: 5.0,
                                     showOnOff: false,
                                     onToggle: (state) async {
-                                       
-                                          if (state) {
-                                           await disbaleSlot();
-                                            getData();
-                                          } else {
-                                           await enableSlot();
-                                            getData();
-                                          }
-                                        setState(() { });
-                                     
+                                      if (state) {
+                                        await disbaleSlot();
+                                        getData();
+                                      } else {
+                                        await enableSlot();
+                                        getData();
+                                      }
+                                      setState(() {});
                                     },
                                   ),
                                   Spacer(),
