@@ -24,11 +24,16 @@ cur=db.cursor(dictionary=True)
 # for i in d:
 #     for x in a:
 #         d[i][x['Slots']]=x[i]
-today=datetime.today().strftime('%Y-%m-%d')
-# game='Squash'
-# date=datetime.strptime('27-01-2022', '%d-%m-%Y').strftime('%Y-%m-%d')
-# slot='5:00pm-6:00pm'
-# cur.execute(f"update `bookings` set `Cancelled`=1, `Cancellation_Date`='{today}', `Confirm`=0 where `Game`='{game}' and `Date`='{date}' and `Slot`='{slot}'")
-# db.commit()
-cur.execute("select exists(select * from `blacklist`) as exists")
-print(cur.fetchall())
+# cur.execute("select * from `Gym` where `Slots`='Enabled'")
+# a=cur.fetchone()
+# days='Monday, Tuesday'
+# isEnabled={i: False for i in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']}
+# for i in isEnabled:
+#     isEnabled[i]=bool(a[i])
+# arg=' and '.join([i+'!=0' for i in days.split(', ')])
+cur.execute(f"select * from `Football` where `Slots`='Enabled'")
+a=cur.fetchall()
+# slots={i: {} for i in days.split(', ')}
+# for i in slots:
+#     for x in a[:-1]:
+#         slots[i][x['Slots']] = x[i]
