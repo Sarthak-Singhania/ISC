@@ -62,6 +62,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             //     text: 'Account',
             //     icon: Icons.account_box_outlined,
             //     func: () {}),
+            SizedBox(
+              height: size.height * 0.05,
+            ),
             StudentInfo.isAdmin == false
                 ? ProfileCard(
                     size: size,

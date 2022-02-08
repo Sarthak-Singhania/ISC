@@ -26,30 +26,27 @@ class _LoginScreenState extends State<LoginScreen> {
   bool passwordVisible = false;
 
   final _auth = FirebaseAuth.instance;
-
+  late final snapShot;
   // string for displaying the error Message
   String? errorMessage;
 
   Future<void> signIn(String email, String password) async {
     if (_formKey.currentState!.validate()) {
       try {
-        final snapShot = await FirebaseFirestore.instance
-            .collection('admin-users')
-            .doc(email)
-            .get();
-
-        if (snapShot.exists) {
-          StudentInfo.isAdmin = true;
-        } else {
-          StudentInfo.isAdmin = false;
-        }
         bool userVerified;
         await _auth
             .signInWithEmailAndPassword(email: email, password: password)
-            .then((uid) => {
+            .then((uid) async => {
                   userVerified = _auth.currentUser!.emailVerified,
                   if (userVerified)
                     {
+                       snapShot = await FirebaseFirestore.instance.collection('admin-users').doc(email).get(),
+
+              if (snapShot.exists) {
+              StudentInfo.isAdmin = true,
+              } else {
+              StudentInfo.isAdmin = false,
+              },
                       Fluttertoast.showToast(msg: "Login Successful"),
                       // Navigator.pushReplacementNamed(
                       //     context, AppRoutes.eventScreen)
@@ -100,6 +97,7 @@ class _LoginScreenState extends State<LoginScreen> {
     dynamic theme = Provider.of<ThemeProvider>(context);
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Container(
         child: Stack(children: [
           Center(

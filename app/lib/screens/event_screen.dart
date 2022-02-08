@@ -60,7 +60,6 @@ class _EventScreenState extends State<EventScreen> {
         "x-access-token": StudentInfo.jwtToken,
         "admin-header": adminheader
       });
-      print(response.statusCode);
       jsonData = (await jsonDecode(response.body))['message'];
       print(jsonData);
       var notificationResponse = await http.get(

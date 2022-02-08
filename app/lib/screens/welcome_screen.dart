@@ -16,6 +16,7 @@ class WelcomeScreen extends StatelessWidget {
     ));
     Size size = MediaQuery.of(context).size;
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Center(
         child: Container(
           child: Column(

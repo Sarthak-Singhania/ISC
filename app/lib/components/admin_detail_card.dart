@@ -4,8 +4,10 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
+import 'package:isc/provider/theme_provider.dart';
 import 'package:isc/user-info.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import '../constants.dart';
 
 class AdminSlotCard extends StatelessWidget {
@@ -44,7 +46,7 @@ class AdminSlotCard extends StatelessWidget {
       );
       print(response.body);
     } catch (e) {
-        if (!(await InternetConnectionChecker().hasConnection)) {
+      if (!(await InternetConnectionChecker().hasConnection)) {
         Fluttertoast.showToast(msg: "Please check you internet connection");
       } else {
         Fluttertoast.showToast(msg: "Please try again.");
@@ -55,6 +57,7 @@ class AdminSlotCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    ThemeProvider theme = Provider.of<ThemeProvider>(context);
     return Container(
       margin: EdgeInsets.all(10),
       padding: EdgeInsets.only(left: 10, right: 10),
@@ -121,14 +124,14 @@ class AdminSlotCard extends StatelessWidget {
         ],
       ),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.checkTheme(
+            kPrimaryLightColor, Colors.purple.shade600, context),
         borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(
-            color: kPrimaryLightColor,
-            spreadRadius: 5,
-            blurRadius: 8,
-            offset: Offset(0, 3), // changes position of shadow
+            color: Colors.grey,
+            offset: Offset(0.0, 2.0), //(x,y)
+            blurRadius: 5.0,
           ),
         ],
       ),

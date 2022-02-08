@@ -26,6 +26,7 @@ class _TimeSlotState extends State<TimeSlot> {
   bool isDisabled = true;
   int calendarRange = 0;
   bool isLoading = false;
+  bool circP = true;
   bool isDateChoosen = false;
   String gameChoosen = " ";
   Response? oldResponse;
@@ -192,8 +193,10 @@ class _TimeSlotState extends State<TimeSlot> {
       jsonData = await jsonDecode(response!.body);
       tapToRefresh = false;
       print(jsonData);
+      circP = false;
       setState(() {});
     } catch (e) {
+      circP = false;
       tapToRefresh = true;
       setState(() {});
       print(e);
@@ -250,59 +253,42 @@ class _TimeSlotState extends State<TimeSlot> {
                 color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
           ),
         ),
-        body: tapToRefresh
-            ? GestureDetector(
-                onTap: () async {
-                  if (!(await InternetConnectionChecker().hasConnection)) {
-                    Fluttertoast.showToast(
-                        msg: "Please check your internet connection");
-                  } else {
-                    tapToRefresh = false;
-                    getData();
-                  }
-                },
-                child: Container(
-                    child: Center(
-                        child: AutoSizeText(
-                  "Tap To Refresh",
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ))),
-              )
-            : Column(
-                children: [
-                  StudentInfo.isAdmin == false
-                      ? GestureDetector(
-                          onTap: () {
-                            selectDate(context);
-                          },
-                          child: Container(
-                            alignment: Alignment.center,
-                            width: size.width * 0.85,
-                            margin: EdgeInsets.only(top: 5),
-                            padding: EdgeInsets.all(15),
-                            decoration: BoxDecoration(color: kPrimaryColor),
+        body: circP
+            ? Center(
+                child: CircularProgressIndicator(
+                color: Colors.blue,
+              ))
+            : tapToRefresh
+                ? GestureDetector(
+                    onTap: () async {
+                      if (!(await InternetConnectionChecker().hasConnection)) {
+                        Fluttertoast.showToast(
+                            msg: "Please check your internet connection");
+                      } else {
+                        tapToRefresh = false;
+                        getData();
+                      }
+                    },
+                    child: Container(
+                        child: Center(
                             child: AutoSizeText(
-                              selectedDate == null
-                                  ? "CHOOSE YOUR DATE"
-                                  : '${selectedDate!.day}-${selectedDate!.month}-${selectedDate!.year}',
-                              style:
-                                  TextStyle(color: Colors.white, fontSize: 17),
-                            ),
-                          ),
-                        )
-                      : Row(
-                          children: [
-                            Spacer(),
-                            GestureDetector(
+                      "Tap To Refresh",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ))),
+                  )
+                : Column(
+                    children: [
+                      StudentInfo.isAdmin == false
+                          ? GestureDetector(
                               onTap: () {
                                 selectDate(context);
                               },
                               child: Container(
                                 alignment: Alignment.center,
-                                width: size.width * 0.4,
+                                width: size.width * 0.85,
                                 margin: EdgeInsets.only(top: 5),
                                 padding: EdgeInsets.all(15),
                                 decoration: BoxDecoration(color: kPrimaryColor),
@@ -311,66 +297,91 @@ class _TimeSlotState extends State<TimeSlot> {
                                       ? "CHOOSE YOUR DATE"
                                       : '${selectedDate!.day}-${selectedDate!.month}-${selectedDate!.year}',
                                   style: TextStyle(
-                                      color: Colors.white, fontSize: 13),
+                                      color: Colors.white, fontSize: 17),
                                 ),
                               ),
+                            )
+                          : Row(
+                              children: [
+                                Spacer(),
+                                GestureDetector(
+                                  onTap: () {
+                                    selectDate(context);
+                                  },
+                                  child: Container(
+                                    alignment: Alignment.center,
+                                    width: size.width * 0.4,
+                                    margin: EdgeInsets.only(top: 5),
+                                    padding: EdgeInsets.all(15),
+                                    decoration:
+                                        BoxDecoration(color: kPrimaryColor),
+                                    child: AutoSizeText(
+                                      selectedDate == null
+                                          ? "CHOOSE YOUR DATE"
+                                          : '${selectedDate!.day}-${selectedDate!.month}-${selectedDate!.year}',
+                                      style: TextStyle(
+                                          color: Colors.white, fontSize: 13),
+                                    ),
+                                  ),
+                                ),
+                                Spacer(flex: 4),
+                                GestureDetector(
+                                  onTap: () async {
+                                    if (isDateChoosen) {
+                                      if (isDisabled) {
+                                        await disbaleSlot();
+                                      } else {
+                                        await enableSlot();
+                                        isDisabled = true;
+                                      }
+                                      await getData();
+                                      print("latest");
+                                      await getSlot(
+                                          weekDays[selectedDate!.weekday - 1]);
+                                    }
+                                  },
+                                  child: Container(
+                                    alignment: Alignment.center,
+                                    width: size.width * 0.4,
+                                    margin: EdgeInsets.only(top: 5),
+                                    padding: EdgeInsets.all(15),
+                                    decoration: isDisabled
+                                        ? BoxDecoration(color: Colors.red)
+                                        : BoxDecoration(color: Colors.green),
+                                    child: isDisabled
+                                        ? AutoSizeText(
+                                            'Disable',
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 14),
+                                          )
+                                        : AutoSizeText(
+                                            'Enable',
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 14),
+                                          ),
+                                  ),
+                                ),
+                                Spacer(),
+                              ],
                             ),
-                            Spacer(flex: 4),
-                            GestureDetector(
-                              onTap: () async {
-                                if (isDateChoosen) {
-                                  if (isDisabled) {
-                                    await disbaleSlot();
-                                  } else {
-                                    await enableSlot();
-                                    isDisabled = true;
-                                  }
-                                  await getData();
-                                  print("latest");
-                                  await getSlot(
-                                      weekDays[selectedDate!.weekday - 1]);
-                                }
-                              },
-                              child: Container(
-                                alignment: Alignment.center,
-                                width: size.width * 0.4,
-                                margin: EdgeInsets.only(top: 5),
-                                padding: EdgeInsets.all(15),
-                                decoration: isDisabled
-                                    ? BoxDecoration(color: Colors.red)
-                                    : BoxDecoration(color: Colors.green),
-                                child: isDisabled
-                                    ? AutoSizeText(
-                                        'Disable',
-                                        style: TextStyle(
-                                            color: Colors.white, fontSize: 14),
-                                      )
-                                    : AutoSizeText(
-                                        'Enable',
-                                        style: TextStyle(
-                                            color: Colors.white, fontSize: 14),
-                                      ),
-                              ),
-                            ),
-                            Spacer(),
-                          ],
-                        ),
-                  Expanded(
-                    child: ListView.builder(
-                        physics: ScrollPhysics(),
-                        shrinkWrap: true,
-                        itemCount: slotAvailable.length,
-                        itemBuilder: (context, index) {
-                          return SlotCard(
-                            slotTime: slotAvailable[index],
-                            color: sport[slotAvailable[index]] > 0
-                                ? theme.checkTheme(Colors.green,
-                                    Colors.green.shade600, context)
-                                : Colors.grey,
-                          );
-                        }),
-                  )
-                ],
-              ));
+                      Expanded(
+                        child: ListView.builder(
+                            physics: ScrollPhysics(),
+                            shrinkWrap: true,
+                            itemCount: slotAvailable.length,
+                            itemBuilder: (context, index) {
+                              return SlotCard(
+                                slotTime: slotAvailable[index],
+                                color: sport[slotAvailable[index]] > 0
+                                    ? theme.checkTheme(Colors.green,
+                                        Colors.green.shade600, context)
+                                    : Colors.grey,
+                              );
+                            }),
+                      )
+                    ],
+                  ));
   }
 }

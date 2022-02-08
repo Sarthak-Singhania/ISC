@@ -2,10 +2,13 @@ import 'dart:convert';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:isc/components/student_detail.dart';
 import 'package:isc/constants.dart';
 import 'package:isc/user-info.dart';
 import 'package:http/http.dart' as http;
+
+import '../routes.dart';
 
 class DetailScreen extends StatefulWidget {
   @override
@@ -48,59 +51,62 @@ class _DetailScreenState extends State<DetailScreen> {
       }
     }
 
-    // String JWTtoken = StudentInfo.jwtToken;
-    // Map<String, dynamic> mp = {};
-    // mp.putIfAbsent(firstNameController!.text, () => currEmail);
-    // for (var i = 0; i < (length * 2); i = i + 2) {
-    //   mp.putIfAbsent(_controller[i].text, () => _controller[i + 1].text);
-    // }
+    Map<String, dynamic> dayBooking = {};
+    for (var i = 0; i < StudentInfo.dayChoosen.length; i++) {
+      Map<String, dynamic> nameEmail = {};
+      for (var j = 0; j < (length[i] * 2); j = j + 2) {
+        nameEmail.putIfAbsent(
+            _controller[i][j].text, () => _controller[i][j + 1].text);
+      }
+      dayBooking.putIfAbsent(StudentInfo.dayChoosen[i], () => nameEmail);
+    }
 
-    // var body = jsonEncode({
-    //   "sports_name": StudentInfo.gameChoosen,
-    //   "date": StudentInfo.dateChoosen,
-    //   "slot": StudentInfo.slotChoosen,
-    //   "student_details": mp,
-    // });
+    var body = jsonEncode({
+      "sports_name": StudentInfo.gameChoosen,
+      "slot": StudentInfo.slotChoosen,
+      "Bookings": dayBooking,
+    });
 
-    // print(body);
-    // try {
-    //   final response = await http.post(
-    //     Uri.parse(kIpAddress + '/book'),
-    //     headers: {
-    //       'Content-Type': 'application/json',
-    //       'Accept': '*/*',
-    //       'Accept-Encoding': 'gzip, deflate, br',
-    //       'Access-Control-Allow-Origin': ' *',
-    //       "x-access-token": JWTtoken,
-    //     },
-    //     body: body,
-    //   );
-    //   print("Hello ${response.statusCode}");
-    //   Map jsonData = await jsonDecode(response.body);
-    //   print("details");
-    //   print(jsonData);
-    //   circP = false;
-    //   setState(() {});
-    //   if (jsonData['status'] == 'confirmed') {
-    //     Fluttertoast.showToast(msg: "YOUR DETAILS HAS BEEN SUBMITTED ");
-    //     Future.delayed(Duration(milliseconds: 2000), () {});
-    //     Navigator.pushReplacementNamed(context, AppRoutes.bookingsScreen);
-    //   } else if (jsonData['status'] == 'duplicate') {
-    //     Fluttertoast.showToast(msg: "YOU HAVE ALREADY A BOOKING FOR THIS GAME");
-    //   } else {
-    //     Fluttertoast.showToast(msg: "YOU HAVE BEEN BLACKLISTED FOR THIS GAME");
-    //   }
-    // } catch (e) {
-    //   circP = false;
-    //   bool hasInternet = await InternetConnectionChecker().hasConnection;
-    //   if (!hasInternet) {
-    //     Fluttertoast.showToast(msg: "Please check your internet connection");
-    //   } else {
-    //     Fluttertoast.showToast(msg: "Something went wrong.Please retry;");
-    //   }
-    //   print(e);
-    //   setState(() {});
-    // }
+    print(body);
+    try {
+      final response = await http.post(
+        Uri.parse(kIpAddress + '/book'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': '*/*',
+          'Accept-Encoding': 'gzip, deflate, br',
+          'Access-Control-Allow-Origin': ' *',
+          "x-access-token": StudentInfo.jwtToken,
+        },
+        body: body,
+      );
+      final jsonData = await jsonDecode(response.body);
+      print("details");
+      print(jsonData['status']);
+      circP = false;
+      setState(() {});
+      if (jsonData['status'] == 'confirmed') {
+        Fluttertoast.showToast(msg: "YOUR DETAILS HAS BEEN SUBMITTED ");
+        Future.delayed(Duration(milliseconds: 2000), () {});
+        Navigator.pushReplacementNamed(context, AppRoutes.bookingsScreen);
+      } else if (jsonData['status'] == 'duplicate') {
+        Fluttertoast.showToast(msg: "YOU HAVE ALREADY A BOOKING FOR THIS GAME");
+      } else if (jsonData['status'] == 'blacklist') {
+        Fluttertoast.showToast(msg: "YOU HAVE BEEN BLACKLISTED FOR THIS GAME");
+      } else {
+        Fluttertoast.showToast(msg: "Something went wrong.Please try again");
+      }
+    } catch (e) {
+      circP = false;
+      bool hasInternet = await InternetConnectionChecker().hasConnection;
+      if (!hasInternet) {
+        Fluttertoast.showToast(msg: "Please check your internet connection");
+      } else {
+        Fluttertoast.showToast(msg: "Something went wrong.Please retry;");
+      }
+      print(e);
+      setState(() {});
+    }
   }
 
   void getData() async {
@@ -141,6 +147,7 @@ class _DetailScreenState extends State<DetailScreen> {
     return Scaffold(
         appBar: AppBar(
           title: Text('Please fill in your details'),
+          backgroundColor: Colors.purple,
           centerTitle: true,
         ),
         body: Stack(children: [
