@@ -1,7 +1,9 @@
-import firebase_admin
-from firebase_admin import auth, credentials
-# cred = credentials.Certificate("cred_singhania.json")
-# firebase_admin.initialize_app(cred)
-id_token='eyJhbGciOiJSUzI1NiIsImtpZCI6IjQwMTU0NmJkMWRhMzA0ZDc2NGNmZWUzYTJhZTVjZDBlNGY2ZjgyN2IiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vc251aXNjIiwiYXVkIjoic251aXNjIiwiYXV0aF90aW1lIjoxNjQyNzc1NjIwLCJ1c2VyX2lkIjoiYlltakxSQmRpUk5NWkphdlI0RDNIeXBFSmJtMSIsInN1YiI6ImJZbWpMUkJkaVJOTVpKYXZSNEQzSHlwRUpibTEiLCJpYXQiOjE2NDI3NzU2MjAsImV4cCI6MTY0Mjc3OTIyMCwiZW1haWwiOiJzczg3OEBzbnUuZWR1LmluIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJmaXJlYmFzZSI6eyJpZGVudGl0aWVzIjp7ImVtYWlsIjpbInNzODc4QHNudS5lZHUuaW4iXX0sInNpZ25faW5fcHJvdmlkZXIiOiJwYXNzd29yZCJ9fQ.e-khYhi7lCo346SlWMoxWu5p1Ip-X49bE9tjidIe5b6aHvlaE02_j56SX54X7W9BekFBPppwGdAKBz6PCKJOZ8ITPK3tCtsJtJGBcNnb-Z7wMGbzHa0IXm-tzEyClUS27Jzuhk7uUNXwy2Uf-tqnvwg49uU8_uzNYrCMDbuusWPJlvrfudWxxD-WL9SH-dMl-b8jIeHY2LiSSrFCTpkN3itARfKbTurX74NrsyQ2OOG2rU7U7KddL78sIcHRnv4tjOJR3riVHoGK9bViHKgaIBccSjdVt0EK08HXix2TJxMkQaga_HG3mKbtKvz4qEq0uDyDdxerEwMhg7ofO5RsCA'
-decoded_token=auth.verify_id_token(id_token)
-print(auth.get_user(decoded_token['uid']))
+from flask import Flask, request,make_response
+app=Flask(__name__)
+
+@app.route('/hello')
+def hello():
+    return make_response({'message':request.args.get('list').split(',')})
+
+if __name__=='__main__':
+    app.run(debug=True)

@@ -1,2 +1,6 @@
 
 server/cred_singhania.json
+*.pyc
+*.iml
+*.iml
+.idea/ISC.iml

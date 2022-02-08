@@ -1,13 +1,11 @@
 from flask import Flask, request, make_response
 from flask_cors import CORS, cross_origin
 from flask_mysqldb import MySQL
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
+from flask_limiter import Limiter, util
 from datetime import datetime
 from firebase_admin import auth, credentials
 from functools import wraps
 import MySQLdb.cursors as cur
-import pandas as pd
 import firebase_admin
 import secrets
 import string
@@ -17,7 +15,7 @@ cors = CORS(app)
 
 limiter = Limiter(
     application,
-    key_func=get_remote_address,
+    key_func=util.get_remote_address,
     default_limits=["200 per day", "50 per hour"]
 )
 
@@ -53,16 +51,17 @@ def token_required(f):
     return decorated
 
 
-@app.route('/games', defaults={'game': None})
-@app.route('/games/<game>',methods=['GET'])
-def games(game):
+@app.get('/games')
+def games():
     cursor = mysql.connection.cursor(cur.DictCursor)
-    cursor.execute("select `Sports_Name`,`URL` from `games` order by `Sports_Name` and `Enabled`='1'")
-    sports = {i['Sports_Name']: i['URL'] for i in cursor.fetchall()}
-    if game:
-        return sports[game.title()]
+    if request.headers['admin-header'].title()=='Yes':
+        cursor.execute("select `Sports_Name`,`URL`,`Enabled` from `games` order by `Sports_Name`")
+        sports = [{'game':i['Sports_Name'],'url':i['URL'],'isEnabled':bool(i['Enabled'])} for i in cursor.fetchall()]
+        return make_response({'message':sports})
     else:
-        return sports
+        cursor.execute("select `Sports_Name`,`URL` from `games` where `Enabled`='1' order by `Sports_Name`")
+        sports = [{'game':i['Sports_Name'],'url':i['URL']} for i in cursor.fetchall()]
+        return make_response({'message':sports})
 
 
 @app.get('/max-person')
@@ -73,18 +72,54 @@ def max_num():
     return num
 
 
-@app.get('/slots/<game>')
-@token_required
-def slots(game):
+@app.get('/slots')
+# @token_required
+def slots():
     cursor = mysql.connection.cursor(cur.DictCursor)
-    game = game.title().replace(' ', '_')
-    cursor.execute(f'select * from `{game}`')
-    a = cursor.fetchall()
-    d = {i: {} for i in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']}
-    for i in d:
-        for x in a:
-            d[i][x['Slots']] = x[i]
-    return make_response({game.replace('_',' '): d})
+    game = request.args.get('game').title().replace(' ', '_')
+    if request.headers['admin-header'].title()=='Yes':
+        cursor.execute(f'select * from `{game}`')
+        a = cursor.fetchall()
+        d = {i: {} for i in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']}
+        isEnabled={i: False for i in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']}
+        for i in d:
+            for x in a[:-1]:
+                d[i][x['Slots']] = x[i]
+            isEnabled[i]=bool(a[-1][i])
+        return make_response({request.args.get('game').title(): d,'isEnabled':isEnabled})
+    elif request.headers['admin-header'].title()=='No':
+        if request.args.get('pos')=='1':
+            cursor.execute(f"select `Max_Days` from `games` where `Sports_Name`='{game}'")
+            max_days=cursor.fetchone()['Max_Days']
+            cursor.execute(f"select * from `{game}` where `Slots`='Enabled'")
+            isEnabled={i: False for i in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']}
+            a=cursor.fetchone()
+            for i in isEnabled:
+                isEnabled[i]=bool(a[i])
+            return make_response({'max_days':max_days,'isEnabled':isEnabled})
+        elif request.args.get('pos')=='2':
+            days=request.args.get('days')[1:-1]
+            arg=' and '.join([i+'!=0' for i in days.split(', ')])
+            cursor.execute(f"select {days}, Slots from `{game}` where {arg}")
+            a=cursor.fetchall()
+            cursor.execute(f"select `Slot`,`Day` from `team_training` where `Game`='{request.args.get('game').title()}'")
+            b={i['Day']:i['Slot'] for i in cursor.fetchall()}
+            slots={i: {} for i in days.split(', ')}
+            for i in slots:
+                for x in a[:-1]:
+                    if i.title() in b:
+                        print(x)
+                        if x['Slots'] in b[i.title()]:
+                            slots[i][x['Slots']+' (Team Training)']=0
+                        else:
+                            slots[i][x['Slots']] = x[i]
+                    else:
+                        slots[i][x['Slots']] = x[i]
+            return make_response({request.args.get('game').title():slots})
+        else: make_response({'message':'invalid args'}),403
+    else:
+        make_response({'message':'invalid args'}),403
+        
 
 
 @app.post('/book')
@@ -95,16 +130,14 @@ def book():
     cursor = mysql.connection.cursor(cur.DictCursor)
     sports_name = x['sports_name'].title().replace(' ', '_')
     slot = x['slot']
-    day = pd.to_datetime(x['date'], dayfirst=True).day_name()
+    day = datetime.strptime(x['date'],'%d-%m-%Y').strftime('%A')
     cursor.execute('select `Booking_ID` from bookings')
     ids = [i['Booking_ID'] for i in cursor.fetchall()]
     booking_id = ''.join(secrets.choice(string.ascii_uppercase + string.digits) for i in range(9))
     if booking_id in ids: booking_id = ''.join(secrets.choice(string.ascii_uppercase + string.digits) for i in range(9))
     date = datetime.strptime(x['date'], "%d-%m-%Y").strftime("%Y-%m-%d")
     cnt = 0
-    cursor.execute(f"update `{sports_name}` set `{day}`=`{day}`-1 where `Slots`='{slot}' and `Cancelled`='0'")
-    mysql.connection.commit()
-    cursor.execute(f"select `SNU_ID` from `bookings` where `Game`='{sports_name}' and `Date`='{date}'")
+    cursor.execute(f"select `SNU_ID` from `bookings` where `Game`='{sports_name}' and `Date`='{date}' and `Cancelled`='0'")
     duplicate=[i['SNU_ID'] for i in cursor.fetchall()]
     cursor.execute("select `SNU_ID` from blacklist")
     blacklist=[i['SNU_ID'] for i in cursor.fetchall()]
@@ -181,7 +214,7 @@ def confirm():
     det = cursor.fetchone()
     sports_name = det['Game']
     slot = det['Slot']
-    day = pd.to_datetime(det['Date'], dayfirst=True).day_name()
+    day = datetime.strptime(x['date'], '%d-%m-%Y').strftime('%A')
     cursor.execute(f"update bookings set `Confirm`='1' where `SNU_ID`='{snu_id}' and `Booking_ID`='{booking_id}'")
     mysql.connection.commit()
     cursor.execute(f"update `{sports_name}` set {day}={day}-1 where Slots='{slot}'")
@@ -216,19 +249,13 @@ def cancel():
     det = cursor.fetchone()
     sports_name = det['Game']
     slot = det['Slot']
-    day = pd.to_datetime(det['Date'], dayfirst=True).day_name()
+    day = datetime.strptime(x['date'], '%d-%m-%Y').strftime('%A')
     date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     cursor.execute(
         f"update bookings set `Confirm`='0', `Cancelled`='1', `Cancellation_Date`='{date}' where `SNU_ID`='{snu_id}' and `Booking_ID`='{booking_id}'")
     mysql.connection.commit()
     cursor.execute(f"update `{sports_name}` set {day}={day}+1 where Slots='{slot}'")
     mysql.connection.commit()
-    # if round((datetime.strptime(str(datetime.now().strftime('%Y-%m-%d'))+' '+slot[:slot.find('-')],'%Y-%m-%d %I:%M%p')-datetime.now()).total_seconds()/60)<60:
-    #     cursor.execute(f"select `SNU_ID` from `Blacklist`")
-    #     names=[i['SNU_ID'] for i in cursor.fetchall()]
-    #     if snu_id in names:
-    #         cursor.execute(f"update `Blacklist` set `Cancellation_Num`=`Cancellation_Num`+1 where `SNU_ID`='{snu_id}'")
-    #     else:
     return 'Booking cancelled'
 
 
@@ -252,11 +279,17 @@ def pending(snu_id):
 def admin_bookings(game, date, slot):
     if request.headers['admin-header'].title()=='Yes':
         cursor = mysql.connection.cursor(cur.DictCursor)
-        date = datetime.strptime(date, '%d-%m-%Y').strftime('%Y-%m-%d')
+        booking_date = datetime.strptime(date, '%d-%m-%Y').strftime('%Y-%m-%d')
+        day=datetime.strptime(date, '%d-%m-%Y').strftime('%A')
         cursor.execute(
-            f"select `Student_Name`,`SNU_ID`,`Booking_ID` from `bookings` where `Game`='{game.title().replace(' ','_')}' and `Slot`='{slot}' and `Date`='{date}' and `Confirm`='1'")
+            f"select `Student_Name`,`SNU_ID`,`Booking_ID` from `bookings` where `Game`='{game.title().replace(' ','_')}' and `Slot`='{slot}' and `Date`='{booking_date}' and `Confirm`='1'")
         bookings = cursor.fetchall()
-        return make_response({'message': bookings})
+        enabled=True
+        if len(bookings)==0:
+            cursor.execute(f"select `{day}` from `{game.title().replace(' ','_')}` where `Slots`='{slot}'")
+            if cursor.fetchone()[day]==0:
+                enabled=False
+        return make_response({'message': bookings,'isEnabled':enabled})
     else:
         return make_response({'message': 'You cannot access since you are not an admin'}), 403
 
@@ -271,27 +304,30 @@ def stop():
         if x['category']=='game':
             game=x['game']
             date=datetime.now().strftime('%Y-%m-%d')
-            cursor.execute(f"update `games` set `Enabled`='0' where `Sports_Name`='{game}'")
+            cursor.execute(f"update `games` set `Enabled`='0' where `Sports_Name`='{x['game'].title()}'")
             mysql.connection.commit()
             cursor.execute(f"update `bookings` set `Cancelled`=1, `Cancellation_Date`='{today}', `Confirm`=0 where `Game`='{game}' and `Date`>='{date}'")
             mysql.connection.commit()
             cursor.execute(f"update `{game.title().replace(' ','_')}` set `Monday`='0',`Tuesday`='0',`Wednesday`='0',`Thursday`='0',`Friday`='0',`Saturday`='0',`Sunday`='0'")
             mysql.connection.commit()
             print('band ho gaya game',x)
-            return make_response({'message':f'booking stopped for {game}'})
+            return make_response({'message':f'booking stopped for {x["game"].title()}'})
         elif x['category']=='date':
             game=x['game'].title().replace(' ','_')
-            day=pd.to_datetime(x['date']).day_name()
+            day=datetime.strptime(x['date'], '%d-%m-%Y').strftime('%A')
             date=datetime.strptime(x['date'], '%d-%m-%Y').strftime('%Y-%m-%d')
             cursor.execute(f"update `{game}` set `{day}`='0'")
             mysql.connection.commit()
             cursor.execute(f"update `bookings` set `Cancelled`=1, `Cancellation_Date`='{today}', `Confirm`=0 where `Game`='{game}' and `Date`='{date}'")
             mysql.connection.commit()
+            cursor.execute(f"update `{game}` set `{day}`='0' where `Slots`='Enabled'")
+            mysql.connection.commit()
             print('band ho gaya date',x)
-            return make_response({'message':f'booking stopped for {game} for the day {x["date"]}'})
+            return make_response({'message':f'booking stopped for {x["game"].title()} for the day {x["date"]}'})
         elif x['category']=='slot':
             game=x['game'].title().replace(' ','_')
-            day=pd.to_datetime(x['date']).day_name()
+            day=datetime.strptime(x['date'], '%d-%m-%Y').strftime('%A')
+            print(day)
             slot=x['slot'].lower()
             date=datetime.strptime(x['date'], '%d-%m-%Y').strftime('%Y-%m-%d')
             cursor.execute(f"update `{game}` set `{day}`='0' where `Slots`='{slot}'")
@@ -299,7 +335,7 @@ def stop():
             cursor.execute(f"update `bookings` set `Cancelled`=1, `Cancellation_Date`='{today}', `Confirm`=0 where `Game`='{game}' and `Date`='{date}' and `Slot`='{slot}'")
             mysql.connection.commit()
             print('band ho gaya slot',x)
-            return make_response({'message':f'booking stopped for {game} for the day {x["date"]} for {slot} slot'})
+            return make_response({'message':f'booking stopped for {x["game"].title()} for the day {x["date"]} for {slot} slot'})
     else:
         return make_response({'message': 'You cannot access since you are not an admin'}), 403
 
@@ -312,33 +348,37 @@ def unstop():
     if request.headers['admin-header'].title()=='Yes':
         if x['category']=='game':
             game=x['game'].title().replace(' ','_')
-            cursor.execute(f"update `games` set `Enabled`='1' where `Sports_Name`='{game}'")
+            cursor.execute(f"update `games` set `Enabled`='1' where `Sports_Name`='{x['game'].title()}'")
             mysql.connection.commit()
-            cursor.execute(f"select `Capacity` from `games` where `Sports_Name`='{game}'")
+            cursor.execute(f"select `Capacity` from `games` where `Sports_Name`='{x['game'].title()}'")
             a=cursor.fetchone()['Capacity']
             cursor.execute(f"update `{game.title().replace(' ','_')}` set `Monday`='{a}',`Tuesday`='{a}',`Wednesday`='{a}',`Thursday`='{a}',`Friday`='{a}',`Saturday`='{a}',`Sunday`='{a}'")
             mysql.connection.commit()
+            cursor.execute(f"update `{game.title().replace(' ','_')}` set `Monday`='1',`Tuesday`='1',`Wednesday`='1',`Thursday`='1',`Friday`='1',`Saturday`='1',`Sunday`='1' where `Slots`='Enabled'")
+            mysql.connection.commit()
             print('chaloo ho gaya game',x)
-            return make_response({'message':f'booking started for {game}'})
+            return make_response({'message':f'booking started for {x["game"].title()}'})
         elif x['category']=='date':
             game=x['game'].title().replace(' ','_')
-            day=pd.to_datetime(x['date']).day_name()
+            day=datetime.strptime(x['date'], '%d-%m-%Y').strftime('%A')
             cursor.execute(f"select `Capacity` from `games` where `Sports_Name`='{game}'")
             a=cursor.fetchone()['Capacity']
             cursor.execute(f"update `{game}` set `{day}`='{a}'")
             mysql.connection.commit()
+            cursor.execute(f"update `{game}` set `{day}`='1' where `Slots`='Enabled'")
+            mysql.connection.commit()
             print('chaloo ho gaya date',x)
-            return make_response({'message':f'booking started for {game} for the day {x["date"]}'})
+            return make_response({'message':f'booking started for {x["game"].title()} for the day {x["date"]}'})
         elif x['category']=='slot':
             game=x['game'].title().replace(' ','_')
-            day=pd.to_datetime(x['date']).day_name()
+            day=datetime.strptime(x['date'], '%d-%m-%Y').strftime('%A')
             slot=x['slot'].lower()
             cursor.execute(f"select `Capacity` from `games` where `Sports_Name`='{game}'")
             a=cursor.fetchone()['Capacity']
             cursor.execute(f"update `{game}` set `{day}`='{a}' where `Slots`='{slot}'")
             mysql.connection.commit()
             print('chaloo ho gaya slot',x)
-            return make_response({'message':f'booking started for {game} for the day {x["date"]} for {slot} slot'})
+            return make_response({'message':f'booking started for {x["game"].title()} for the day {x["date"]} for {slot} slot'})
     else:
         return make_response({'message': 'You cannot access since you are not an admin'}), 403
 
@@ -390,6 +430,23 @@ def absent():
     cursor.execute(com,val)
     mysql.connection.commit()
     return make_response({'message':f"{x['name']} has been marked absent"})
+
+
+# @app.methods('/team-training',methods=['POST','GET'])
+# @token_required
+# def team_training():
+#     cursor=mysql.connection.cursor(cur.DictCursor)
+#     if request.method=='POST':
+#         x=request.get_json()
+#         if request.args.get('option').lower=='on':
+#             com='insert into team_training (`Game`,`Slot`,`Day`) values (%s,%s,%s)'
+#             val=(x['game'],x['slot'],x['day'])
+#             cursor.execute(com,val)
+#             mysql.connection.commit()
+#             return make_response({'message':'team training enabled'})
+#         elif request.args.get('option').lower=='off':
+#             cursor.execute(f"delete from `team_training` where `Game`='{x['game']}' and `Slot`='{x['slot']}' and `Day`='{x['day']}'")
+#             mysql.connection.commit()
 
 
 if __name__ == "__main__":
