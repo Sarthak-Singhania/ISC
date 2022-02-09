@@ -7,6 +7,8 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:isc/components/slot_card.dart';
 import 'package:http/http.dart' as http;
+import 'package:isc/provider/theme_provider.dart';
+import 'package:provider/provider.dart';
 import '../constants.dart';
 import '../user-info.dart';
 
@@ -105,6 +107,7 @@ class _UserTimeSlotState extends State<UserTimeSlot> {
   int maxDaysAllowed = 7;
   bool tapToRefresh = false;
   final slotAvailable = [];
+  Map<String, dynamic> sport = {};
   bool circP = true;
   bool secondCircp = false;
   @override
@@ -164,7 +167,7 @@ class _UserTimeSlotState extends State<UserTimeSlot> {
             "admin-header": "no"
           });
       final jsonData = await jsonDecode(response.body);
-      final sport = jsonData[StudentInfo.gameChoosen][daySelected[0]];
+      sport = jsonData[StudentInfo.gameChoosen][daySelected[0]];
       StudentInfo.gameData = jsonData[StudentInfo.gameChoosen];
       sport.forEach((k, v) {
         slotAvailable.add(k);
@@ -183,6 +186,7 @@ class _UserTimeSlotState extends State<UserTimeSlot> {
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
+    ThemeProvider theme = Provider.of<ThemeProvider>(context);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: kPrimaryColor,
@@ -302,33 +306,20 @@ class _UserTimeSlotState extends State<UserTimeSlot> {
                           ),
                           Expanded(
                             child: Container(
-                                // margin: EdgeInsets.only(top: size.height * 0.05),
-                                child: Column(
-                              children: [
-                                // Row(
-                                //   children: [
-                                //     Spacer(flex: 1),
-                                //     Icon(Icons.arrow_left_outlined),
-                                //     Spacer(flex: 1),
-                                //     Text("Monday", style: TextStyle(fontSize: 20)),
-                                //     Spacer(flex: 1),
-                                //     Icon(Icons.arrow_right_outlined),
-                                //     Spacer(flex: 1),
-                                //   ],
-                                // ),
-                                Expanded(
-                                  child: ListView.builder(
-                                    itemCount: slotAvailable.length,
-                                    itemBuilder: (context, index) {
-                                      return SlotCard(
-                                        slotTime: slotAvailable[index],
-                                        color: Colors.green,
-                                      );
-                                    },
-                                  ),
-                                ),
-                              ],
-                            )),
+                              width: size.width * 0.8,
+                              child: ListView.builder(
+                                shrinkWrap: true,
+                                itemCount: slotAvailable.length,
+                                itemBuilder: (context, index) {
+                                  return SlotCard(
+                                      slotTime: slotAvailable[index],
+                                      color: sport[slotAvailable[index]] > 0
+                                    ? theme.checkTheme(Colors.green,
+                                        Colors.green.shade600, context)
+                                    : Colors.grey,);
+                                },
+                              ),
+                            ),
                           )
                         ],
                       )

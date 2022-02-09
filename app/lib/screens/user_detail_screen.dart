@@ -41,8 +41,8 @@ class _DetailScreenState extends State<DetailScreen> {
     // TODO: implement initState
     super.initState();
     for (var i = 0; i < StudentInfo.dayChoosen.length; i++) {
-        _controller[i][0].text = StudentInfo.name;
-         _controller[i][1].text = StudentInfo.emailId;
+      _controller[i][0].text = StudentInfo.name;
+      _controller[i][1].text = StudentInfo.emailId;
     }
     getData();
   }
@@ -197,14 +197,17 @@ class _DetailScreenState extends State<DetailScreen> {
                               Spacer(),
                               IconButton(
                                   onPressed: () {
-                                    if (length == slotsRemaining[i]) {
+                                    print(
+                                        "Slots remianing ${slotsRemaining[i]}");
+                                    print("Maxlenght $maxLength");
+                                    if (length[i] == slotsRemaining[i]) {
                                       Fluttertoast.showToast(
                                           msg:
                                               "Sorry no more slots are available");
-                                    } else if (length == maxLength) {
+                                    } else if (length[i] == maxLength) {
                                       Fluttertoast.showToast(
                                           msg:
-                                              "Sorry you cannot book more than $length slots for this game");
+                                              "Sorry you cannot book more than ${length[i]} slots for this game");
                                     } else {
                                       length[i]++;
                                       setState(() {});
@@ -258,12 +261,11 @@ class _DetailScreenState extends State<DetailScreen> {
                   height: size.height * 0.03,
                 ),
                 GestureDetector(
-                  onTap: ()async {
+                  onTap: () async {
                     if (_formKey.currentState!.validate()) {
                       circP = true;
-                      setState(() {
-                      });
-                     await postData();
+                      setState(() {});
+                      await postData();
                     }
                   },
                   child: Container(

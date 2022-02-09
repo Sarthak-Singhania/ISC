@@ -42,7 +42,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: theme.checkTheme(Colors.white, Colors.black, context),
-        leading: BackButton(color: kPrimaryColor),
         centerTitle: true,
         title: Text("Profile", style: TextStyle(color: kPrimaryColor)),
       ),

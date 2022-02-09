@@ -1,5 +1,6 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:isc/routes.dart';
 import 'package:isc/screens/admin_detail_screen.dart';
 import 'package:isc/screens/user_detail_screen.dart';
@@ -22,15 +23,19 @@ class SlotCard extends StatelessWidget {
         if (StudentInfo.isAdmin) {
           Navigator.pushReplacementNamed(context, AppRoutes.adminDetail);
         } else {
-          Navigator.pushReplacementNamed(context, AppRoutes.studentDetail);
+          if (color == Colors.grey) {
+            Fluttertoast.showToast(msg: "This slot is not available.");
+          } else {
+            Navigator.pushReplacementNamed(context, AppRoutes.studentDetail);
+          }
         }
       },
       child: Container(
+          height: size.height * 0.07,
           margin: EdgeInsets.only(
-              top: size.width * 0.05,
-              bottom: size.width * 0.05,
-              left: size.width * 0.1,
-              right: size.width * 0.1),
+            top: size.width * 0.05,
+            bottom: size.width * 0.05,
+          ),
           padding: EdgeInsets.all(size.width * 0.04),
           alignment: Alignment.center,
           decoration: BoxDecoration(
