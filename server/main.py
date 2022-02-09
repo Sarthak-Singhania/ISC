@@ -2,13 +2,14 @@ from flask import Flask, request, make_response
 from flask_cors import CORS, cross_origin
 from flask_mysqldb import MySQL
 from flask_limiter import Limiter, util
-from datetime import datetime
+from datetime import datetime, timedelta
 from firebase_admin import auth, credentials
 from functools import wraps
 import MySQLdb.cursors as cur
 import firebase_admin
 import secrets
 import string
+import isc_email
 
 application = app = Flask(__name__)
 cors = CORS(app)
@@ -28,6 +29,7 @@ app.config['JSON_SORT_KEYS'] = False
 
 mysql = MySQL(app)
 
+day_number={'Monday':0,'Tuesday':1,'Wednesday':2,'Thursday':3,'Friday':4,'Saturday':5,'Sunday':6}
 
 def token_required(f):
     @wraps(f)
@@ -55,12 +57,12 @@ def token_required(f):
 def games():
     cursor = mysql.connection.cursor(cur.DictCursor)
     if request.headers['admin-header'].title()=='Yes':
-        cursor.execute("select `Sports_Name`,`URL`,`Enabled` from `games` order by `Sports_Name`")
-        sports = [{'game':i['Sports_Name'],'url':i['URL'],'isEnabled':bool(i['Enabled'])} for i in cursor.fetchall()]
+        cursor.execute("select `Sports_Name`,`URL`,`Enabled`,`Info` from `games` order by `Sports_Name`")
+        sports = [{'game':i['Sports_Name'],'url':i['URL'],'isEnabled':bool(i['Enabled']),'info':i['Info'].split('\\n')} for i in cursor.fetchall()]
         return make_response({'message':sports})
     else:
-        cursor.execute("select `Sports_Name`,`URL` from `games` where `Enabled`='1' order by `Sports_Name`")
-        sports = [{'game':i['Sports_Name'],'url':i['URL']} for i in cursor.fetchall()]
+        cursor.execute("select `Sports_Name`,`URL`,`Info` from `games` where `Enabled`='1' order by `Sports_Name`")
+        sports = [{'game':i['Sports_Name'],'url':i['URL'],'info':i['Info'].split('\\n')} for i in cursor.fetchall()]
         return make_response({'message':sports})
 
 
@@ -73,7 +75,7 @@ def max_num():
 
 
 @app.get('/slots')
-# @token_required
+@token_required
 def slots():
     cursor = mysql.connection.cursor(cur.DictCursor)
     game = request.args.get('game').title().replace(' ', '_')
@@ -104,18 +106,18 @@ def slots():
             a=cursor.fetchall()
             cursor.execute(f"select `Slot`,`Day` from `team_training` where `Game`='{request.args.get('game').title()}'")
             b={i['Day']:i['Slot'] for i in cursor.fetchall()}
-            slots={i: {} for i in days.split(', ')}
-            for i in slots:
+            slots_user={i: {} for i in days.split(', ')}
+            for i in slots_user:
                 for x in a[:-1]:
                     if i.title() in b:
                         print(x)
                         if x['Slots'] in b[i.title()]:
-                            slots[i][x['Slots']+' (Team Training)']=0
+                            slots_user[i][x['Slots']+' (Team Training)']=0
                         else:
-                            slots[i][x['Slots']] = x[i]
+                            slots_user[i][x['Slots']] = x[i]
                     else:
-                        slots[i][x['Slots']] = x[i]
-            return make_response({request.args.get('game').title():slots})
+                        slots_user[i][x['Slots']] = x[i]
+            return make_response({request.args.get('game').title():slots_user})
         else: make_response({'message':'invalid args'}),403
     else:
         make_response({'message':'invalid args'}),403
@@ -130,36 +132,38 @@ def book():
     cursor = mysql.connection.cursor(cur.DictCursor)
     sports_name = x['sports_name'].title().replace(' ', '_')
     slot = x['slot']
-    day = datetime.strptime(x['date'],'%d-%m-%Y').strftime('%A')
     cursor.execute('select `Booking_ID` from bookings')
     ids = [i['Booking_ID'] for i in cursor.fetchall()]
-    booking_id = ''.join(secrets.choice(string.ascii_uppercase + string.digits) for i in range(9))
-    if booking_id in ids: booking_id = ''.join(secrets.choice(string.ascii_uppercase + string.digits) for i in range(9))
-    date = datetime.strptime(x['date'], "%d-%m-%Y").strftime("%Y-%m-%d")
-    cnt = 0
-    cursor.execute(f"select `SNU_ID` from `bookings` where `Game`='{sports_name}' and `Date`='{date}' and `Cancelled`='0'")
-    duplicate=[i['SNU_ID'] for i in cursor.fetchall()]
     cursor.execute("select `SNU_ID` from blacklist")
     blacklist=[i['SNU_ID'] for i in cursor.fetchall()]
     message=''
-    for i in x['student_details']:
-        if x['student_details'][i] not in duplicate and x['student_details'][i] not in blacklist:
-            if cnt == 0:
-                cursor.execute(f"update `{sports_name}` set `{day}`=`{day}`-1 where `Slots`='{slot}'")
-                message=booking_id
-                flag='confirmed'
-                confirm = 1
-            else: confirm = 0
-            com = 'INSERT INTO bookings (`Student_Name`, `SNU_ID`, `Game`, `Date`, `Slot`, `Booking_ID`, `Confirm`) VALUES (%s,%s,%s,%s,%s,%s,%s)'
-            val = (
-                str(i), str(x['student_details'][i]), str(sports_name), str(date), str(slot), str(booking_id), str(confirm))
-            cursor.execute(com, val)
-            mysql.connection.commit()
-            cnt += 1
-        else:
-            message=cnt
-            flag='blacklist' if x['student_details'][i] in blacklist else 'duplicate'
-            break
+    for i in x['Bookings']:
+        cnt=0
+        day=i
+        date=(datetime.now()+timedelta(day_number[day]-datetime.now().weekday())).strftime('%Y-%m-%d')
+        cursor.execute(f"select `SNU_ID` from `bookings` where `Game`='{sports_name}' and `Date`='{date}' and `Cancelled`='0'")
+        duplicate=[i['SNU_ID'] for i in cursor.fetchall()]
+        booking_id = ''.join(secrets.choice(string.ascii_uppercase + string.digits) for i in range(9))
+        if booking_id in ids: booking_id = ''.join(secrets.choice(string.ascii_uppercase + string.digits) for i in range(9))
+        for j in x['Bookings'][i]:
+            if x['Bookings'][i][j] not in duplicate and x['Bookings'][i][j] not in blacklist:
+                if cnt == 0:
+                    cursor.execute(f"update `{sports_name}` set `{day}`=`{day}`-1 where `Slots`='{slot}'")
+                    message=booking_id
+                    flag='confirmed'
+                    confirmed = 1
+                    isc_email.email(str(x['Bookings'][i][j]),f"{sports_name} at ISC for {slot} slot",'Confirmed',str(j))
+                else: confirmed = 0
+                com = 'INSERT INTO bookings (`Student_Name`, `SNU_ID`, `Game`, `Date`, `Slot`, `Booking_ID`, `Confirm`) VALUES (%s,%s,%s,%s,%s,%s,%s)'
+                val = (
+                    str(j), str(x['Bookings'][i][j]), str(sports_name), str(date), str(slot), str(booking_id), str(confirmed))
+                cursor.execute(com, val)
+                mysql.connection.commit()
+                cnt += 1
+            else:
+                message=cnt
+                flag='blacklist' if x['Bookings'][i][j] in blacklist else 'duplicate'
+                break
     return make_response({'message':message,'status':flag})
 
 
@@ -214,11 +218,12 @@ def confirm():
     det = cursor.fetchone()
     sports_name = det['Game']
     slot = det['Slot']
-    day = datetime.strptime(x['date'], '%d-%m-%Y').strftime('%A')
+    day = det['Date'].strftime('%A')
     cursor.execute(f"update bookings set `Confirm`='1' where `SNU_ID`='{snu_id}' and `Booking_ID`='{booking_id}'")
     mysql.connection.commit()
     cursor.execute(f"update `{sports_name}` set {day}={day}-1 where Slots='{slot}'")
     mysql.connection.commit()
+    isc_email.email(x['snu_id'],f"{sports_name} at ISC for {slot} slot",'Confirmed','you')
     return 'Booking confirmed'
 
 
@@ -249,13 +254,14 @@ def cancel():
     det = cursor.fetchone()
     sports_name = det['Game']
     slot = det['Slot']
-    day = datetime.strptime(x['date'], '%d-%m-%Y').strftime('%A')
+    day = det['Date'].strftime('%A')
     date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     cursor.execute(
         f"update bookings set `Confirm`='0', `Cancelled`='1', `Cancellation_Date`='{date}' where `SNU_ID`='{snu_id}' and `Booking_ID`='{booking_id}'")
     mysql.connection.commit()
     cursor.execute(f"update `{sports_name}` set {day}={day}+1 where Slots='{slot}'")
     mysql.connection.commit()
+    isc_email.email(x['snu_id'],f"{sports_name} at ISC for {slot} slot",'Cancelled','you')
     return 'Booking cancelled'
 
 
@@ -430,6 +436,39 @@ def absent():
     cursor.execute(com,val)
     mysql.connection.commit()
     return make_response({'message':f"{x['name']} has been marked absent"})
+
+
+@app.route('/slot-capacity-change',methods=['GET','POST'])
+@token_required
+def slot_capacity_change():
+    cursor=mysql.connection.cursor(cur.DictCursor)
+    if request.headers['admin-header'].title()=='Yes':
+        if request.method=='GET':
+            game=request.args.get('game').title().replace(' ','_')
+            day=datetime.strptime(request.args.get('date',type=str),'%d-%m-%Y').strftime('%A')
+            slot=request.args.get('slot')
+            cursor.execute(f"select `{day}` as 'Capacity' from `{game}` where `Slots`='{slot}'")
+            return make_response({'message':int(cursor.fetchone()['Capacity'])})
+        elif request.method=='POST':
+            x=request.get_json()
+            game=x['game'].title().replace(' ','_')        
+            day=datetime.strptime(x['date'],'%d-%m-%Y').strftime('%A')
+            date=datetime.strptime(x['date'],'%d-%m-%Y').strftime('%Y-%m-%d')
+            cursor.execute(f"select `Capacity` from `games` where `Sports_Name`='{x['game']}'")
+            capacity=int(x['capacity'])
+            slot=x['slot']
+            cap=int(cursor.fetchone()['Capacity'])
+            cursor.execute(f"select count(*) as num from `bookings` where `Game`='{game}' and `Date`='{date}' and `Slot`='{slot}' and `Confirm`='1'")
+            bookingNum=cursor.fetchone()['num']
+            if cap-bookingNum>=capacity:
+                cursor.execute(f"update `{game}` set `{day}`='{capacity}' where `Slots`='{slot}'")
+                mysql.connection.commit()
+                message='Capacity changed'
+            else:
+                message=f'Entered number is greater than capacity, maximum capacity can be {cap}'
+            return make_response({'message':message})
+    else:
+        return make_response({'message': 'You cannot access since you are not an admin'}), 403
 
 
 # @app.methods('/team-training',methods=['POST','GET'])
