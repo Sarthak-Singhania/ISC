@@ -1,9 +1,12 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:isc/constants.dart';
 import 'package:isc/provider/theme_provider.dart';
 import 'package:isc/screens/event_screen.dart';
 import 'package:isc/screens/profile_screen.dart';
 import 'package:provider/provider.dart';
+
+import '../routes.dart';
 
 class BottomNaviBar extends StatefulWidget {
   BottomNaviBar();
@@ -14,6 +17,17 @@ class BottomNaviBar extends StatefulWidget {
 
 class _BottomNaviBarState extends State<BottomNaviBar> {
   int currentIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(const Duration(seconds: kSessionExpireTimeout), () async {
+      print("hgya");
+      await FirebaseAuth.instance.signOut();
+      Navigator.pushNamedAndRemoveUntil(
+          context, AppRoutes.homeScreen, (route) => false);
+    });
+  }
 
   Future<bool?> showAlertDialog(){
      return showDialog(context: context, builder:(context){

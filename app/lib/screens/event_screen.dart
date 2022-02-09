@@ -33,6 +33,12 @@ class _EventScreenState extends State<EventScreen> {
   @override
   void initState() {
     super.initState();
+    // Future.delayed(const Duration(seconds: kSessionExpireTimeout), () async {
+    //   print("hgya");
+    //   await FirebaseAuth.instance.signOut();
+    //   Navigator.pushNamedAndRemoveUntil(
+    //       context, AppRoutes.homeScreen, (route) => false);
+    // });
     getData();
   }
 
