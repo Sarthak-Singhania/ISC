@@ -8,7 +8,7 @@ import 'package:isc/provider/theme_provider.dart';
 import 'package:isc/routes.dart';
 import 'package:isc/screens/admin_detail_screen.dart';
 import 'package:isc/screens/booking_screen.dart';
-import 'package:isc/screens/detail_screen.dart';
+import 'package:isc/screens/user_detail_screen.dart';
 import 'package:isc/screens/email_verfification.dart';
 import 'package:isc/screens/event_screen.dart';
 import 'package:isc/screens/login_screen.dart';

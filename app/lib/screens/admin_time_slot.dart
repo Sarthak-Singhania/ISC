@@ -32,7 +32,7 @@ class _TimeSlotState extends State<TimeSlot> {
   Response? oldResponse;
   bool _decideWhichDayToEnable(DateTime day) {
     if ((day.isAfter(DateTime.now().subtract(Duration(days: 1))) &&
-        day.isBefore(DateTime.now().add(Duration(days: 7 - calendarRange))))) {
+        day.isBefore(DateTime.now().add(Duration(days: 6 - calendarRange))))) {
       return true;
     }
     return false;
@@ -223,6 +223,9 @@ class _TimeSlotState extends State<TimeSlot> {
   selectDate(context) async {
     final initialDate = DateTime.now();
     calendarRange = initialDate.weekday;
+    if (calendarRange == 7) {
+      calendarRange = 0;
+    }
     final newDate = await showDatePicker(
         context: context,
         initialDate: initialDate,

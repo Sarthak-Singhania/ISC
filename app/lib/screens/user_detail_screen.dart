@@ -40,10 +40,14 @@ class _DetailScreenState extends State<DetailScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    for (var i = 0; i < StudentInfo.dayChoosen.length; i++) {
+        _controller[i][0].text = StudentInfo.name;
+         _controller[i][1].text = StudentInfo.emailId;
+    }
     getData();
   }
 
-  void postData() async {
+  Future<void> postData() async {
     for (var i = 0; i < length.length; i++) {
       for (var j = 0; j < length[i] * 2; j++) {
         print(_controller[i][j].text);
@@ -102,7 +106,7 @@ class _DetailScreenState extends State<DetailScreen> {
       if (!hasInternet) {
         Fluttertoast.showToast(msg: "Please check your internet connection");
       } else {
-        Fluttertoast.showToast(msg: "Something went wrong.Please retry;");
+        Fluttertoast.showToast(msg: "Something went wrong.Please retry.");
       }
       print(e);
       setState(() {});
@@ -254,9 +258,12 @@ class _DetailScreenState extends State<DetailScreen> {
                   height: size.height * 0.03,
                 ),
                 GestureDetector(
-                  onTap: () {
+                  onTap: ()async {
                     if (_formKey.currentState!.validate()) {
-                      postData();
+                      circP = true;
+                      setState(() {
+                      });
+                     await postData();
                     }
                   },
                   child: Container(
