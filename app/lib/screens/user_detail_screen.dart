@@ -91,7 +91,6 @@ class _DetailScreenState extends State<DetailScreen> {
       setState(() {});
       if (jsonData['status'] == 'confirmed') {
         Fluttertoast.showToast(msg: "YOUR DETAILS HAS BEEN SUBMITTED ");
-        Future.delayed(Duration(milliseconds: 2000), () {});
         Navigator.pushReplacementNamed(context, AppRoutes.bookingsScreen);
       } else if (jsonData['status'] == 'duplicate') {
         Fluttertoast.showToast(msg: "YOU HAVE ALREADY A BOOKING FOR THIS GAME");

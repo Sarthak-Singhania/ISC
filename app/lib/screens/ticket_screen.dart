@@ -9,6 +9,7 @@ import 'package:flutter_custom_clippers/flutter_custom_clippers.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:isc/constants.dart';
 import 'package:isc/provider/theme_provider.dart';
+import 'package:isc/routes.dart';
 import 'package:isc/user-info.dart';
 import 'package:provider/provider.dart';
 import 'package:transparent_image/transparent_image.dart';
@@ -31,6 +32,7 @@ class _TicketScreenState extends State<TicketScreen> {
   var response;
   var sNo;
   var nameList;
+  var firstName;
   @override
   void initState() {
     super.initState();
@@ -39,7 +41,7 @@ class _TicketScreenState extends State<TicketScreen> {
     getData();
   }
 
-  void getData() async {
+  Future<void> getData() async {
     currEmail = StudentInfo.emailId;
     jwtToken = StudentInfo.jwtToken;
     try {
@@ -48,6 +50,8 @@ class _TicketScreenState extends State<TicketScreen> {
               kIpAddress + '/get_bookings/$currEmail/${widget.bookingId}'),
           headers: {"x-access-token": jwtToken});
       response = jsonDecode(json.body);
+      firstName = response['First_name'];
+      print(response);
       var list = response['name'];
       for (var i = 0; i < list.length; i++) {
         nameList[i] = list[i];
@@ -84,9 +88,10 @@ class _TicketScreenState extends State<TicketScreen> {
       print(acceptResponse.body);
       secondCircP = false;
       Fluttertoast.showToast(msg: "BOOKING CONFIRMED");
-      setState(() {
-        getData();
-      });
+      setState(() {});
+      await getData();
+      Navigator.pushNamedAndRemoveUntil(
+          context, AppRoutes.bottomNavigationScreen, (route) => false);
     } catch (e) {
       secondCircP = false;
       bool hasInternet = await InternetConnectionChecker().hasConnection;
@@ -119,7 +124,8 @@ class _TicketScreenState extends State<TicketScreen> {
       secondCircP = false;
       Fluttertoast.showToast(msg: "BOOKING CANCELLED");
 
-      Navigator.of(context).pop();
+      Navigator.pushNamedAndRemoveUntil(
+          context, AppRoutes.bottomNavigationScreen, (route) => false);
     } catch (e) {
       secondCircP = false;
       bool hasInternet = await InternetConnectionChecker().hasConnection;
@@ -152,7 +158,8 @@ class _TicketScreenState extends State<TicketScreen> {
       print(acceptResponse.body);
       secondCircP = false;
       Fluttertoast.showToast(msg: "BOOKING REQUEST REJECTED");
-      Navigator.pop(context);
+      Navigator.pushNamedAndRemoveUntil(
+          context, AppRoutes.bottomNavigationScreen, (route) => false);
     } catch (e) {
       secondCircP = false;
       bool hasInternet = await InternetConnectionChecker().hasConnection;
@@ -209,7 +216,7 @@ class _TicketScreenState extends State<TicketScreen> {
                           BorderRadius.all(Radius.elliptical(10, 10))),
                   child: Center(
                     child: AutoSizeText(
-                      '${nameList[0]} has added you to the booking',
+                      '$firstName has added you to the booking',
                       style: TextStyle(
                           color: Colors.white,
                           fontSize: 15,
