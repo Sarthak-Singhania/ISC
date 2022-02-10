@@ -366,20 +366,26 @@ class _TimeSlotState extends State<TimeSlot> {
                                 Spacer(),
                               ],
                             ),
+                      SizedBox(
+                        height: size.height * 0.05,
+                      ),
                       Expanded(
-                        child: ListView.builder(
-                            physics: ScrollPhysics(),
-                            shrinkWrap: true,
-                            itemCount: slotAvailable.length,
-                            itemBuilder: (context, index) {
-                              return SlotCard(
-                                slotTime: slotAvailable[index],
-                                color: sport[slotAvailable[index]] > 0
-                                    ? theme.checkTheme(Colors.green,
-                                        Colors.green.shade600, context)
-                                    : Colors.grey,
-                              );
-                            }),
+                        child: Container(
+                          width: size.width * 0.8,
+                          child: ListView.builder(
+                              physics: ScrollPhysics(),
+                              shrinkWrap: true,
+                              itemCount: slotAvailable.length,
+                              itemBuilder: (context, index) {
+                                return SlotCard(
+                                  slotTime: slotAvailable[index],
+                                  color: sport[slotAvailable[index]] > 0
+                                      ? theme.checkTheme(Colors.green,
+                                          Colors.green.shade600, context)
+                                      : Colors.grey,
+                                );
+                              }),
+                        ),
                       )
                     ],
                   ));

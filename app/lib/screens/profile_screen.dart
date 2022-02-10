@@ -82,6 +82,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
             //     }),
             ProfileCard(
               size: size,
+              text: 'FAQs',
+              icon: Icons.question_answer,
+              func: () async {
+                print("hello");
+              },
+            ),
+            ProfileCard(
+              size: size,
               text: 'Log Out',
               icon: Icons.login_outlined,
               func: () async {

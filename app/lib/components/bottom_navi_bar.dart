@@ -34,7 +34,7 @@ class _BottomNaviBarState extends State<BottomNaviBar> {
         return AlertDialog(
           title: Text('Do you want to exit?'),
           actions: [TextButton(child: Text("CANCEL"),onPressed: (){Navigator.pop(context,false);},),
-          TextButton(child: Text("YES"),onPressed: (){Navigator.pop(context,true);},)],
+          TextButton(child: Text("YES"),onPressed: ()async{   await FirebaseAuth.instance.signOut();Navigator.pop(context,true);},)],
         );
       });
   }

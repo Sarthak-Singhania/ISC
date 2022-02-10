@@ -56,11 +56,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
     super.didChangeAppLifecycleState(state);
 
-    final isBackground = state == AppLifecycleState.detached;
+   // final isBackground = state == AppLifecycleState.detached;
 
-    if (isBackground) {
+    if (state==AppLifecycleState.detached) {
+       await FirebaseAuth.instance.signOut();
       print("band");
-      await FirebaseAuth.instance.signOut();
+     
     }
   }
 

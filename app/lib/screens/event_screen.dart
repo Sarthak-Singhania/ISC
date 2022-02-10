@@ -177,8 +177,8 @@ class _EventScreenState extends State<EventScreen> {
                                             ),
                                             notificationListLength > 0
                                                 ? Positioned(
-                                                    top: 20,
-                                                    right: 9,
+                                                    top: 5,
+                                                    right: 8,
                                                     child: Container(
                                                       width: 20,
                                                       height: 20,
@@ -190,6 +190,8 @@ class _EventScreenState extends State<EventScreen> {
                                                         child: AutoSizeText(
                                                           '$notificationListLength',
                                                           style: TextStyle(
+                                                              color:
+                                                                  Colors.white,
                                                               fontSize: 10),
                                                         ),
                                                       ),
@@ -198,7 +200,7 @@ class _EventScreenState extends State<EventScreen> {
                                           ],
                                         ),
                                       )
-                                    : Container()
+                                    : Spacer()
                               ],
                             )),
                             SizedBox(
