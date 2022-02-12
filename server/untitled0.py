@@ -16,3 +16,9 @@ print(cur.fetchall())
 #     db.commit()
 # except errors.DataError:
 #     print('lol')
+for i in range(5):
+    for j in range(5):
+        print(i)
+        break
+    else:
+        print(i)

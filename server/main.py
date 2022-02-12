@@ -525,5 +525,10 @@ def slot_capacity_change():
 #             mysql.connection.commit()
 
 
+@app.get('/time')
+def time():
+    return '9:30pm'
+
+
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=8080, debug=True)
