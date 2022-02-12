@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from firebase_admin import auth, credentials
 from functools import wraps
 import MySQLdb.cursors as cur
+from mysql.connector import errors
 import firebase_admin
 import secrets
 import string
@@ -136,7 +137,10 @@ def book():
     ids = [i['Booking_ID'] for i in cursor.fetchall()]
     cursor.execute("select `SNU_ID` from blacklist")
     blacklist=[i['SNU_ID'] for i in cursor.fetchall()]
-    message=''
+    message={}
+    start_day=datetime.today()-timedelta(days=datetime.today().weekday())
+    start=(start_day).strftime('%Y-%m-%d')
+    end=(start_day+timedelta(days=6)).strftime('%Y-%m-%d')
     for i in x['Bookings']:
         cnt=0
         day=i
@@ -146,23 +150,44 @@ def book():
         booking_id = ''.join(secrets.choice(string.ascii_uppercase + string.digits) for i in range(9))
         if booking_id in ids: booking_id = ''.join(secrets.choice(string.ascii_uppercase + string.digits) for i in range(9))
         for j in x['Bookings'][i]:
-            if x['Bookings'][i][j] not in duplicate and x['Bookings'][i][j] not in blacklist:
-                if cnt == 0:
-                    cursor.execute(f"update `{sports_name}` set `{day}`=`{day}`-1 where `Slots`='{slot}'")
-                    message=booking_id
+            cursor.execute(f"SELECT count(*) AS 'Booking_Num',`games`.`Max_Days` FROM `bookings` JOIN `games` ON `bookings`.`Game`=`games`.`Sports_Name` where `bookings`.`Date`>='{start}' and `bookings`.`Date`<='{end}' and `bookings`.`SNU_ID`='{x['Bookings'][i][j]}' and `bookings`.`Game`='{sports_name}' and `bookings`.`Confirm`='1'")
+            Booking_Num=cursor.fetchone()
+            if Booking_Num['Max_Days'] is None:
+                cursor.execute(f"select `Max_Days` from `games` where `Sports_Name`='{sports_name}'")
+                Booking_Num['Max_Days']=int(cursor.fetchone()['Max_Days'])
+            print(Booking_Num)
+            if x['Bookings'][i][j] not in duplicate and x['Bookings'][i][j] not in blacklist and Booking_Num['Booking_Num']<Booking_Num['Max_Days']:
+                try:
+                    if cnt == 0:
+                        cursor.execute(f"update `{sports_name}` set `{day}`=`{day}`-1 where `Slots`='{slot}'")
+                        confirmed = 1
+                        # isc_email.email(str(x['Bookings'][i][j]),f"{sports_name} at ISC for {slot} slot",'Confirmed',str(j))
+                    else: confirmed = 0
+                    com = 'INSERT INTO bookings (`Student_Name`, `SNU_ID`, `Game`, `Date`, `Slot`, `Booking_ID`, `Confirm`) VALUES (%s,%s,%s,%s,%s,%s,%s)'
+                    val = (
+                        str(j), str(x['Bookings'][i][j]), str(sports_name), str(date), str(slot), str(booking_id), str(confirmed))
+                    cursor.execute(com, val)
+                    mysql.connection.commit()
+                    cnt += 1
+                    if 'Confirmed' not in message:
+                        message['Confirmed']=[]
+                    message['Confirmed'].append(f'Confirmed for {day} and booking id is {booking_id}')
                     flag='confirmed'
-                    confirmed = 1
-                    isc_email.email(str(x['Bookings'][i][j]),f"{sports_name} at ISC for {slot} slot",'Confirmed',str(j))
-                else: confirmed = 0
-                com = 'INSERT INTO bookings (`Student_Name`, `SNU_ID`, `Game`, `Date`, `Slot`, `Booking_ID`, `Confirm`) VALUES (%s,%s,%s,%s,%s,%s,%s)'
-                val = (
-                    str(j), str(x['Bookings'][i][j]), str(sports_name), str(date), str(slot), str(booking_id), str(confirmed))
-                cursor.execute(com, val)
-                mysql.connection.commit()
-                cnt += 1
+                except errors.DataError:
+                    flag='slots finished'
+                    if flag not in message:
+                        message[flag]={i:[]}
+                    message[flag][i].append(f'student number {cnt}')
             else:
-                message=cnt
-                flag='blacklist' if x['Bookings'][i][j] in blacklist else 'duplicate'
+                flag=''
+                if x['Bookings'][i][j] in blacklist:
+                    flag='blacklist'
+                elif Booking_Num['Booking_Num']==Booking_Num['Max_Days']:
+                    flag=f"You have already booked for {Booking_Num['Max_Days']} days"
+                else: flag='duplicate'
+                if flag not in message:
+                    message[flag]={i:[]}
+                message[flag][i].append(f'student number {cnt}')
                 break
     return make_response({'message':message,'status':flag})
 
@@ -177,6 +202,7 @@ def get_bookings(snu_id, booking_id):
         cursor.execute(
             f"select `Game`,`Date`,`Slot`,`Student_Name`,`Confirm`,`SNU_ID` from `bookings` where `Booking_ID`='{booking_id}' and `Cancelled`='0'")
         a = cursor.fetchall()
+        
         if a[0]['Slot'][-2:].lower() == 'pm':
             url = 'https://firebasestorage.googleapis.com/v0/b/snuisc.appspot.com/o/image%204.png?alt=media&token=454af3da-b739-4ad2-ba6f-ce86ad311496'
         else:
@@ -189,6 +215,9 @@ def get_bookings(snu_id, booking_id):
                 b['confirm'] = i['Confirm']
             if i['SNU_ID'][:len(snu_id)] == snu_id:
                 b['confirm'] = i['Confirm']
+        cursor.execute(f"select `Student_Name` from `bookings` where `Booking_ID`='{booking_id}' limit 1")
+        a = cursor.fetchone()
+        b['First_name'] = a['Student_Name']
         return b
     else:
         cursor.execute(
@@ -221,10 +250,14 @@ def confirm():
     day = det['Date'].strftime('%A')
     cursor.execute(f"update bookings set `Confirm`='1' where `SNU_ID`='{snu_id}' and `Booking_ID`='{booking_id}'")
     mysql.connection.commit()
-    cursor.execute(f"update `{sports_name}` set {day}={day}-1 where Slots='{slot}'")
-    mysql.connection.commit()
-    isc_email.email(x['snu_id'],f"{sports_name} at ISC for {slot} slot",'Confirmed','you')
-    return 'Booking confirmed'
+    try:
+        cursor.execute(f"update `{sports_name}` set {day}={day}-1 where Slots='{slot}'")
+        mysql.connection.commit()
+    except errors.DataError:
+        request.post('/cancel',json={'snu_id':snu_id,'booking_id':booking_id},headers={'x-access-token':request.headers['x-access-token']})
+        return make_response({'message':'All slots have been filled your booking has been cancelled'})
+    # isc_email.email(x['snu_id'],f"{sports_name} at ISC for {slot} slot",'Confirmed','you')
+    return make_response({'message':'Booking confirmed'})
 
 
 @app.post('/reject')
@@ -261,7 +294,7 @@ def cancel():
     mysql.connection.commit()
     cursor.execute(f"update `{sports_name}` set {day}={day}+1 where Slots='{slot}'")
     mysql.connection.commit()
-    isc_email.email(x['snu_id'],f"{sports_name} at ISC for {slot} slot",'Cancelled','you')
+    # isc_email.email(x['snu_id'],f"{sports_name} at ISC for {slot} slot",'Cancelled','you')
     return 'Booking cancelled'
 
 
