@@ -77,43 +77,43 @@ class _NotificationScreenState extends State<NotificationScreen> {
                   child: CircularProgressIndicator(
                   color: Colors.blue,
                 ))
-          :tapToRefresh
-            ? GestureDetector(
-                onTap: () async {
-                  if (!(await InternetConnectionChecker().hasConnection)) {
-                    Fluttertoast.showToast(
-                        msg: "Please check your internet connection");
-                  } else {
-                    circP = true;
-                    tapToRefresh = false;
-                    setState(() {});
-                    getData();
-                  }
-                },
-                child:  Container(
-                      child: Center(
-                          child: AutoSizeText(
-                    "Tap To Refresh",
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
+              : tapToRefresh
+                  ? GestureDetector(
+                      onTap: () async {
+                        if (!(await InternetConnectionChecker()
+                            .hasConnection)) {
+                          Fluttertoast.showToast(
+                              msg: "Please check your internet connection");
+                        } else {
+                          circP = true;
+                          tapToRefresh = false;
+                          setState(() {});
+                          getData();
+                        }
+                      },
+                      child: Container(
+                          child: Center(
+                              child: AutoSizeText(
+                        "Tap To Refresh",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ))),
+                    )
+                  : RefreshIndicator(
+                      onRefresh: getData,
+                      child: ListView.builder(
+                          physics: AlwaysScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          itemCount: pendingList.length,
+                          itemBuilder: (context, index) {
+                            return NotificationCard(
+                                username: pendingList[index]['First_name'],
+                                game: pendingList[index]['Game'],
+                                bookingId: pendingList[index]['Booking_ID']);
+                          }),
                     ),
-                  ))),
-                
-              )
-              : RefreshIndicator(
-                onRefresh: getData,
-                child: ListView.builder(
-                    physics: AlwaysScrollableScrollPhysics(),
-                    shrinkWrap: true,
-                    itemCount: pendingList.length,
-                    itemBuilder: (context, index) {
-                      return NotificationCard(
-                          username: pendingList[index]['First_name'],
-                          game: pendingList[index]['Game'],
-                          bookingId: pendingList[index]['Booking_ID']);
-                    }),
-              ),
     );
   }
 }

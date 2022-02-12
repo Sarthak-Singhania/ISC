@@ -87,6 +87,7 @@ class _DetailScreenState extends State<DetailScreen> {
       final jsonData = await jsonDecode(response.body);
       print("details");
       print(jsonData['status']);
+      print(jsonData['message']);
       circP = false;
       setState(() {});
       if (jsonData['status'] == 'confirmed') {
@@ -97,7 +98,7 @@ class _DetailScreenState extends State<DetailScreen> {
       } else if (jsonData['status'] == 'blacklist') {
         Fluttertoast.showToast(msg: "YOU HAVE BEEN BLACKLISTED FOR THIS GAME");
       } else {
-        Fluttertoast.showToast(msg: "Something went wrong.Please try again");
+        Fluttertoast.showToast(msg: jsonData['status']);
       }
     } catch (e) {
       circP = false;

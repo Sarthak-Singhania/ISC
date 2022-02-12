@@ -118,6 +118,9 @@ class _UserTimeSlotState extends State<UserTimeSlot> {
   }
 
   Future<void> getData() async {
+    //DateTime timeNow = DateTime.now();
+    //print(  " hour is ${timeNow.hour} and minute is ${timeNow.minute} and weekday is ${timeNow.weekday}");
+
     try {
       final response = await http.get(
           Uri.parse(kIpAddress +
@@ -134,6 +137,9 @@ class _UserTimeSlotState extends State<UserTimeSlot> {
       for (var i = 0; i < daysAvailable.length; i++) {
         if (daysAvailable.values.elementAt(i)) {
           String day = daysAvailable.keys.elementAt(i);
+          // if(weekdayToday==7&&timeNow.hour>=12&&timeNow.minute>=0){
+          //    daysAvailable[day] =true;
+          // }
           if (weekdays.indexOf(day) < weekdayToday - 1) {
             daysAvailable[day] = false;
           }
@@ -312,11 +318,12 @@ class _UserTimeSlotState extends State<UserTimeSlot> {
                                 itemCount: slotAvailable.length,
                                 itemBuilder: (context, index) {
                                   return SlotCard(
-                                      slotTime: slotAvailable[index],
-                                      color: sport[slotAvailable[index]] > 0
-                                    ? theme.checkTheme(Colors.green,
-                                        Colors.green.shade600, context)
-                                    : Colors.grey,);
+                                    slotTime: slotAvailable[index],
+                                    color: sport[slotAvailable[index]] > 0
+                                        ? theme.checkTheme(Colors.green,
+                                            Colors.green.shade600, context)
+                                        : Colors.grey,
+                                  );
                                 },
                               ),
                             ),
