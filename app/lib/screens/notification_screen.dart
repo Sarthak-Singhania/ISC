@@ -23,7 +23,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
   dynamic pendingList = [];
   bool circP = true;
   bool emptyList = false;
-  late final notificationJsonData;
+  // late final notificationJsonData;
   late bool tapToRefresh;
   @override
   void initState() {
@@ -36,10 +36,11 @@ class _NotificationScreenState extends State<NotificationScreen> {
       var notificationResponse = await http.get(
           Uri.parse(kIpAddress + '/pending/${StudentInfo.emailId}'),
           headers: {"x-access-token": StudentInfo.jwtToken});
-      notificationJsonData = await jsonDecode(notificationResponse.body);
+      var notificationJsonData = await jsonDecode(notificationResponse.body);
 
       print(notificationJsonData);
       pendingList = notificationJsonData["message"];
+      print(pendingList);
       if (pendingList.length == 0) {
         circP = false;
         emptyList = true;
@@ -62,10 +63,19 @@ class _NotificationScreenState extends State<NotificationScreen> {
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: Text('Notifications'),
-      ),
+      appBar: AppBar(centerTitle: true, title: Text('Notifications'), actions: [
+        IconButton(
+            onPressed: () async {
+              circP = true;
+              emptyList = false;
+              setState(() {});
+              await getData();
+            },
+            icon: Icon(
+              Icons.refresh,
+              size: size.width * 0.07,
+            )),
+      ]),
       body: emptyList == true
           ? Center(
               child: AutoSizeText(
@@ -101,19 +111,16 @@ class _NotificationScreenState extends State<NotificationScreen> {
                         ),
                       ))),
                     )
-                  : RefreshIndicator(
-                      onRefresh: getData,
-                      child: ListView.builder(
-                          physics: AlwaysScrollableScrollPhysics(),
-                          shrinkWrap: true,
-                          itemCount: pendingList.length,
-                          itemBuilder: (context, index) {
-                            return NotificationCard(
-                                username: pendingList[index]['First_name'],
-                                game: pendingList[index]['Game'],
-                                bookingId: pendingList[index]['Booking_ID']);
-                          }),
-                    ),
+                  : ListView.builder(
+                      physics: AlwaysScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      itemCount: pendingList.length,
+                      itemBuilder: (context, index) {
+                        return NotificationCard(
+                            username: pendingList[index]['First_name'],
+                            game: pendingList[index]['Game'],
+                            bookingId: pendingList[index]['Booking_ID']);
+                      }),
     );
   }
 }
