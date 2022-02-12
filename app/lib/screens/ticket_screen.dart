@@ -465,10 +465,6 @@ class _TicketScreenState extends State<TicketScreen> {
                                   style: TextStyle(fontSize: 20),
                                 ),
                                 Spacer(),
-                                FadeInImage.memoryNetwork(
-                                  image: '${response['url']}',
-                                  placeholder: kTransparentImage,
-                                ),
                                 AutoSizeText(
                                   "${response['slot']}".toUpperCase(),
                                   style: TextStyle(fontSize: 20),

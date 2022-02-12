@@ -32,7 +32,7 @@ class _TimeSlotState extends State<TimeSlot> {
   Response? oldResponse;
   bool _decideWhichDayToEnable(DateTime day) {
     if ((day.isAfter(DateTime.now().subtract(Duration(days: 1))) &&
-        day.isBefore(DateTime.now().add(Duration(days: 6 - calendarRange))))) {
+        day.isBefore(DateTime.now().add(Duration(days: 7 - calendarRange))))) {
       return true;
     }
     return false;

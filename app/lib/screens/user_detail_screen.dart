@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ffi';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -31,10 +32,12 @@ class _DetailScreenState extends State<DetailScreen> {
   var length = List<int>.filled(StudentInfo.dayChoosen.length, 1);
   var slotsRemaining = List<int>.filled(StudentInfo.dayChoosen.length, 0);
   var downArrow = List<bool>.filled(StudentInfo.dayChoosen.length, true);
-  // List<TextEditingController> _controller = List.generate(
-  //     8,
-  //     (i) =>
-  //         TextEditingController()); //TODO: dynamica krna acooridng to sum of max slots allowed
+  var isError = List.generate(
+      StudentInfo.dayChoosen.length, (i) => List.generate(8, (j) => false),
+      growable: false);
+  var errorMessage = List.generate(
+      StudentInfo.dayChoosen.length, (i) => List.generate(8, (j) => ""),
+      growable: false);
 
   @override
   void initState() {
@@ -86,20 +89,30 @@ class _DetailScreenState extends State<DetailScreen> {
       );
       final jsonData = await jsonDecode(response.body);
       print("details");
-      print(jsonData['status']);
       print(jsonData['message']);
       circP = false;
-      setState(() {});
-      if (jsonData['status'] == 'confirmed') {
-        Fluttertoast.showToast(msg: "YOUR DETAILS HAS BEEN SUBMITTED ");
-        Navigator.pushReplacementNamed(context, AppRoutes.bookingsScreen);
-      } else if (jsonData['status'] == 'duplicate') {
-        Fluttertoast.showToast(msg: "YOU HAVE ALREADY A BOOKING FOR THIS GAME");
-      } else if (jsonData['status'] == 'blacklist') {
-        Fluttertoast.showToast(msg: "YOU HAVE BEEN BLACKLISTED FOR THIS GAME");
-      } else {
-        Fluttertoast.showToast(msg: jsonData['status']);
+      for (var dayNum in jsonData['message'].keys) {
+        for (var errorM in jsonData['message'][dayNum].keys) {
+          var newList = jsonData['message'][dayNum][errorM];
+          print(newList);
+          for (var userNum in newList) {
+            isError[int.parse(dayNum)][userNum * 2] = true;
+            isError[int.parse(dayNum)][(userNum * 2)+1] = true;
+            errorMessage[int.parse(dayNum)][userNum * 2] = errorM;
+          }
+        }
       }
+      setState(() {});
+      // if (jsonData['status'] == 'confirmed') {
+      //   Fluttertoast.showToast(msg: "YOUR DETAILS HAS BEEN SUBMITTED ");
+      //   Navigator.pushReplacementNamed(context, AppRoutes.bookingsScreen);
+      // } else if (jsonData['status'] == 'duplicate') {
+      //   Fluttertoast.showToast(msg: "YOU HAVE ALREADY A BOOKING FOR THIS GAME");
+      // } else if (jsonData['status'] == 'blacklist') {
+      //   Fluttertoast.showToast(msg: "YOU HAVE BEEN BLACKLISTED FOR THIS GAME");
+      // } else {
+      //   Fluttertoast.showToast(msg: jsonData['status']);
+      // }
     } catch (e) {
       circP = false;
       bool hasInternet = await InternetConnectionChecker().hasConnection;
@@ -247,9 +260,12 @@ class _DetailScreenState extends State<DetailScreen> {
                                   itemCount: (length[i]) * 2,
                                   itemBuilder: (context, j) {
                                     return StudentDetail(
-                                        title: sNames[j],
-                                        controller: _controller[i][j],
-                                        index: j);
+                                      title: sNames[j],
+                                      controller: _controller[i][j],
+                                      index: j,
+                                      isError: isError[i][j],
+                                      errorMessage: errorMessage[i][j],
+                                    );
                                   })
                               : Container(),
                         ],

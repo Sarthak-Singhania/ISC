@@ -77,33 +77,33 @@ class _BookingScreenState extends State<BookingScreen> {
                   color: Colors.blue,
                 ))
               : tapToRefresh
-            ? GestureDetector(
-                onTap: () async {
-                  if (!(await InternetConnectionChecker().hasConnection)) {
-                    Fluttertoast.showToast(
-                        msg: "Please check your internet connection");
-                  } else {
-                    circP = true;
-                    tapToRefresh = false;
-                    setState(() {});
-                    getData();
-                  }
-                },
-                child: Container(
-                      child: Center(
-                          child: AutoSizeText(
-                    "Tap To Refresh",
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ))),
-                )
+                  ? GestureDetector(
+                      onTap: () async {
+                        if (!(await InternetConnectionChecker()
+                            .hasConnection)) {
+                          Fluttertoast.showToast(
+                              msg: "Please check your internet connection");
+                        } else {
+                          circP = true;
+                          tapToRefresh = false;
+                          setState(() {});
+                          getData();
+                        }
+                      },
+                      child: Container(
+                          child: Center(
+                              child: AutoSizeText(
+                        "Tap To Refresh",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ))),
+                    )
                   : RefreshIndicator(
                       onRefresh: getData,
                       child: ListView.builder(
                           physics: AlwaysScrollableScrollPhysics(),
-                          shrinkWrap: true,
                           itemCount: bookingList.length,
                           itemBuilder: (context, index) {
                             return BookingCard(
