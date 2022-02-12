@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from firebase_admin import auth, credentials
 from functools import wraps
 import MySQLdb.cursors as cur
+import requests as rq
 from mysql.connector import errors
 import firebase_admin
 import secrets
@@ -153,7 +154,7 @@ def book():
             cursor.execute(f"SELECT count(*) AS 'Booking_Num',`games`.`Max_Days` FROM `bookings` JOIN `games` ON `bookings`.`Game`=`games`.`Sports_Name` where `bookings`.`Date`>='{start}' and `bookings`.`Date`<='{end}' and `bookings`.`SNU_ID`='{x['Bookings'][i][j]}' and `bookings`.`Game`='{sports_name}' and `bookings`.`Confirm`='1'")
             Booking_Num=cursor.fetchone()
             if Booking_Num['Max_Days'] is None:
-                cursor.execute(f"select `Max_Days` from `games` where `Sports_Name`='{sports_name}'")
+                cursor.execute(f"select * from `games` where `Sports_Name`='{sports_name}'")
                 Booking_Num['Max_Days']=int(cursor.fetchone()['Max_Days'])
             print(Booking_Num)
             if x['Bookings'][i][j] not in duplicate and x['Bookings'][i][j] not in blacklist and Booking_Num['Booking_Num']<Booking_Num['Max_Days']:
@@ -248,13 +249,16 @@ def confirm():
     sports_name = det['Game']
     slot = det['Slot']
     day = det['Date'].strftime('%A')
-    cursor.execute(f"update bookings set `Confirm`='1' where `SNU_ID`='{snu_id}' and `Booking_ID`='{booking_id}'")
-    mysql.connection.commit()
+    date=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     try:
         cursor.execute(f"update `{sports_name}` set {day}={day}-1 where Slots='{slot}'")
         mysql.connection.commit()
-    except errors.DataError:
-        request.post('/cancel',json={'snu_id':snu_id,'booking_id':booking_id},headers={'x-access-token':request.headers['x-access-token']})
+        cursor.execute(f"update bookings set `Confirm`='1' where `SNU_ID`='{snu_id}' and `Booking_ID`='{booking_id}'")
+        mysql.connection.commit()
+    except:
+        cursor.execute(
+            f"update bookings set `Confirm`='0', `Cancelled`='1', `Cancellation_Date`='{date}' where `SNU_ID`='{snu_id}' and `Booking_ID`='{booking_id}'")
+        mysql.connection.commit()
         return make_response({'message':'All slots have been filled your booking has been cancelled'})
     # isc_email.email(x['snu_id'],f"{sports_name} at ISC for {slot} slot",'Confirmed','you')
     return make_response({'message':'Booking confirmed'})
