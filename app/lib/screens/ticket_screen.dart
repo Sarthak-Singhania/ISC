@@ -84,14 +84,13 @@ class _TicketScreenState extends State<TicketScreen> {
         },
         body: body,
       );
-
-      print(acceptResponse.body);
+      print("hello");
+      var acceptResponseBody = jsonDecode(acceptResponse.body);
       secondCircP = false;
-      Fluttertoast.showToast(msg: "BOOKING CONFIRMED");
+      Fluttertoast.showToast(msg: acceptResponseBody["message"]);
       setState(() {});
       await getData();
-      Navigator.pushNamedAndRemoveUntil(
-          context, AppRoutes.bottomNavigationScreen, (route) => false);
+      Navigator.pushReplacementNamed(context, AppRoutes.bookingsScreen);
     } catch (e) {
       secondCircP = false;
       bool hasInternet = await InternetConnectionChecker().hasConnection;
