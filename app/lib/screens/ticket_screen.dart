@@ -119,9 +119,9 @@ class _TicketScreenState extends State<TicketScreen> {
         },
         body: body,
       );
-      print(acceptResponse.body);
+      final jsonData=jsonDecode(acceptResponse.body);
       secondCircP = false;
-      Fluttertoast.showToast(msg: "BOOKING CANCELLED");
+      Fluttertoast.showToast(msg: jsonData['message'],toastLength:Toast.LENGTH_LONG);
 
       Navigator.pushNamedAndRemoveUntil(
           context, AppRoutes.bottomNavigationScreen, (route) => false);

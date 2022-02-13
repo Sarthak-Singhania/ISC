@@ -101,6 +101,7 @@ class _BookingScreenState extends State<BookingScreen> {
                       ))),
                     )
                   : RefreshIndicator(
+                      displacement: 100,
                       onRefresh: getData,
                       child: ListView.builder(
                           physics: AlwaysScrollableScrollPhysics(),

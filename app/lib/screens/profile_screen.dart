@@ -85,7 +85,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               text: 'FAQs',
               icon: Icons.question_answer,
               func: () async {
-                print("hello");
+                Navigator.pushNamed(context, AppRoutes.faqscreen);
               },
             ),
             ProfileCard(

@@ -66,8 +66,14 @@ class _EventScreenState extends State<EventScreen> {
         "x-access-token": StudentInfo.jwtToken,
         "admin-header": adminheader
       });
+      var timeResponse = await http.get(Uri.parse(kIpAddress + '/time'),
+          headers: {"admin-header": adminheader});
       jsonData = (await jsonDecode(response.body))['message'];
-      print(jsonData);
+      var timeJsonData = await jsonDecode(timeResponse.body);
+      print(timeJsonData);
+      StudentInfo.resetHour = timeJsonData['resetHour'];
+      StudentInfo.resetWeekday = timeJsonData['resetDay'];
+      StudentInfo.resetMinute = timeJsonData['resetMinute'];
       var notificationResponse = await http.get(
           Uri.parse(kIpAddress + '/pending/${StudentInfo.emailId}'),
           headers: {"x-access-token": StudentInfo.jwtToken});

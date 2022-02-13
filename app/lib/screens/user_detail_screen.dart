@@ -38,6 +38,9 @@ class _DetailScreenState extends State<DetailScreen> {
   var errorMessage = List.generate(
       StudentInfo.dayChoosen.length, (i) => List.generate(8, (j) => ""),
       growable: false);
+  var isConfirm = List.generate(
+      StudentInfo.dayChoosen.length, (i) => List.generate(8, (j) => false),
+      growable: false);
 
   @override
   void initState() {
@@ -96,9 +99,15 @@ class _DetailScreenState extends State<DetailScreen> {
           var newList = jsonData['message'][dayNum][errorM];
           print(newList);
           for (var userNum in newList) {
-            isError[int.parse(dayNum)][userNum * 2] = true;
-            isError[int.parse(dayNum)][(userNum * 2)+1] = true;
-            errorMessage[int.parse(dayNum)][userNum * 2] = errorM;
+            if (errorM == 'Your booking has been confirmed') {
+              isConfirm[int.parse(dayNum)][userNum * 2] = true;
+              isConfirm[int.parse(dayNum)][(userNum * 2) + 1] = true;
+              errorMessage[int.parse(dayNum)][userNum * 2] = errorM;
+            } else {
+              isError[int.parse(dayNum)][userNum * 2] = true;
+              isError[int.parse(dayNum)][(userNum * 2) + 1] = true;
+              errorMessage[int.parse(dayNum)][userNum * 2] = errorM;
+            }
           }
         }
       }
@@ -161,155 +170,163 @@ class _DetailScreenState extends State<DetailScreen> {
   Widget build(BuildContext context) {
     print(currEmail);
     Size size = MediaQuery.of(context).size;
-    return Scaffold(
-        appBar: AppBar(
-          title: Text('Please fill in your details'),
-          backgroundColor: Colors.purple,
-          centerTitle: true,
-        ),
-        body: Stack(children: [
-          SingleChildScrollView(
-            child: Column(
-              children: [
-                SizedBox(
-                  height: size.height * 0.01,
-                ),
-                Form(
-                  key: _formKey,
-                  child: ListView.builder(
-                    physics: NeverScrollableScrollPhysics(),
-                    shrinkWrap: true,
-                    itemCount: (StudentInfo.dayChoosen.length),
-                    itemBuilder: (context, i) {
-                      return Column(
-                        children: [
-                          Row(
-                            children: [
-                              SizedBox(
-                                width: size.width * 0.02,
-                              ),
-                              IconButton(
-                                  onPressed: () {
-                                    downArrow[i] = !downArrow[i];
-                                    setState(() {});
-                                  },
-                                  icon: Icon(
-                                    downArrow[i]
-                                        ? Icons.keyboard_arrow_down
-                                        : Icons.keyboard_arrow_right,
-                                    size: size.width * 0.07,
-                                  )),
-                              SizedBox(
-                                width: size.width * 0.03,
-                              ),
-                              AutoSizeText(
-                                StudentInfo.dayChoosen[i],
-                                style: TextStyle(
-                                    fontSize: 20, fontWeight: FontWeight.bold),
-                              ),
-                              Spacer(),
-                              IconButton(
-                                  onPressed: () {
-                                    print(
-                                        "Slots remianing ${slotsRemaining[i]}");
-                                    print("Maxlenght $maxLength");
-                                    if (length[i] == slotsRemaining[i]) {
-                                      Fluttertoast.showToast(
-                                          msg:
-                                              "Sorry no more slots are available");
-                                    } else if (length[i] == maxLength) {
-                                      Fluttertoast.showToast(
-                                          msg:
-                                              "Sorry you cannot book more than ${length[i]} slots for this game");
-                                    } else {
-                                      length[i]++;
-                                      setState(() {});
-                                    }
-                                  },
-                                  icon: Icon(
-                                    Icons.add,
-                                    size: size.width * 0.07,
-                                  )),
-                              SizedBox(
-                                width: size.width * 0.06,
-                              ),
-                              IconButton(
-                                  onPressed: () {
-                                    if (length[i] == 1) {
-                                      Fluttertoast.showToast(
-                                          msg:
-                                              "Minimum 1 student credetials should be there");
-                                    } else {
-                                      length[i]--;
-                                      setState(() {});
-                                    }
-                                  },
-                                  icon: Icon(
-                                    Icons.remove,
-                                    size: size.width * 0.07,
-                                  )),
-                              SizedBox(
-                                width: size.width * 0.05,
-                              ),
-                            ],
-                          ),
-                          downArrow[i]
-                              ? ListView.builder(
-                                  shrinkWrap: true,
-                                  physics: NeverScrollableScrollPhysics(),
-                                  itemCount: (length[i]) * 2,
-                                  itemBuilder: (context, j) {
-                                    return StudentDetail(
-                                      title: sNames[j],
-                                      controller: _controller[i][j],
-                                      index: j,
-                                      isError: isError[i][j],
-                                      errorMessage: errorMessage[i][j],
-                                    );
-                                  })
-                              : Container(),
-                        ],
-                      );
-                    },
+    return GestureDetector(
+      onTap: () {
+        FocusManager.instance.primaryFocus?.unfocus();
+      },
+      child: Scaffold(
+          appBar: AppBar(
+            title: Text('Please fill in your details'),
+            backgroundColor: Colors.purple,
+            centerTitle: true,
+          ),
+          body: Stack(children: [
+            SingleChildScrollView(
+              child: Column(
+                children: [
+                  SizedBox(
+                    height: size.height * 0.01,
                   ),
-                ),
-                SizedBox(
-                  height: size.height * 0.03,
-                ),
-                GestureDetector(
-                  onTap: () async {
-                    if (_formKey.currentState!.validate()) {
-                      circP = true;
-                      setState(() {});
-                      await postData();
-                    }
-                  },
-                  child: Container(
-                    width: size.width * 0.9,
-                    height: size.height * 0.05,
-                    decoration: BoxDecoration(
-                        color: Colors.purple,
-                        borderRadius: BorderRadius.circular(10)),
-                    child: Center(
-                      child: AutoSizeText(
-                        "SUBMIT",
-                        style: TextStyle(color: Colors.white, fontSize: 20),
+                  Form(
+                    key: _formKey,
+                    child: ListView.builder(
+                      physics: NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      itemCount: (StudentInfo.dayChoosen.length),
+                      itemBuilder: (context, i) {
+                        return Column(
+                          children: [
+                            Row(
+                              children: [
+                                SizedBox(
+                                  width: size.width * 0.02,
+                                ),
+                                IconButton(
+                                    onPressed: () {
+                                      downArrow[i] = !downArrow[i];
+                                      setState(() {});
+                                    },
+                                    icon: Icon(
+                                      downArrow[i]
+                                          ? Icons.keyboard_arrow_down
+                                          : Icons.keyboard_arrow_right,
+                                      size: size.width * 0.07,
+                                    )),
+                                SizedBox(
+                                  width: size.width * 0.03,
+                                ),
+                                AutoSizeText(
+                                  StudentInfo.dayChoosen[i],
+                                  style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                Spacer(),
+                                IconButton(
+                                    onPressed: () {
+                                      print(
+                                          "Slots remianing ${slotsRemaining[i]}");
+                                      print("Maxlenght $maxLength");
+                                      if (length[i] == slotsRemaining[i]) {
+                                        Fluttertoast.showToast(
+                                            msg:
+                                                "Sorry no more slots are available");
+                                      } else if (length[i] == maxLength) {
+                                        Fluttertoast.showToast(
+                                            msg:
+                                                "Sorry you cannot book more than ${length[i]} slots for this game");
+                                      } else {
+                                        length[i]++;
+                                        setState(() {});
+                                      }
+                                    },
+                                    icon: Icon(
+                                      Icons.add,
+                                      size: size.width * 0.07,
+                                    )),
+                                SizedBox(
+                                  width: size.width * 0.06,
+                                ),
+                                IconButton(
+                                    onPressed: () {
+                                      if (length[i] == 1) {
+                                        Fluttertoast.showToast(
+                                            msg:
+                                                "Minimum 1 student credetials should be there");
+                                      } else {
+                                        length[i]--;
+                                        setState(() {});
+                                      }
+                                    },
+                                    icon: Icon(
+                                      Icons.remove,
+                                      size: size.width * 0.07,
+                                    )),
+                                SizedBox(
+                                  width: size.width * 0.05,
+                                ),
+                              ],
+                            ),
+                            downArrow[i]
+                                ? ListView.builder(
+                                    shrinkWrap: true,
+                                    physics: NeverScrollableScrollPhysics(),
+                                    itemCount: (length[i]) * 2,
+                                    itemBuilder: (context, j) {
+                                      return StudentDetail(
+                                        title: sNames[j],
+                                        controller: _controller[i][j],
+                                        index: j,
+                                        isError: isError[i][j],
+                                        isConfirm: isConfirm[i][j],
+                                        errorMessage: errorMessage[i][j],
+                                      );
+                                    })
+                                : Container(),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                  SizedBox(
+                    height: size.height * 0.03,
+                  ),
+                  GestureDetector(
+                    onTap: () async {
+                       FocusManager.instance.primaryFocus?.unfocus();
+                      if (_formKey.currentState!.validate()) {
+                        circP = true;
+                        setState(() {});
+                        await postData();
+                      }
+                    },
+                    child: Container(
+                      width: size.width * 0.9,
+                      height: size.height * 0.05,
+                      decoration: BoxDecoration(
+                          color: Colors.purple,
+                          borderRadius: BorderRadius.circular(10)),
+                      child: Center(
+                        child: AutoSizeText(
+                          "SUBMIT",
+                          style: TextStyle(color: Colors.white, fontSize: 20),
+                        ),
                       ),
                     ),
                   ),
-                ),
-                SizedBox(
-                  height: size.height * 0.01,
-                ),
-              ],
+                  SizedBox(
+                    height: size.height * 0.01,
+                  ),
+                ],
+              ),
             ),
-          ),
-          circP == true
-              ? Center(
-                  child: CircularProgressIndicator(
-                  color: Colors.blue,
-                ))
-              : Container()
-        ]));
+            circP == true
+                ? Center(
+                    child: CircularProgressIndicator(
+                    color: Colors.blue,
+                  ))
+                : Container()
+          ])),
+    );
   }
 }

@@ -6,12 +6,14 @@ class StudentDetail extends StatelessWidget {
   final index;
   final bool isError;
   final String errorMessage;
+  final bool isConfirm;
   StudentDetail(
       {required this.title,
       required this.controller,
       required this.index,
       required this.isError,
-      required this.errorMessage});
+      required this.errorMessage,
+      required this.isConfirm});
   late bool nameField;
 
   @override
@@ -27,12 +29,14 @@ class StudentDetail extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          isError&&nameField
-              ? Container(
+          (isError||isConfirm) && nameField
+              ? AnimatedContainer(
+                  duration: const Duration(seconds: 1),
+                  curve: Curves.fastOutSlowIn,
                   padding: EdgeInsets.all(8),
                   decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10),
-                      color: Colors.red),
+                      color:isConfirm? Colors.green:Colors.red),
                   child: Text(
                     errorMessage,
                     style: TextStyle(color: Colors.white),
@@ -72,11 +76,12 @@ class StudentDetail extends StatelessWidget {
               labelText: title,
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(15),
-                borderSide: BorderSide(color: Colors.greenAccent, width: 5.0),
+                borderSide: BorderSide(color: Colors.purple, width: 5.0),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(color: isError?Colors.red:Colors.blue, width: 3.0),
+                borderSide: BorderSide(
+                    color: isConfirm?Colors.greenAccent:isError ? Colors.red : Colors.blue, width: 3.0),
               ),
             ),
             onSaved: (value) {
