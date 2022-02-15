@@ -63,64 +63,63 @@ class _NotificationScreenState extends State<NotificationScreen> {
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     return Scaffold(
-      appBar: AppBar(centerTitle: true, title: Text('Notifications'), actions: [
-        IconButton(
-            onPressed: () async {
-              circP = true;
-              emptyList = false;
-              setState(() {});
-              await getData();
-            },
-            icon: Icon(
-              Icons.refresh,
-              size: size.width * 0.07,
-            )),
-      ]),
-      body: emptyList == true
+      appBar:
+          AppBar(centerTitle: true, title: Text('Notifications'), actions: []),
+      body: circP
           ? Center(
-              child: AutoSizeText(
-              'No new notifications',
-              style: TextStyle(fontSize: 20),
+              child: CircularProgressIndicator(
+              color: Colors.blue,
             ))
-          : circP
-              ? Center(
-                  child: CircularProgressIndicator(
-                  color: Colors.blue,
-                ))
-              : tapToRefresh
-                  ? GestureDetector(
-                      onTap: () async {
-                        if (!(await InternetConnectionChecker()
-                            .hasConnection)) {
-                          Fluttertoast.showToast(
-                              msg: "Please check your internet connection");
-                        } else {
-                          circP = true;
-                          tapToRefresh = false;
-                          setState(() {});
-                          getData();
-                        }
-                      },
-                      child: Container(
-                          child: Center(
-                              child: AutoSizeText(
-                        "Tap To Refresh",
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ))),
-                    )
-                  : ListView.builder(
-                      physics: AlwaysScrollableScrollPhysics(),
-                      shrinkWrap: true,
-                      itemCount: pendingList.length,
-                      itemBuilder: (context, index) {
-                        return NotificationCard(
-                            username: pendingList[index]['First_name'],
-                            game: pendingList[index]['Game'],
-                            bookingId: pendingList[index]['Booking_ID']);
-                      }),
+          : tapToRefresh
+              ? GestureDetector(
+                  onTap: () async {
+                    if (!(await InternetConnectionChecker().hasConnection)) {
+                      Fluttertoast.showToast(
+                          msg: "Please check your internet connection");
+                    } else {
+                      circP = true;
+                      tapToRefresh = false;
+                      setState(() {});
+                      getData();
+                    }
+                  },
+                  child: Container(
+                      child: Center(
+                          child: AutoSizeText(
+                    "Tap To Refresh",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ))),
+                )
+              : RefreshIndicator(
+                  onRefresh: getData,
+                  child: ListView(children: [
+                    emptyList == true
+                        ? Column(
+                            children: [
+                              SizedBox(
+                                height: size.height * 0.4,
+                              ),
+                              AutoSizeText(
+                                'No new notifications',
+                                style: TextStyle(fontSize: 20),
+                              ),
+                            ],
+                          )
+                        : ListView.builder(
+                            physics: NeverScrollableScrollPhysics(),
+                            shrinkWrap: true,
+                            itemCount: pendingList.length,
+                            itemBuilder: (context, index) {
+                              return NotificationCard(
+                                  username: pendingList[index]['First_name'],
+                                  game: pendingList[index]['Game'],
+                                  bookingId: pendingList[index]['Booking_ID']);
+                            }),
+                  ]),
+                ),
     );
   }
 }

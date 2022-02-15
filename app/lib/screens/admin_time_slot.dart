@@ -281,91 +281,70 @@ class _TimeSlotState extends State<TimeSlot> {
                   )
                 : Column(
                     children: [
-                      StudentInfo.isAdmin == false
-                          ? GestureDetector(
-                              onTap: () {
-                                selectDate(context);
-                              },
-                              child: Container(
-                                alignment: Alignment.center,
-                                width: size.width * 0.85,
-                                margin: EdgeInsets.only(top: 5),
-                                padding: EdgeInsets.all(15),
-                                decoration: BoxDecoration(color: kPrimaryColor),
-                                child: AutoSizeText(
-                                  selectedDate == null
-                                      ? "CHOOSE YOUR DATE"
-                                      : '${selectedDate!.day}-${selectedDate!.month}-${selectedDate!.year}',
-                                  style: TextStyle(
-                                      color: Colors.white, fontSize: 17),
-                                ),
+                      Row(
+                        children: [
+                          Spacer(),
+                          GestureDetector(
+                            onTap: () {
+                              selectDate(context);
+                            },
+                            child: Container(
+                              alignment: Alignment.center,
+                              height: size.height * 0.05,
+                              width: size.width * 0.4,
+                              margin: EdgeInsets.only(top: 5),
+                              padding: EdgeInsets.all(15),
+                              decoration: BoxDecoration(color: kPrimaryColor),
+                              child: AutoSizeText(
+                                selectedDate == null
+                                    ? "CHOOSE YOUR DATE"
+                                    : '${selectedDate!.day}-${selectedDate!.month}-${selectedDate!.year}',
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 13),
                               ),
-                            )
-                          : Row(
-                              children: [
-                                Spacer(),
-                                GestureDetector(
-                                  onTap: () {
-                                    selectDate(context);
-                                  },
-                                  child: Container(
-                                    alignment: Alignment.center,
-                                    width: size.width * 0.4,
-                                    margin: EdgeInsets.only(top: 5),
-                                    padding: EdgeInsets.all(15),
-                                    decoration:
-                                        BoxDecoration(color: kPrimaryColor),
-                                    child: AutoSizeText(
-                                      selectedDate == null
-                                          ? "CHOOSE YOUR DATE"
-                                          : '${selectedDate!.day}-${selectedDate!.month}-${selectedDate!.year}',
-                                      style: TextStyle(
-                                          color: Colors.white, fontSize: 13),
-                                    ),
-                                  ),
-                                ),
-                                Spacer(flex: 4),
-                                GestureDetector(
-                                  onTap: () async {
-                                    if (isDateChoosen) {
-                                      if (isDisabled) {
-                                        await disbaleSlot();
-                                      } else {
-                                        await enableSlot();
-                                        isDisabled = true;
-                                      }
-                                      await getData();
-                                      print("latest");
-                                      await getSlot(
-                                          weekDays[selectedDate!.weekday - 1]);
-                                    }
-                                  },
-                                  child: Container(
-                                    alignment: Alignment.center,
-                                    width: size.width * 0.4,
-                                    margin: EdgeInsets.only(top: 5),
-                                    padding: EdgeInsets.all(15),
-                                    decoration: isDisabled
-                                        ? BoxDecoration(color: Colors.red)
-                                        : BoxDecoration(color: Colors.green),
-                                    child: isDisabled
-                                        ? AutoSizeText(
-                                            'Disable',
-                                            style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 14),
-                                          )
-                                        : AutoSizeText(
-                                            'Enable',
-                                            style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 14),
-                                          ),
-                                  ),
-                                ),
-                                Spacer(),
-                              ],
                             ),
+                          ),
+                          Spacer(flex: 4),
+                          GestureDetector(
+                            onTap: () async {
+                              if (isDateChoosen) {
+                                if (isDisabled) {
+                                  await disbaleSlot();
+                                } else {
+                                  await enableSlot();
+                                  isDisabled = true;
+                                }
+                                await getData();
+                                print("latest");
+                                await getSlot(
+                                    weekDays[selectedDate!.weekday - 1]);
+                              }
+                            },
+                            child: Container(
+                              alignment: Alignment.center,
+                              width: size.width * 0.4,
+                              height: size.height * 0.05,
+                              margin: EdgeInsets.only(top: 5),
+                              padding: EdgeInsets.all(15),
+                              decoration: isDisabled
+                                  ? BoxDecoration(color: Colors.red)
+                                  : BoxDecoration(color: Colors.green),
+                              child: isDisabled
+                                  ? AutoSizeText(
+                                      'Disable',
+                                      style: TextStyle(
+                                          color: Colors.white, fontSize: 14),
+                                    )
+                                  : AutoSizeText(
+                                      'Enable',
+                                      style: TextStyle(
+                                          color: Colors.white, fontSize: 14),
+                                    ),
+                            ),
+                          ),
+                          Spacer(),
+                        ],
+                      ),
                       SizedBox(
                         height: size.height * 0.05,
                       ),

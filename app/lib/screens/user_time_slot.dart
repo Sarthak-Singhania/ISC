@@ -148,8 +148,7 @@ class _UserTimeSlotState extends State<UserTimeSlot> {
           }
         }
       }
-      print(daysAvailable);
-      circP = false;
+            circP = false;
       tapToRefresh = false;
       setState(() {});
     } catch (e) {

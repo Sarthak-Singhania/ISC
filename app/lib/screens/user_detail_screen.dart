@@ -16,6 +16,16 @@ class DetailScreen extends StatefulWidget {
   _DetailScreenState createState() => _DetailScreenState();
 }
 
+var weekday = {
+  'Monday': 1,
+  'Tuesday': 2,
+  'Wednesday': 3,
+  'Thursday': 4,
+  'Friday': 5,
+  'Saturday': 6,
+  'Sunday': 7,
+};
+
 class _DetailScreenState extends State<DetailScreen> {
   TextEditingController? firstNameController;
   final _formKey = GlobalKey<FormState>();
@@ -41,7 +51,7 @@ class _DetailScreenState extends State<DetailScreen> {
   var isConfirm = List.generate(
       StudentInfo.dayChoosen.length, (i) => List.generate(8, (j) => false),
       growable: false);
-
+  DateTime? todayDate;
   @override
   void initState() {
     // TODO: implement initState
@@ -50,6 +60,7 @@ class _DetailScreenState extends State<DetailScreen> {
       _controller[i][0].text = StudentInfo.name;
       _controller[i][1].text = StudentInfo.emailId;
     }
+    todayDate = DateTime.now();
     getData();
   }
 
@@ -62,13 +73,26 @@ class _DetailScreenState extends State<DetailScreen> {
     }
 
     Map<String, dynamic> dayBooking = {};
+
     for (var i = 0; i < StudentInfo.dayChoosen.length; i++) {
       Map<String, dynamic> nameEmail = {};
       for (var j = 0; j < (length[i] * 2); j = j + 2) {
         nameEmail.putIfAbsent(
             _controller[i][j].text, () => _controller[i][j + 1].text);
       }
-      dayBooking.putIfAbsent(StudentInfo.dayChoosen[i], () => nameEmail);
+      int? bookingDayNum = weekday[StudentInfo.dayChoosen[i]];
+      int todayNum = todayDate!.weekday;
+      if (todayDate!.weekday == StudentInfo.resetWeekday &&
+          todayDate!.hour >= StudentInfo.resetHour &&
+          todayDate!.minute >= StudentInfo.resetMinute) {
+        todayNum = 0;
+      }
+      DateTime? bookingDate =
+          todayDate?.add(Duration(days: bookingDayNum! - todayNum));
+      var dateParse = DateTime.parse(bookingDate.toString());
+      var formattedDate =
+          "${dateParse.day}-${dateParse.month}-${dateParse.year}";
+      dayBooking.putIfAbsent(formattedDate, () => nameEmail);
     }
 
     var body = jsonEncode({
@@ -78,6 +102,7 @@ class _DetailScreenState extends State<DetailScreen> {
     });
 
     print(body);
+
     try {
       final response = await http.post(
         Uri.parse(kIpAddress + '/book'),
@@ -112,16 +137,6 @@ class _DetailScreenState extends State<DetailScreen> {
         }
       }
       setState(() {});
-      // if (jsonData['status'] == 'confirmed') {
-      //   Fluttertoast.showToast(msg: "YOUR DETAILS HAS BEEN SUBMITTED ");
-      //   Navigator.pushReplacementNamed(context, AppRoutes.bookingsScreen);
-      // } else if (jsonData['status'] == 'duplicate') {
-      //   Fluttertoast.showToast(msg: "YOU HAVE ALREADY A BOOKING FOR THIS GAME");
-      // } else if (jsonData['status'] == 'blacklist') {
-      //   Fluttertoast.showToast(msg: "YOU HAVE BEEN BLACKLISTED FOR THIS GAME");
-      // } else {
-      //   Fluttertoast.showToast(msg: jsonData['status']);
-      // }
     } catch (e) {
       circP = false;
       bool hasInternet = await InternetConnectionChecker().hasConnection;
@@ -145,7 +160,6 @@ class _DetailScreenState extends State<DetailScreen> {
     }
     currEmail = StudentInfo.emailId;
     firstName = StudentInfo.name;
-
     firstNameController = TextEditingController(text: firstName);
     firstEmailController = TextEditingController(text: currEmail);
     circP = false;
@@ -293,7 +307,7 @@ class _DetailScreenState extends State<DetailScreen> {
                   ),
                   GestureDetector(
                     onTap: () async {
-                       FocusManager.instance.primaryFocus?.unfocus();
+                      FocusManager.instance.primaryFocus?.unfocus();
                       if (_formKey.currentState!.validate()) {
                         circP = true;
                         setState(() {});

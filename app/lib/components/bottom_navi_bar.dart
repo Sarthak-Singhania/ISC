@@ -43,7 +43,9 @@ class _BottomNaviBarState extends State<BottomNaviBar> {
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
     final theme = Provider.of<ThemeProvider>(context);
-    final screens = [EventScreen(), ProfileScreen()];
+    final screens = 
+    [ 
+    EventScreen(),ProfileScreen(),];
     return WillPopScope(
       onWillPop: ()async{
         final shouldPop=await showAlertDialog();

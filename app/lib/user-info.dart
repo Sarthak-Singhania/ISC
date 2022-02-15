@@ -12,4 +12,5 @@ class StudentInfo {
   static int resetWeekday = 7;
   static int resetHour = 23;
   static int resetMinute = 59;
+  static List<String> getDataSport = [];
 }
