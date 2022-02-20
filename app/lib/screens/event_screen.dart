@@ -66,18 +66,26 @@ class _EventScreenState extends State<EventScreen> {
         "x-access-token": StudentInfo.jwtToken,
         "admin-header": adminheader
       });
+      var timeResponse = await http.get(Uri.parse(kIpAddress + '/time'),
+          headers: {"admin-header": adminheader});
       jsonData = (await jsonDecode(response.body))['message'];
+      var timeJsonData = await jsonDecode(timeResponse.body);
       print(jsonData);
+      StudentInfo.resetHour = timeJsonData['resetHour'];
+      StudentInfo.resetWeekday = timeJsonData['resetDay'];
+      StudentInfo.resetMinute = timeJsonData['resetMinute'];
       var notificationResponse = await http.get(
           Uri.parse(kIpAddress + '/pending/${StudentInfo.emailId}'),
           headers: {"x-access-token": StudentInfo.jwtToken});
       var notificationJsonData = await jsonDecode(notificationResponse.body);
       notificationListLength = notificationJsonData["message"].length;
 
-      for (var i = 0; i < jsonData.length; i++) {
-        print(jsonData[i]['info']);
-        // print(jsonData[i]['url']);
+      if(StudentInfo.isAdmin){
+        for (var i = 0; i < jsonData.length; i++) {
+        StudentInfo.getDataSport.add((jsonData[i]['game']));
       }
+      }
+      
       circP = false;
       tapToRefresh = false;
       setState(() {});
@@ -138,7 +146,7 @@ class _EventScreenState extends State<EventScreen> {
                         child: Column(
                           children: [
                             SizedBox(
-                              height: size.height * 0.03,
+                              height: size.height * 0.02,
                             ),
                             Container(
                                 child: Row(

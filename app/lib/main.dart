@@ -8,6 +8,8 @@ import 'package:isc/provider/theme_provider.dart';
 import 'package:isc/routes.dart';
 import 'package:isc/screens/admin_detail_screen.dart';
 import 'package:isc/screens/booking_screen.dart';
+import 'package:isc/screens/data_screen.dart';
+import 'package:isc/screens/faq_screen.dart';
 import 'package:isc/screens/user_detail_screen.dart';
 import 'package:isc/screens/email_verfification.dart';
 import 'package:isc/screens/event_screen.dart';
@@ -102,6 +104,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               AppRoutes.emailVerification: (context) => EmailVerification(),
               AppRoutes.notificationScreen: (context) => NotificationScreen(),
               AppRoutes.profileScreen: (context) => ProfileScreen(),
+              AppRoutes.faqscreen:(context)=>FaqScreen(),
+              AppRoutes.datascreen:(context)=>DataScreen(),
             },
           );
         },

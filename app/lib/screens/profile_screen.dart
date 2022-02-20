@@ -85,9 +85,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
               text: 'FAQs',
               icon: Icons.question_answer,
               func: () async {
-                print("hello");
+                Navigator.pushNamed(context, AppRoutes.faqscreen);
               },
             ),
+            StudentInfo.isAdmin?ProfileCard(
+              size: size,
+              text: 'Data',
+              icon: Icons.info_outline,
+              func: () async {
+                Navigator.pushNamed(context, AppRoutes.datascreen);
+              },
+            ):Container(),
             ProfileCard(
               size: size,
               text: 'Log Out',

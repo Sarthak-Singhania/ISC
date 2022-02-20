@@ -19,7 +19,7 @@ class _BookingScreenState extends State<BookingScreen> {
   dynamic bookingList = [];
   bool circP = true;
   bool emptyList = false;
-  late bool tapToRefresh;
+  bool tapToRefresh = false;
   @override
   void initState() {
     super.initState();
@@ -65,31 +65,25 @@ class _BookingScreenState extends State<BookingScreen> {
         title: Text('BOOKINGS'),
         centerTitle: true,
       ),
-      body: emptyList == true
+      body: circP
           ? Center(
-              child: AutoSizeText(
-              'No Booking found',
-              style: TextStyle(fontSize: 20),
+              child: CircularProgressIndicator(
+              color: Colors.blue,
             ))
-          : circP
-              ? Center(
-                  child: CircularProgressIndicator(
-                  color: Colors.blue,
-                ))
-              : tapToRefresh
-            ? GestureDetector(
-                onTap: () async {
-                  if (!(await InternetConnectionChecker().hasConnection)) {
-                    Fluttertoast.showToast(
-                        msg: "Please check your internet connection");
-                  } else {
-                    circP = true;
-                    tapToRefresh = false;
-                    setState(() {});
-                    getData();
-                  }
-                },
-                child: Container(
+          : tapToRefresh
+              ? GestureDetector(
+                  onTap: () async {
+                    if (!(await InternetConnectionChecker().hasConnection)) {
+                      Fluttertoast.showToast(
+                          msg: "Please check your internet connection");
+                    } else {
+                      circP = true;
+                      tapToRefresh = false;
+                      setState(() {});
+                      getData();
+                    }
+                  },
+                  child: Container(
                       child: Center(
                           child: AutoSizeText(
                     "Tap To Refresh",
@@ -99,25 +93,43 @@ class _BookingScreenState extends State<BookingScreen> {
                     ),
                   ))),
                 )
-                  : RefreshIndicator(
-                      onRefresh: getData,
-                      child: ListView.builder(
-                          physics: AlwaysScrollableScrollPhysics(),
-                          shrinkWrap: true,
-                          itemCount: bookingList.length,
-                          itemBuilder: (context, index) {
-                            return BookingCard(
-                              isConfirm: bookingList[index]['Confirm'],
-                              size: size,
-                              date: bookingList[index]['Date'],
-                              sportName: bookingList[index]['Game'],
-                              bookingId: bookingList[index]['Booking_ID'],
-                              studentName: bookingList[index]['Student_Name'],
-                              totalCount: bookingList[index]['Count'],
-                              slotTime: bookingList[index]['Slot'],
-                            );
-                          }),
-                    ),
+              : RefreshIndicator(
+                  displacement: 100,
+                  onRefresh: getData,
+                  child: ListView(children: [
+                    Column(children: [
+                      emptyList == true
+                          ? Column(
+                              children: [
+                                SizedBox(
+                                  height: size.height * 0.4,
+                                ),
+                                AutoSizeText(
+                                  'No Booking found',
+                                  style: TextStyle(fontSize: 20),
+                                ),
+                              ],
+                            )
+                          : ListView.builder(
+                              shrinkWrap: true,
+                              physics: NeverScrollableScrollPhysics(),
+                              itemCount: bookingList.length,
+                              itemBuilder: (context, index) {
+                                return BookingCard(
+                                  isConfirm: bookingList[index]['Confirm'],
+                                  size: size,
+                                  date: bookingList[index]['Date'],
+                                  sportName: bookingList[index]['Game'],
+                                  bookingId: bookingList[index]['Booking_ID'],
+                                  studentName: bookingList[index]
+                                      ['Student_Name'],
+                                  totalCount: bookingList[index]['Count'],
+                                  slotTime: bookingList[index]['Slot'],
+                                );
+                              }),
+                    ]),
+                  ]),
+                ),
     );
   }
 }

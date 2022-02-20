@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:isc/constants.dart';
 import 'package:isc/components/roundedbutton.dart';
 import 'package:isc/provider/theme_provider.dart';
@@ -40,13 +41,19 @@ class _LoginScreenState extends State<LoginScreen> {
                   userVerified = _auth.currentUser!.emailVerified,
                   if (userVerified)
                     {
-                       snapShot = await FirebaseFirestore.instance.collection('admin-users').doc(email).get(),
+                      snapShot = await FirebaseFirestore.instance
+                          .collection('admin-users')
+                          .doc(email)
+                          .get(),
 
-              if (snapShot.exists) {
-              StudentInfo.isAdmin = true,
-              } else {
-              StudentInfo.isAdmin = false,
-              },
+                      if (snapShot.exists)
+                        {
+                          StudentInfo.isAdmin = true,
+                        }
+                      else
+                        {
+                          StudentInfo.isAdmin = false,
+                        },
                       Fluttertoast.showToast(msg: "Login Successful"),
                       // Navigator.pushReplacementNamed(
                       //     context, AppRoutes.eventScreen)
@@ -198,10 +205,16 @@ class _LoginScreenState extends State<LoginScreen> {
                         color: kPrimaryColor,
                         tcolor: Colors.white,
                         size: size,
-                        func: () async{
+                        func: () async {
                           circP = true;
                           setState(() {});
-                          await signIn(emailController.text, passwordController.text);
+                          if (await InternetConnectionChecker().hasConnection) {
+                            await signIn(
+                                emailController.text, passwordController.text);
+                          } else {
+                            Fluttertoast.showToast(
+                                msg: "Please check your internet connection");
+                          }
                           circP = false;
                           setState(() {});
                         }),
@@ -247,7 +260,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       children: <Widget>[
                         Text("Don't have an account? "),
                         GestureDetector(
-                          onTap: () {
+                          onTap: () async {
                             Navigator.pushReplacementNamed(
                                 context, AppRoutes.registrationScreen);
                           },

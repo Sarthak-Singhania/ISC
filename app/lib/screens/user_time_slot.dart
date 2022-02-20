@@ -118,8 +118,9 @@ class _UserTimeSlotState extends State<UserTimeSlot> {
   }
 
   Future<void> getData() async {
-    //DateTime timeNow = DateTime.now();
-    //print(  " hour is ${timeNow.hour} and minute is ${timeNow.minute} and weekday is ${timeNow.weekday}");
+    DateTime timeNow = DateTime.now();
+    print(
+        " hour is ${timeNow.hour} and minute is ${timeNow.minute} and weekday is ${timeNow.weekday}");
 
     try {
       final response = await http.get(
@@ -132,21 +133,22 @@ class _UserTimeSlotState extends State<UserTimeSlot> {
             "admin-header": "no"
           });
       final jsonData = await jsonDecode(response.body);
+      print(jsonData);
       daysAvailable = jsonData["isEnabled"];
       maxDaysAllowed = jsonData["max_days"];
       for (var i = 0; i < daysAvailable.length; i++) {
         if (daysAvailable.values.elementAt(i)) {
           String day = daysAvailable.keys.elementAt(i);
-          // if(weekdayToday==7&&timeNow.hour>=12&&timeNow.minute>=0){
-          //    daysAvailable[day] =true;
-          // }
-          if (weekdays.indexOf(day) < weekdayToday - 1) {
+          if (weekdayToday == StudentInfo.resetWeekday &&
+              timeNow.hour >= StudentInfo.resetHour &&
+              timeNow.minute >= StudentInfo.resetMinute) {
+            daysAvailable[day] = true;
+          } else if (weekdays.indexOf(day) < weekdayToday - 1) {
             daysAvailable[day] = false;
           }
         }
       }
-      print(jsonData);
-      circP = false;
+            circP = false;
       tapToRefresh = false;
       setState(() {});
     } catch (e) {

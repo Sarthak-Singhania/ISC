@@ -9,4 +9,8 @@ class StudentInfo {
   static List dayChoosen = [];
   static Map gameData = {};
   static List gameChoosenInfo = [];
+  static int resetWeekday = 7;
+  static int resetHour = 23;
+  static int resetMinute = 59;
+  static List<String> getDataSport = [];
 }

@@ -3,11 +3,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:isc/constants.dart';
 import 'package:isc/provider/theme_provider.dart';
 import 'package:isc/routes.dart';
 import 'package:provider/provider.dart';
-
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({Key? key}) : super(key: key);
@@ -144,9 +144,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           if (value!.isEmpty) {
                             return ("Please Enter Your Name");
                           }
-                        if (!RegExp(r"^\s*([A-Za-z]{1,}([\.,] |[-']| ))+[A-Za-z]+\.?\s*$").hasMatch(value)) {
-                          return ("Please Enter a valid name");
-                        }
+                          if (!RegExp(
+                                  r"^\s*([A-Za-z]{1,}([\.,] |[-']| ))+[A-Za-z]+\.?\s*$")
+                              .hasMatch(value)) {
+                            return ("Please Enter a valid name");
+                          }
                           return null;
                         },
                         onSaved: (value) {
@@ -243,11 +245,15 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(29)),
                         ),
-                        onPressed: () async{
+                        onPressed: () async {
                           circP = true;
                           setState(() {});
-                          await signUp(emailController.text, passwordController.text,
-                              nameController.text);
+                          if (await InternetConnectionChecker().hasConnection) {
+                            await signUp(emailController.text,
+                                passwordController.text, nameController.text);
+                          } else {
+                            Fluttertoast.showToast(msg: "Please check your internet connection");
+                          }
                           circP = false;
                           setState(() {});
                         }),
