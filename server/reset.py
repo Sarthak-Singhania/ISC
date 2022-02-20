@@ -8,3 +8,5 @@ for i in games:
     db.commit()
     cur.execute(f"update {i} set `Monday`='1',`Tuesday`='1',`Wednesday`='1',`Thursday`='1',`Friday`='1',`Saturday`='1',`Sunday`='1' where `Slots`='Enabled'")
     db.commit()
+cur.execute('truncate table `blacklist`')
+db.commit()
