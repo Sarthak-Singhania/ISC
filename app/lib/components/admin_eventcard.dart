@@ -102,29 +102,28 @@ class _AdminEventCardState extends State<AdminEventCard> {
   }
 
   void disbaleSlot() async {
-   try{ final slotResponse = await http.get(
-        Uri.parse(
-            kIpAddress + "/booking-count?category=game&game=" + widget.title),
-        headers: {"x-access-token": StudentInfo.jwtToken});
+    try {
+      final slotResponse = await http.get(
+          Uri.parse(
+              kIpAddress + "/booking-count?category=game&game=" + widget.title),
+          headers: {"x-access-token": StudentInfo.jwtToken});
 
-    final responseJsonData = jsonDecode(slotResponse.body);
-    String slotsAvailable = responseJsonData['message'];
-    bool isSlotAvailable = false;
-    print("Sport ke slot = $slotsAvailable");
-    if (slotsAvailable != '0') {
-      isSlotAvailable = true;
+      final responseJsonData = jsonDecode(slotResponse.body);
+      String slotsAvailable = responseJsonData['message'];
+      bool isSlotAvailable = false;
+      print("Sport ke slot = $slotsAvailable");
+      if (slotsAvailable != '0') {
+        isSlotAvailable = true;
+      }
+      await showConfirmationDialog(isSlotAvailable);
+    } catch (e) {
+      if (!(await InternetConnectionChecker().hasConnection)) {
+        Fluttertoast.showToast(msg: "Please check you internet connection");
+      } else {
+        Fluttertoast.showToast(msg: "Please try again.");
+      }
+      print(e);
     }
-    await showConfirmationDialog(isSlotAvailable);}
-    catch (e) {
-                    if (!(await InternetConnectionChecker().hasConnection)) {
-                      Fluttertoast.showToast(
-                          msg: "Please check you internet connection");
-                    } else {
-                      Fluttertoast.showToast(msg: "Please try again.");
-                    }
-                    print(e);
-                  }
-    
   }
 
   void enableSlot() async {
@@ -167,7 +166,11 @@ class _AdminEventCardState extends State<AdminEventCard> {
       onLongPress: () {},
       onTap: () {
         StudentInfo.gameChoosen = widget.title;
-        Navigator.pushNamed(context, AppRoutes.adminTime);
+        if (!toggleValue) {
+          Navigator.pushNamed(context, AppRoutes.adminTime);
+        } else {
+          Fluttertoast.showToast(msg: "This sport is disabled.");
+        }
       },
       child: Container(
         height: MediaQuery.of(context).size.height * 0.7,

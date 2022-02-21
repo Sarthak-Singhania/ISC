@@ -84,13 +84,12 @@ class _TicketScreenState extends State<TicketScreen> {
         },
         body: body,
       );
-      print("hello");
       var acceptResponseBody = jsonDecode(acceptResponse.body);
       secondCircP = false;
-      Fluttertoast.showToast(msg: acceptResponseBody["message"]);
+      Fluttertoast.showToast(msg: acceptResponseBody["message"],toastLength:Toast.LENGTH_LONG);
       setState(() {});
-      await getData();
-      Navigator.pushReplacementNamed(context, AppRoutes.bookingsScreen);
+      Navigator.pushNamedAndRemoveUntil(
+          context, AppRoutes.eventScreen, (route) => false);
     } catch (e) {
       secondCircP = false;
       bool hasInternet = await InternetConnectionChecker().hasConnection;
@@ -108,7 +107,7 @@ class _TicketScreenState extends State<TicketScreen> {
     var body =
         jsonEncode({"snu_id": currEmail, "booking_id": widget.bookingId});
     try {
-      final acceptResponse = await http.post(
+      final cancelResponse = await http.post(
         Uri.parse(kIpAddress + '/cancel'),
         headers: {
           'Content-Type': 'application/json',
@@ -119,9 +118,9 @@ class _TicketScreenState extends State<TicketScreen> {
         },
         body: body,
       );
-      final jsonData=jsonDecode(acceptResponse.body);
+      final cancelJsonData=jsonDecode(cancelResponse.body);
       secondCircP = false;
-      Fluttertoast.showToast(msg: jsonData['message'],toastLength:Toast.LENGTH_LONG);
+      Fluttertoast.showToast(msg: cancelJsonData['message'],toastLength:Toast.LENGTH_LONG);
 
       Navigator.pushNamedAndRemoveUntil(
           context, AppRoutes.eventScreen, (route) => false);
@@ -142,7 +141,7 @@ class _TicketScreenState extends State<TicketScreen> {
     var body =
         jsonEncode({"snu_id": currEmail, "booking_id": widget.bookingId});
     try {
-      final acceptResponse = await http.post(
+      final rejectResponse = await http.post(
         Uri.parse(kIpAddress + '/reject'),
         headers: {
           'Content-Type': 'application/json',
@@ -154,9 +153,9 @@ class _TicketScreenState extends State<TicketScreen> {
         body: body,
       );
 
-      print(acceptResponse.body);
+     final rejectJsonData=jsonDecode(rejectResponse.body);
       secondCircP = false;
-      Fluttertoast.showToast(msg: "BOOKING REQUEST REJECTED");
+      Fluttertoast.showToast(msg: rejectJsonData['message'],toastLength:Toast.LENGTH_LONG);
       Navigator.pushNamedAndRemoveUntil(
           context, AppRoutes.eventScreen, (route) => false);
     } catch (e) {

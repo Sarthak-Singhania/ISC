@@ -97,29 +97,32 @@ class _FaqScreenState extends State<FaqScreen> {
                             return Theme(
                               data: Theme.of(context)
                                   .copyWith(dividerColor: Colors.transparent),
-                              child: ExpansionTile(
-                                iconColor: Colors.purple,
-                                collapsedIconColor: Colors.purple,
-                                title: Container(
-                                    margin: EdgeInsets.only(left: 5),
-                                    child: AutoSizeText(
-                                      questionAnswer.keys.elementAt(index),
-                                      style: TextStyle(
-                                          fontSize: 20,
-                                          color: Color(0xFFD655D0),
-                                          fontWeight: FontWeight.bold),
-                                    )),
-                                children: [
-                                  Container(
-                                      padding:
-                                          EdgeInsets.only(top: 5, bottom: 20),
-                                      margin:
-                                          EdgeInsets.only(left: 20, right: 20),
+                              child: Container(
+                                margin: EdgeInsets.all(5),
+                                child: ExpansionTile(
+                                  iconColor: Colors.purple,
+                                  collapsedIconColor: Colors.purple,
+                                  title: Container(
+                                      margin: EdgeInsets.only(left: 5),
                                       child: AutoSizeText(
-                                        questionAnswer.values.elementAt(index),
-                                        style: TextStyle(fontSize: 17),
+                                        questionAnswer.keys.elementAt(index),
+                                        style: TextStyle(
+                                            fontSize: 20,
+                                            color: Color(0xFFD655D0),
+                                            fontWeight: FontWeight.bold),
                                       )),
-                                ],
+                                  children: [
+                                    Container(
+                                        padding:
+                                            EdgeInsets.only(top: 5, bottom: 20),
+                                        margin:
+                                            EdgeInsets.only(left: 20, right: 20),
+                                        child: AutoSizeText(
+                                          questionAnswer.values.elementAt(index),
+                                          style: TextStyle(fontSize: 17),
+                                        )),
+                                  ],
+                                ),
                               ),
                             );
                           }),

@@ -11,6 +11,7 @@ import 'package:http/http.dart' as http;
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:isc/components/admin_eventcard.dart';
 import 'package:isc/components/event_card.dart';
+import 'package:isc/components/shimmer_card.dart';
 import 'package:isc/constants.dart';
 import 'package:isc/provider/theme_provider.dart';
 import 'package:isc/routes.dart';
@@ -28,7 +29,7 @@ class _EventScreenState extends State<EventScreen> {
   bool isInternet = true;
   late final jsonData;
   bool circP = true;
-  late bool tapToRefresh;
+  late bool tapToRefresh = false;
   int notificationListLength = 0;
   @override
   void initState() {
@@ -103,165 +104,183 @@ class _EventScreenState extends State<EventScreen> {
     final theme = Provider.of<ThemeProvider>(context);
     Size size = MediaQuery.of(context).size;
     GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
-    return circP
-        ? Scaffold(
-            body: Center(
-                child: CircularProgressIndicator(
-            color: Colors.blue,
-          )))
-        : tapToRefresh
-            ? GestureDetector(
-                onTap: () async {
-                  if (!(await InternetConnectionChecker().hasConnection)) {
-                    Fluttertoast.showToast(
-                        msg: "Please check your internet connection");
-                  } else {
-                    circP = true;
-                    tapToRefresh = false;
-                    setState(() {});
-                    getData();
-                  }
-                },
-                child: Scaffold(
-                  body: Container(
-                      child: Center(
-                          child: AutoSizeText(
-                    "Tap To Refresh",
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ))),
+    // return circP
+    //     ? Scaffold(
+    //         body: Center(
+    //             child: CircularProgressIndicator(
+    //         color: Colors.blue,
+    //       )))
+    return tapToRefresh
+        ? GestureDetector(
+            onTap: () async {
+              if (!(await InternetConnectionChecker().hasConnection)) {
+                Fluttertoast.showToast(
+                    msg: "Please check your internet connection");
+              } else {
+                circP = true;
+                tapToRefresh = false;
+                setState(() {});
+                getData();
+              }
+            },
+            child: Scaffold(
+              body: Container(
+                  child: Center(
+                      child: AutoSizeText(
+                "Tap To Refresh",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
                 ),
-              )
-            : Scaffold(
-                key: _scaffoldState,
-                drawer: Drawer(
-                  child: ListView(
-                  children: [
-                      !StudentInfo.isAdmin?DrawerTile(func: (){ Navigator.pushNamed(context, AppRoutes.bookingsScreen);}, icon: Icons.my_library_books_sharp, title: 'Bookings'):Container(),
-                       DrawerTile(func:(){  Navigator.pushNamed(context, AppRoutes.faqscreen);} , icon: Icons.question_answer ,title: 'FAQs'),
-                       StudentInfo.isAdmin?DrawerTile(func: (){  Navigator.pushNamed(context, AppRoutes.datascreen);}, icon: Icons.info_outline, title: 'Data'):Container(),
-                      
-                      DrawerTile(
-                        func:()async {  bool hasInternet =
-                    await InternetConnectionChecker().hasConnection;
-                if (hasInternet) {
-                   print("signed out");
-                  await FirebaseAuth.instance.signOut();
-                  Navigator.pushNamedAndRemoveUntil(
-                      context, AppRoutes.homeScreen, (route) => false);
-                } else {
-                  Fluttertoast.showToast(
-                      msg: "Please check your internet connection");
-                }},
-                title: 'Log Out',
-                icon:Icons.login_outlined
-                ),
+              ))),
+            ),
+          )
+        : Scaffold(
+            key: _scaffoldState,
+            drawer: Drawer(
+              child: ListView(
+                children: [
+                  !StudentInfo.isAdmin
+                      ? DrawerTile(
+                          func: () {
+                            Navigator.pushNamed(
+                                context, AppRoutes.bookingsScreen);
+                          },
+                          icon: Icons.my_library_books_sharp,
+                          title: 'Bookings')
+                      : Container(),
+                  DrawerTile(
+                      func: () {
+                        Navigator.pushNamed(context, AppRoutes.faqscreen);
+                      },
+                      icon: Icons.question_answer,
+                      title: 'FAQs'),
+                  StudentInfo.isAdmin
+                      ? DrawerTile(
+                          func: () {
+                            Navigator.pushNamed(context, AppRoutes.datascreen);
+                          },
+                          icon: Icons.info_outline,
+                          title: 'Data')
+                      : Container(),
+                  DrawerTile(
+                      func: () async {
+                        bool hasInternet =
+                            await InternetConnectionChecker().hasConnection;
+                        if (hasInternet) {
+                          print("signed out");
+                          await FirebaseAuth.instance.signOut();
+                          Navigator.pushNamedAndRemoveUntil(
+                              context, AppRoutes.homeScreen, (route) => false);
+                        } else {
+                          Fluttertoast.showToast(
+                              msg: "Please check your internet connection");
+                        }
+                      },
+                      title: 'Log Out',
+                      icon: Icons.login_outlined),
                 ],
+              ),
+            ),
+            body: SingleChildScrollView(
+              child: Stack(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(color: Colors.purple[600]),
+                    width: size.width,
+                    height: size.height * 0.35,
                   ),
-                ),
-                body: SingleChildScrollView(
-                  child: Stack(
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(color: Colors.purple[600]),
-                        width: size.width,
-                        height: size.height * 0.35,
-                      ),
-                      SafeArea(
-                        child: Column(
+                  SafeArea(
+                    child: Column(
+                      children: [
+                        SizedBox(
+                          height: size.height * 0.02,
+                        ),
+                        Container(
+                            child: Row(
                           children: [
-                            SizedBox(
-                              height: size.height * 0.02,
+                            IconButton(
+                              icon: Icon(
+                                Icons.menu,
+                                color: Colors.white,
+                                size: size.width * 0.07,
+                              ),
+                              onPressed: () {
+                                _scaffoldState.currentState!.openDrawer();
+                              },
                             ),
-                            Container(
-                                child: Row(
-                              children: [
-                                IconButton(
-                                  icon: Icon(
-                                    Icons.menu,
-                                    color: Colors.white,
-                                    size: size.width * 0.07,
-                                  ),
-                                  onPressed: () {
-                                    _scaffoldState.currentState!.openDrawer();
-                                  },
-                                ),
-                                Spacer(
-                                  flex: 1,
-                                ),
-                                AutoSizeText(
-                                  'SELECT YOUR SPORT',
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 25,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                Spacer(
-                                  flex: 1,
-                                ),
-                                !StudentInfo.isAdmin
-                                    ? Container(
-                                        child: Stack(
-                                          children: [
-                                            Center(
-                                              child: IconButton(
-                                                color: Colors.white,
-                                                onPressed: () {
-                                                  Navigator.pushNamed(
-                                                      context,
-                                                      AppRoutes
-                                                          .notificationScreen);
-                                                },
-                                                icon: Icon(
-                                                  Icons.notifications,
-                                                  size: size.width * 0.07,
-                                                ),
-                                              ),
+                            Spacer(
+                              flex: 1,
+                            ),
+                            AutoSizeText(
+                              'SELECT YOUR SPORT',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 25,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                            Spacer(
+                              flex: 1,
+                            ),
+                            !StudentInfo.isAdmin
+                                ? Container(
+                                    child: Stack(
+                                      children: [
+                                        Center(
+                                          child: IconButton(
+                                            color: Colors.white,
+                                            onPressed: () {
+                                              Navigator.pushNamed(context,
+                                                  AppRoutes.notificationScreen);
+                                            },
+                                            icon: Icon(
+                                              Icons.notifications,
+                                              size: size.width * 0.07,
                                             ),
-                                            notificationListLength > 0
-                                                ? Positioned(
-                                                    top: 5,
-                                                    right: 8,
-                                                    child: Container(
-                                                      width: 20,
-                                                      height: 20,
-                                                      decoration: BoxDecoration(
-                                                          shape:
-                                                              BoxShape.circle,
-                                                          color: Colors.red),
-                                                      child: Center(
-                                                        child: AutoSizeText(
-                                                          '$notificationListLength',
-                                                          style: TextStyle(
-                                                              color:
-                                                                  Colors.white,
-                                                              fontSize: 10),
-                                                        ),
-                                                      ),
-                                                    ))
-                                                : Container()
-                                          ],
+                                          ),
                                         ),
-                                      )
-                                    : Spacer()
-                              ],
-                            )),
-                            SizedBox(
-                              height: size.height * 0.06,
-                            ),
-                            GridView.builder(
-                              physics: ScrollPhysics(),
-                              shrinkWrap: true,
-                              gridDelegate:
-                                  SliverGridDelegateWithFixedCrossAxisCount(
-                                      childAspectRatio:
-                                          StudentInfo.isAdmin ? 0.79 : 1,
-                                      crossAxisCount: 2),
-                              itemCount: jsonData.length,
-                              itemBuilder: (context, index) {
-                                return StudentInfo.isAdmin
+                                        notificationListLength > 0
+                                            ? Positioned(
+                                                top: 5,
+                                                right: 8,
+                                                child: Container(
+                                                  width: 20,
+                                                  height: 20,
+                                                  decoration: BoxDecoration(
+                                                      shape: BoxShape.circle,
+                                                      color: Colors.red),
+                                                  child: Center(
+                                                    child: AutoSizeText(
+                                                      '$notificationListLength',
+                                                      style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontSize: 10),
+                                                    ),
+                                                  ),
+                                                ))
+                                            : Container()
+                                      ],
+                                    ),
+                                  )
+                                : Spacer()
+                          ],
+                        )),
+                        SizedBox(
+                          height: size.height * 0.06,
+                        ),
+                        GridView.builder(
+                          physics: ScrollPhysics(),
+                          shrinkWrap: true,
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                                  childAspectRatio:
+                                      StudentInfo.isAdmin ? 0.79 : 1,
+                                  crossAxisCount: 2),
+                          itemCount: circP ? 8 : jsonData.length,
+                          itemBuilder: (context, index) {
+                            return circP
+                                ? ShimmerCard()
+                                : StudentInfo.isAdmin
                                     ? AdminEventCard(
                                         title: jsonData[index]['game'],
                                         uri: jsonData[index]['url'],
@@ -271,16 +290,16 @@ class _EventScreenState extends State<EventScreen> {
                                         title: jsonData[index]['game'],
                                         uri: jsonData[index]['url'],
                                         info: jsonData[index]['info']);
-                              },
-                            )
-                          ],
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-                // bottomNavigationBar: BottomNaviBar('event'),
-              );
+                          },
+                        )
+                      ],
+                    ),
+                  )
+                ],
+              ),
+            ),
+            // bottomNavigationBar: BottomNaviBar('event'),
+          );
   }
 }
 

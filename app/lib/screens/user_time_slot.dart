@@ -325,6 +325,7 @@ class _UserTimeSlotState extends State<UserTimeSlot> {
                                         ? theme.checkTheme(Colors.green,
                                             Colors.green.shade600, context)
                                         : Colors.grey,
+                                    isDisabled: true,
                                   );
                                 },
                               ),

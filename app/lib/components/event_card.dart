@@ -34,7 +34,6 @@ class _EventCardState extends State<EventCard> {
   //String game = '';
   bool toggleValue = false;
   late bool hasInternet;
-
   double spreadRadius = 5;
   bool value = true;
   double blurRadius = 7;

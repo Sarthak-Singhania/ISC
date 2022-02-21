@@ -362,6 +362,7 @@ class _TimeSlotState extends State<TimeSlot> {
                                       ? theme.checkTheme(Colors.green,
                                           Colors.green.shade600, context)
                                       : Colors.grey,
+                                  isDisabled: isDisabled,
                                 );
                               }),
                         ),
