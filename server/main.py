@@ -177,8 +177,9 @@ def book():
         return errors
     check_all=checking(x['Check'])
     if len(check_all)==0:
+        cnt=0
         for i in x['Bookings']:
-            cnt=0
+            cnt2=0
             booking_id = ''.join(secrets.choice(string.ascii_uppercase + string.digits) for i in range(9))
             cursor.execute(f"select exists(select * from `bookings` where `Booking_ID`='{booking_id}') as 'booking_id'")
             if bool(cursor.fetchone()['booking_id']): booking_id = ''.join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(9))
@@ -187,9 +188,11 @@ def book():
             for j in x['Bookings'][i]:
                 # if len(checking(x['Check']))==0:
                 try:
-                    if cnt == 0:
+                    if cnt2 == 0:
                         cursor.execute(f"update `{sports_name}` set `{day}`=`{day}`-1 where `Slots`='{slot}'")
-                        message=booking_id
+                        if cnt not in message:
+                            message[cnt]={cnt2:[]}
+                        message[cnt][cnt2].append(booking_id)
                         flag='confirmed'
                         confirmed = 1
                         mysql.connection.commit()
@@ -200,9 +203,12 @@ def book():
                         str(j), str(x['Bookings'][i][j]), str(sports_name), str(date), str(slot), str(booking_id), str(confirmed))
                     cursor.execute(com, val)
                     mysql.connection.commit()
-                    cnt += 1
+                    cnt2 += 1
                 except OperationalError:
-                    message[cnt]='All slots have finished'
+                    if cnt not in message:
+                        message[cnt]={cnt2:[]}
+                    message[cnt][cnt2].append('All slots have finished')
+            cnt+=1
         return make_response({'message':message})
     else:
         return make_response({'errors':check_all})
