@@ -80,12 +80,12 @@ class _EventScreenState extends State<EventScreen> {
       var notificationJsonData = await jsonDecode(notificationResponse.body);
       notificationListLength = notificationJsonData["message"].length;
 
-      if(StudentInfo.isAdmin){
+      if (StudentInfo.isAdmin) {
         for (var i = 0; i < jsonData.length; i++) {
-        StudentInfo.getDataSport.add((jsonData[i]['game']));
+          StudentInfo.getDataSport.add((jsonData[i]['game']));
+        }
       }
-      }
-      
+
       circP = false;
       tapToRefresh = false;
       setState(() {});
@@ -102,6 +102,7 @@ class _EventScreenState extends State<EventScreen> {
     //getData();
     final theme = Provider.of<ThemeProvider>(context);
     Size size = MediaQuery.of(context).size;
+    GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
     return circP
         ? Scaffold(
             body: Center(
@@ -134,6 +135,32 @@ class _EventScreenState extends State<EventScreen> {
                 ),
               )
             : Scaffold(
+                key: _scaffoldState,
+                drawer: Drawer(
+                  child: ListView(
+                  children: [
+                      !StudentInfo.isAdmin?DrawerTile(func: (){ Navigator.pushNamed(context, AppRoutes.bookingsScreen);}, icon: Icons.my_library_books_sharp, title: 'Bookings'):Container(),
+                       DrawerTile(func:(){  Navigator.pushNamed(context, AppRoutes.faqscreen);} , icon: Icons.question_answer ,title: 'FAQs'),
+                       StudentInfo.isAdmin?DrawerTile(func: (){  Navigator.pushNamed(context, AppRoutes.datascreen);}, icon: Icons.info_outline, title: 'Data'):Container(),
+                      
+                      DrawerTile(
+                        func:()async {  bool hasInternet =
+                    await InternetConnectionChecker().hasConnection;
+                if (hasInternet) {
+                   print("signed out");
+                  await FirebaseAuth.instance.signOut();
+                  Navigator.pushNamedAndRemoveUntil(
+                      context, AppRoutes.homeScreen, (route) => false);
+                } else {
+                  Fluttertoast.showToast(
+                      msg: "Please check your internet connection");
+                }},
+                title: 'Log Out',
+                icon:Icons.login_outlined
+                ),
+                ],
+                  ),
+                ),
                 body: SingleChildScrollView(
                   child: Stack(
                     children: [
@@ -151,8 +178,18 @@ class _EventScreenState extends State<EventScreen> {
                             Container(
                                 child: Row(
                               children: [
+                                IconButton(
+                                  icon: Icon(
+                                    Icons.menu,
+                                    color: Colors.white,
+                                    size: size.width * 0.07,
+                                  ),
+                                  onPressed: () {
+                                    _scaffoldState.currentState!.openDrawer();
+                                  },
+                                ),
                                 Spacer(
-                                  flex: 3,
+                                  flex: 1,
                                 ),
                                 AutoSizeText(
                                   'SELECT YOUR SPORT',
@@ -244,5 +281,32 @@ class _EventScreenState extends State<EventScreen> {
                 ),
                 // bottomNavigationBar: BottomNaviBar('event'),
               );
+  }
+}
+
+class DrawerTile extends StatelessWidget {
+  const DrawerTile(
+      {Key? key, required this.func, required this.icon, required this.title})
+      : super(key: key);
+  final Function func;
+  final IconData icon;
+  final String title;
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () async {
+        func();
+      },
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: ListTile(
+          leading: Icon(icon),
+          title: Text(
+            title,
+            style: TextStyle(fontSize: 20),
+          ),
+        ),
+      ),
+    );
   }
 }

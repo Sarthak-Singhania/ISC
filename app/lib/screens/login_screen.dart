@@ -58,7 +58,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       // Navigator.pushReplacementNamed(
                       //     context, AppRoutes.eventScreen)
                       Navigator.pushNamedAndRemoveUntil(context,
-                          AppRoutes.bottomNavigationScreen, (route) => false)
+                          AppRoutes.eventScreen, (route) => false)
                     }
                   else
                     {

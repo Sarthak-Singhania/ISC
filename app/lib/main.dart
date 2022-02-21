@@ -97,7 +97,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               AppRoutes.studentTime: (context) => UserTimeSlot(),
               AppRoutes.studentDetail: (context) => DetailScreen(),
               AppRoutes.bookingsScreen: (context) => BookingScreen(),
-              AppRoutes.bottomNavigationScreen: (context) => BottomNaviBar(),
+             // AppRoutes.bottomNavigationScreen: (context) => BottomNaviBar(),
               AppRoutes.ticketScreen: (context) => TicketScreen(
                     bookingId: ModalRoute.of(context)!.settings.arguments,
                   ),

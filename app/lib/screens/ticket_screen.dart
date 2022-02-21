@@ -124,7 +124,7 @@ class _TicketScreenState extends State<TicketScreen> {
       Fluttertoast.showToast(msg: jsonData['message'],toastLength:Toast.LENGTH_LONG);
 
       Navigator.pushNamedAndRemoveUntil(
-          context, AppRoutes.bottomNavigationScreen, (route) => false);
+          context, AppRoutes.eventScreen, (route) => false);
     } catch (e) {
       secondCircP = false;
       bool hasInternet = await InternetConnectionChecker().hasConnection;
@@ -158,7 +158,7 @@ class _TicketScreenState extends State<TicketScreen> {
       secondCircP = false;
       Fluttertoast.showToast(msg: "BOOKING REQUEST REJECTED");
       Navigator.pushNamedAndRemoveUntil(
-          context, AppRoutes.bottomNavigationScreen, (route) => false);
+          context, AppRoutes.eventScreen, (route) => false);
     } catch (e) {
       secondCircP = false;
       bool hasInternet = await InternetConnectionChecker().hasConnection;

@@ -31,8 +31,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> logout() async {
-    print("signed out");
-    await FirebaseAuth.instance.signOut();
+    // print("signed out");
+    // await FirebaseAuth.instance.signOut();
   }
 
   @override
@@ -64,15 +64,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
             SizedBox(
               height: size.height * 0.05,
             ),
-            StudentInfo.isAdmin == false
-                ? ProfileCard(
-                    size: size,
-                    text: 'Bookings',
-                    icon: Icons.my_library_books_sharp,
-                    func: () async {
-                      Navigator.pushNamed(context, AppRoutes.bookingsScreen);
-                    })
-                : Container(),
+            // StudentInfo.isAdmin == false
+            //     ? ProfileCard(
+            //         size: size,
+            //         text: 'Bookings',
+            //         icon: Icons.my_library_books_sharp,
+            //         func: () async {
+            //           Navigator.pushNamed(context, AppRoutes.bookingsScreen);
+            //         })
+            //    : Container(),
             // ProfileCard(
             //     size: size,
             //     text: 'Settings',
@@ -80,39 +80,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
             //     func: () {
             //       Navigator.pushNamed(context, AppRoutes.settingScreen);
             //     }),
-            ProfileCard(
-              size: size,
-              text: 'FAQs',
-              icon: Icons.question_answer,
-              func: () async {
-                Navigator.pushNamed(context, AppRoutes.faqscreen);
-              },
-            ),
-            StudentInfo.isAdmin?ProfileCard(
-              size: size,
-              text: 'Data',
-              icon: Icons.info_outline,
-              func: () async {
-                Navigator.pushNamed(context, AppRoutes.datascreen);
-              },
-            ):Container(),
-            ProfileCard(
-              size: size,
-              text: 'Log Out',
-              icon: Icons.login_outlined,
-              func: () async {
-                bool hasInternet =
-                    await InternetConnectionChecker().hasConnection;
-                if (hasInternet) {
-                  await logout();
-                  Navigator.pushNamedAndRemoveUntil(
-                      context, AppRoutes.homeScreen, (route) => false);
-                } else {
-                  Fluttertoast.showToast(
-                      msg: "Please check your internet connection");
-                }
-              },
-            ),
+            // ProfileCard(
+            //   size: size,
+            //   text: 'FAQs',
+            //   icon: Icons.question_answer,
+            //   func: () async {
+            //     Navigator.pushNamed(context, AppRoutes.faqscreen);
+            //   },
+            //),
+            // StudentInfo.isAdmin?ProfileCard(
+            //   size: size,
+            //   text: 'Data',
+            //   icon: Icons.info_outline,
+            //   func: () async {
+            //     Navigator.pushNamed(context, AppRoutes.datascreen);
+            //   },
+            // ):Container(),
+            // ProfileCard(
+            //   size: size,
+            //   text: 'Log Out',
+            //   icon: Icons.login_outlined,
+            //   func: () async {
+            //     // bool hasInternet =
+            //     //     await InternetConnectionChecker().hasConnection;
+            //     // if (hasInternet) {
+            //     //   await logout();
+            //     //   Navigator.pushNamedAndRemoveUntil(
+            //     //       context, AppRoutes.homeScreen, (route) => false);
+            //     // } else {
+            //     //   Fluttertoast.showToast(
+            //     //       msg: "Please check your internet connection");
+            //     // }
+            //   },
+            // ),
           ],
         ),
       ),
