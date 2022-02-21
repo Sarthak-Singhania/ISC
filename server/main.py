@@ -193,7 +193,6 @@ def book():
                         if cnt not in message:
                             message[cnt]={cnt2:[]}
                         message[cnt][cnt2].append(booking_id)
-                        flag='confirmed'
                         confirmed = 1
                         mysql.connection.commit()
                         # isc_email.email(str(x['Bookings'][i][j]),f"{sports_name} at ISC for {slot} slot",'Confirmed',str(j))
