@@ -39,7 +39,7 @@ class BookingCard extends StatelessWidget {
     return GestureDetector(
       onTap: () async {
         bool hasInternet = await InternetConnectionChecker().hasConnection;
-          Navigator.pushNamed(context, AppRoutes.ticketScreen,
+          Navigator.pushReplacementNamed(context, AppRoutes.ticketScreen,
               arguments: bookingId);
       },
       child: Container(

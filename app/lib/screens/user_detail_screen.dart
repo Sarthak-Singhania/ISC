@@ -33,6 +33,7 @@ class _DetailScreenState extends State<DetailScreen> {
   final _formKey = GlobalKey<FormState>();
   String firstName = '';
   bool circP = true;
+  bool secondCircP = false;
   TextEditingController? firstEmailController;
   String currEmail = '';
   late int maxLength;
@@ -63,6 +64,15 @@ class _DetailScreenState extends State<DetailScreen> {
   }
 
   Future<void> postData() async {
+    isError = List.generate(
+      StudentInfo.dayChoosen.length, (i) => List.generate(8, (j) => false),
+      growable: false);
+      isConfirm = List.generate(
+      StudentInfo.dayChoosen.length, (i) => List.generate(8, (j) => false),
+      growable: false);
+     errorMessage = List.generate(
+      StudentInfo.dayChoosen.length, (i) => List.generate(8, (j) => ""),
+      growable: false);
     for (var i = 0; i < length.length; i++) {
       for (var j = 0; j < length[i] * 2; j++) {
         print(_controller[i][j].text);
@@ -119,7 +129,7 @@ class _DetailScreenState extends State<DetailScreen> {
       Map<dynamic, dynamic> jsonData = await jsonDecode(response.body);
       print("details");
       print(jsonData);
-      circP = false;
+      secondCircP = false;
       if (jsonData.containsKey('errors')) {
         for (var errorM in jsonData['errors'].keys) {
           for (var emailName in jsonData['errors'][errorM].keys) {
@@ -143,16 +153,19 @@ class _DetailScreenState extends State<DetailScreen> {
         }
       } else {
         for (var dateIndex in jsonData['message'].keys) {
-          for (var i = 0; i < _controller[int.parse(dateIndex)].length; i += 2) {
+          for (var i = 0;
+              i < _controller[int.parse(dateIndex)].length;
+              i += 2) {
             isConfirm[int.parse(dateIndex)][i] = true;
             isConfirm[int.parse(dateIndex)][i + 1] = true;
-            errorMessage[int.parse(dateIndex)][i] = jsonData['message'][dateIndex];
+            errorMessage[int.parse(dateIndex)][i] =
+                jsonData['message'][dateIndex];
           }
         }
       }
       setState(() {});
     } catch (e) {
-      circP = false;
+      secondCircP = false;
       bool hasInternet = await InternetConnectionChecker().hasConnection;
       if (!hasInternet) {
         Fluttertoast.showToast(msg: "Please check your internet connection");
@@ -234,9 +247,9 @@ class _DetailScreenState extends State<DetailScreen> {
                   child: CircularProgressIndicator(
                   color: Colors.blue,
                 ))
-              : SingleChildScrollView(
-                  child: Stack(children: [
-                    Column(
+              : Stack(children: [
+                  SingleChildScrollView(
+                    child: Column(
                       children: [
                         SizedBox(
                           height: size.height * 0.01,
@@ -351,7 +364,7 @@ class _DetailScreenState extends State<DetailScreen> {
                           onTap: () async {
                             FocusManager.instance.primaryFocus?.unfocus();
                             if (_formKey.currentState!.validate()) {
-                              circP = true;
+                              secondCircP = true;
                               setState(() {});
                               await postData();
                             }
@@ -376,8 +389,14 @@ class _DetailScreenState extends State<DetailScreen> {
                         ),
                       ],
                     ),
-                  ]),
-                )),
+                  ),
+                  secondCircP == true
+                      ? Center(
+                          child: CircularProgressIndicator(
+                          color: Colors.blue,
+                        ))
+                      : Container(),
+                ])),
     );
   }
 }

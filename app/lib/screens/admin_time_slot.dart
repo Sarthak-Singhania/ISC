@@ -294,13 +294,18 @@ class _TimeSlotState extends State<TimeSlot> {
                               width: size.width * 0.4,
                               margin: EdgeInsets.only(top: 5),
                               padding: EdgeInsets.all(15),
-                              decoration: BoxDecoration(color: kPrimaryColor),
+                              decoration: BoxDecoration(
+                                color: kPrimaryLightColor,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
                               child: AutoSizeText(
                                 selectedDate == null
                                     ? "CHOOSE YOUR DATE"
                                     : '${selectedDate!.day}-${selectedDate!.month}-${selectedDate!.year}',
                                 style: TextStyle(
-                                    color: Colors.white, fontSize: 13),
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.purple,
+                                    fontSize: 15),
                               ),
                             ),
                           ),
@@ -326,19 +331,24 @@ class _TimeSlotState extends State<TimeSlot> {
                               height: size.height * 0.05,
                               margin: EdgeInsets.only(top: 5),
                               padding: EdgeInsets.all(15),
-                              decoration: isDisabled
-                                  ? BoxDecoration(color: Colors.red)
-                                  : BoxDecoration(color: Colors.green),
+                              decoration: BoxDecoration(
+                                color: kPrimaryLightColor,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
                               child: isDisabled
                                   ? AutoSizeText(
                                       'Disable',
                                       style: TextStyle(
-                                          color: Colors.white, fontSize: 14),
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.red,
+                                          fontSize: 15),
                                     )
                                   : AutoSizeText(
                                       'Enable',
                                       style: TextStyle(
-                                          color: Colors.white, fontSize: 14),
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.green,
+                                          fontSize: 15),
                                     ),
                             ),
                           ),

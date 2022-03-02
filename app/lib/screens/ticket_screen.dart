@@ -8,6 +8,7 @@ import 'dart:ui';
 import 'package:flutter_custom_clippers/flutter_custom_clippers.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:isc/constants.dart';
+import 'package:isc/provider/notification_provider.dart';
 import 'package:isc/provider/theme_provider.dart';
 import 'package:isc/routes.dart';
 import 'package:isc/user-info.dart';
@@ -86,10 +87,13 @@ class _TicketScreenState extends State<TicketScreen> {
       );
       var acceptResponseBody = jsonDecode(acceptResponse.body);
       secondCircP = false;
-      Fluttertoast.showToast(msg: acceptResponseBody["message"],toastLength:Toast.LENGTH_LONG);
+      Fluttertoast.showToast(
+          msg: acceptResponseBody["message"], toastLength: Toast.LENGTH_LONG);
       setState(() {});
-      Navigator.pushNamedAndRemoveUntil(
-          context, AppRoutes.eventScreen, (route) => false);
+      Navigator.pushReplacementNamed(context, AppRoutes.bookingsScreen);
+      await context.read<NotificationProvider>().getNotification();
+      // Navigator.pushNamedAndRemoveUntil(
+      //     context, AppRoutes.eventScreen, (route) => false);
     } catch (e) {
       secondCircP = false;
       bool hasInternet = await InternetConnectionChecker().hasConnection;
@@ -118,12 +122,13 @@ class _TicketScreenState extends State<TicketScreen> {
         },
         body: body,
       );
-      final cancelJsonData=jsonDecode(cancelResponse.body);
+      final cancelJsonData = jsonDecode(cancelResponse.body);
       secondCircP = false;
-      Fluttertoast.showToast(msg: cancelJsonData['message'],toastLength:Toast.LENGTH_LONG);
+      Fluttertoast.showToast(
+          msg: cancelJsonData['message'], toastLength: Toast.LENGTH_LONG);
 
-      Navigator.pushNamedAndRemoveUntil(
-          context, AppRoutes.eventScreen, (route) => false);
+ Navigator.pushReplacementNamed(context, AppRoutes.bookingsScreen);
+      await context.read<NotificationProvider>().getNotification();
     } catch (e) {
       secondCircP = false;
       bool hasInternet = await InternetConnectionChecker().hasConnection;
@@ -153,11 +158,12 @@ class _TicketScreenState extends State<TicketScreen> {
         body: body,
       );
 
-     final rejectJsonData=jsonDecode(rejectResponse.body);
+      final rejectJsonData = jsonDecode(rejectResponse.body);
       secondCircP = false;
-      Fluttertoast.showToast(msg: rejectJsonData['message'],toastLength:Toast.LENGTH_LONG);
-      Navigator.pushNamedAndRemoveUntil(
-          context, AppRoutes.eventScreen, (route) => false);
+      Fluttertoast.showToast(
+          msg: rejectJsonData['message'], toastLength: Toast.LENGTH_LONG);
+     Navigator.pushReplacementNamed(context, AppRoutes.bookingsScreen);
+      await context.read<NotificationProvider>().getNotification();
     } catch (e) {
       secondCircP = false;
       bool hasInternet = await InternetConnectionChecker().hasConnection;

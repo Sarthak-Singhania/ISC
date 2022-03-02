@@ -13,6 +13,7 @@ import 'package:isc/components/admin_eventcard.dart';
 import 'package:isc/components/event_card.dart';
 import 'package:isc/components/shimmer_card.dart';
 import 'package:isc/constants.dart';
+import 'package:isc/provider/notification_provider.dart';
 import 'package:isc/provider/theme_provider.dart';
 import 'package:isc/routes.dart';
 import 'package:isc/user-info.dart';
@@ -75,11 +76,7 @@ class _EventScreenState extends State<EventScreen> {
       StudentInfo.resetHour = timeJsonData['resetHour'];
       StudentInfo.resetWeekday = timeJsonData['resetDay'];
       StudentInfo.resetMinute = timeJsonData['resetMinute'];
-      var notificationResponse = await http.get(
-          Uri.parse(kIpAddress + '/pending/${StudentInfo.emailId}'),
-          headers: {"x-access-token": StudentInfo.jwtToken});
-      var notificationJsonData = await jsonDecode(notificationResponse.body);
-      notificationListLength = notificationJsonData["message"].length;
+      await context.read<NotificationProvider>().getNotification();
 
       if (StudentInfo.isAdmin) {
         for (var i = 0; i < jsonData.length; i++) {
@@ -101,15 +98,8 @@ class _EventScreenState extends State<EventScreen> {
   @override
   Widget build(BuildContext context) {
     //getData();
-    final theme = Provider.of<ThemeProvider>(context);
     Size size = MediaQuery.of(context).size;
     GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
-    // return circP
-    //     ? Scaffold(
-    //         body: Center(
-    //             child: CircularProgressIndicator(
-    //         color: Colors.blue,
-    //       )))
     return tapToRefresh
         ? GestureDetector(
             onTap: () async {
@@ -145,6 +135,10 @@ class _EventScreenState extends State<EventScreen> {
                           func: () {
                             Navigator.pushNamed(
                                 context, AppRoutes.bookingsScreen);
+                            //     .then((value) async {
+                            //   print('booki called');
+                            //   setState(() {});
+                            // });
                           },
                           icon: Icons.my_library_books_sharp,
                           title: 'Bookings')
@@ -230,8 +224,14 @@ class _EventScreenState extends State<EventScreen> {
                                           child: IconButton(
                                             color: Colors.white,
                                             onPressed: () {
-                                              Navigator.pushNamed(context,
-                                                  AppRoutes.notificationScreen);
+                                              Navigator.pushNamed(
+                                                      context,
+                                                      AppRoutes
+                                                          .notificationScreen);
+                                              //     .then((value) async {
+                                              //   print('notifi called');
+                                              //   setState(() {});
+                                              // });
                                             },
                                             icon: Icon(
                                               Icons.notifications,
@@ -239,7 +239,11 @@ class _EventScreenState extends State<EventScreen> {
                                             ),
                                           ),
                                         ),
-                                        notificationListLength > 0
+                                        context
+                                                    .watch<
+                                                        NotificationProvider>()
+                                                    .count >
+                                                0
                                             ? Positioned(
                                                 top: 5,
                                                 right: 8,
@@ -251,7 +255,7 @@ class _EventScreenState extends State<EventScreen> {
                                                       color: Colors.red),
                                                   child: Center(
                                                     child: AutoSizeText(
-                                                      '$notificationListLength',
+                                                      '${context.watch<NotificationProvider>().count}',
                                                       style: TextStyle(
                                                           color: Colors.white,
                                                           fontSize: 10),
@@ -319,7 +323,10 @@ class DrawerTile extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: ListTile(
-          leading: Icon(icon),
+          leading: Icon(
+            icon,
+            color: Colors.purple[600],
+          ),
           title: Text(
             title,
             style: TextStyle(fontSize: 20),
