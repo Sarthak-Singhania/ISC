@@ -1,7 +1,5 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
-import 'package:isc/provider/theme_provider.dart';
-import 'package:provider/provider.dart';
 
 import '../constants.dart';
 
@@ -21,7 +19,6 @@ class ProfileCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    dynamic theme = Provider.of<ThemeProvider>(context);
     return GestureDetector(
       onTap: () {
         func();
@@ -34,13 +31,13 @@ class ProfileCard extends StatelessWidget {
         height: size.height * 0.07,
         decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(15),
-            color: theme.checkTheme(
-                Colors.grey.shade100, Colors.purple.shade700, context)),
+            color: MediaQuery.of(context).platformBrightness == Brightness.light?
+                Colors.grey.shade100: Colors.purple.shade700),
         child: Row(children: [
           Icon(
             icon,
-            color: theme.checkTheme(
-                kPrimaryColor, Colors.purple.shade100, context),
+            color:MediaQuery.of(context).platformBrightness == Brightness.light?
+                kPrimaryColor: Colors.purple.shade100,
             size: size.width * 0.08,
           ),
           Expanded(
@@ -50,14 +47,14 @@ class ProfileCard extends StatelessWidget {
                   text,
                   style: TextStyle(
                       fontSize: 20,
-                      color: theme.checkTheme(
-                          Colors.black, Colors.white, context)),
+                      color:MediaQuery.of(context).platformBrightness == Brightness.light?
+                          Colors.black: Colors.white),
                 )),
           ),
           Icon(
             Icons.navigate_next_outlined,
-            color: theme.checkTheme(
-                kPrimaryColor, Colors.purple.shade100, context),
+            color:MediaQuery.of(context).platformBrightness == Brightness.light?
+                kPrimaryColor: Colors.purple.shade100,
             size: size.width * 0.09,
           ),
         ]),

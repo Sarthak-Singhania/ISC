@@ -1,10 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:isc/constants.dart';
-import 'package:isc/provider/theme_provider.dart';
 import 'package:isc/screens/event_screen.dart';
 import 'package:isc/screens/profile_screen.dart';
-import 'package:provider/provider.dart';
 
 import '../routes.dart';
 
@@ -42,7 +40,6 @@ class _BottomNaviBarState extends State<BottomNaviBar> {
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
-    final theme = Provider.of<ThemeProvider>(context);
     final screens = 
     [ 
     EventScreen(),ProfileScreen(),];
@@ -56,8 +53,8 @@ class _BottomNaviBarState extends State<BottomNaviBar> {
           bottomNavigationBar: BottomNavigationBar(
               type: BottomNavigationBarType.fixed,
               selectedItemColor: kPrimaryColor,
-              backgroundColor:
-                  theme.checkTheme(Colors.white, Colors.black, context),
+             // backgroundColor:
+                 // theme.checkTheme(Colors.white, Colors.black, context),
               unselectedItemColor: Colors.grey,
               currentIndex: currentIndex,
               showSelectedLabels: false,

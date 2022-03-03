@@ -14,7 +14,6 @@ import 'package:isc/components/event_card.dart';
 import 'package:isc/components/shimmer_card.dart';
 import 'package:isc/constants.dart';
 import 'package:isc/provider/notification_provider.dart';
-import 'package:isc/provider/theme_provider.dart';
 import 'package:isc/routes.dart';
 import 'package:isc/user-info.dart';
 import 'package:provider/provider.dart';

@@ -1,13 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:isc/constants.dart';
-import 'package:isc/provider/theme_provider.dart';
 import 'package:isc/routes.dart';
-import 'package:provider/provider.dart';
+
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({Key? key}) : super(key: key);
@@ -76,7 +74,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-    dynamic theme = Provider.of<ThemeProvider>(context);
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -93,8 +90,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     padding: EdgeInsets.all(10),
                     width: size.width * 0.8,
                     decoration: BoxDecoration(
-                      color: theme.checkTheme(
-                          kPrimaryLightColor, Colors.purple.shade300, context),
+                      color: MediaQuery.of(context).platformBrightness == Brightness.light?
+                          kPrimaryLightColor: Colors.purple.shade300,
                       borderRadius: BorderRadius.circular(30),
                     ),
                     child: TextFormField(
@@ -132,8 +129,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     padding: EdgeInsets.all(10),
                     width: size.width * 0.8,
                     decoration: BoxDecoration(
-                      color: theme.checkTheme(
-                          kPrimaryLightColor, Colors.purple.shade300, context),
+                      color: MediaQuery.of(context).platformBrightness == Brightness.light?
+                          kPrimaryLightColor: Colors.purple.shade300, 
                       borderRadius: BorderRadius.circular(30),
                     ),
                     child: TextFormField(
@@ -167,8 +164,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     padding: EdgeInsets.all(10),
                     width: size.width * 0.8,
                     decoration: BoxDecoration(
-                      color: theme.checkTheme(
-                          kPrimaryLightColor, Colors.purple.shade300, context),
+                      color: MediaQuery.of(context).platformBrightness == Brightness.light?
+                          kPrimaryLightColor: Colors.purple.shade300,
                       borderRadius: BorderRadius.circular(30),
                     ),
                     child: TextFormField(
@@ -201,8 +198,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     padding: EdgeInsets.all(10),
                     width: size.width * 0.8,
                     decoration: BoxDecoration(
-                      color: theme.checkTheme(
-                          kPrimaryLightColor, Colors.purple.shade300, context),
+                      color:MediaQuery.of(context).platformBrightness == Brightness.light?
+                          kPrimaryLightColor: Colors.purple.shade300,
                       borderRadius: BorderRadius.circular(30),
                     ),
                     child: TextFormField(

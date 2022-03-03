@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:isc/provider/theme_provider.dart';
-import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 
 class ShimmerCard extends StatelessWidget {
@@ -8,7 +6,6 @@ class ShimmerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    dynamic theme = Provider.of<ThemeProvider>(context);
     return Shimmer.fromColors(
         baseColor: Colors.white,
         highlightColor: Colors.grey[300]!,

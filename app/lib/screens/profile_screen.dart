@@ -6,7 +6,6 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:isc/components/profile_card.dart';
 import 'package:isc/constants.dart';
-import 'package:isc/provider/theme_provider.dart';
 import 'package:isc/routes.dart';
 import 'package:isc/user-info.dart';
 import 'package:provider/provider.dart';
@@ -37,11 +36,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    dynamic theme = Provider.of<ThemeProvider>(context);
     Size size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: theme.checkTheme(Colors.white, Colors.black, context),
+        backgroundColor:MediaQuery.of(context).platformBrightness == Brightness.light?Colors.white: Colors.black,
         centerTitle: true,
         title: Text("Profile", style: TextStyle(color: kPrimaryColor)),
       ),

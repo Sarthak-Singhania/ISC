@@ -1,11 +1,7 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
-import 'package:isc/provider/theme_provider.dart';
 import 'package:isc/routes.dart';
-import 'package:isc/screens/ticket_screen.dart';
-import 'package:provider/provider.dart';
 
 import '../constants.dart';
 
@@ -35,7 +31,6 @@ class BookingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    ThemeProvider theme = Provider.of<ThemeProvider>(context);
     return GestureDetector(
       onTap: () async {
         bool hasInternet = await InternetConnectionChecker().hasConnection;
@@ -81,16 +76,16 @@ class BookingCard extends StatelessWidget {
                   sportName,
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: theme.checkTheme(
-                          kPrimaryColor, Colors.white, context), //kPrimaryColor
+                      color: MediaQuery.of(context).platformBrightness == Brightness.light?
+                          kPrimaryColor: Colors.white, //kPrimaryColor
                       fontSize: 17),
                 ),
                 AutoSizeText(
                   slotTime,
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: theme.checkTheme(
-                          kPrimaryColor, Colors.white, context),
+                      color: MediaQuery.of(context).platformBrightness == Brightness.light?
+                          kPrimaryColor: Colors.white,
                       fontSize: 16),
                 ),
               ],
@@ -106,8 +101,8 @@ class BookingCard extends StatelessWidget {
                           : "$studentName +${int.parse(totalCount) - 1} others",
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: theme.checkTheme(
-                          kPrimaryColor, Colors.white, context),
+                      color: MediaQuery.of(context).platformBrightness == Brightness.light?
+                          kPrimaryColor: Colors.white,
                       fontSize: 17),
                 ),
               ],
@@ -117,8 +112,8 @@ class BookingCard extends StatelessWidget {
         width: size.width * 0.9,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(5.0),
-          color: theme.checkTheme(kPrimaryLightColor, Colors.purple.shade600,
-              context), //kPrimaryLightColor
+          color: MediaQuery.of(context).platformBrightness == Brightness.light?kPrimaryLightColor: Colors.purple.shade600,
+               //kPrimaryLightColor
           boxShadow: [
             BoxShadow(
               color: Colors.grey,

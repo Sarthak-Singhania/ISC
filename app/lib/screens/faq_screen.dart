@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:isc/provider/theme_provider.dart';
 import 'package:provider/provider.dart';
 
 import '../constants.dart';
@@ -49,7 +48,6 @@ class _FaqScreenState extends State<FaqScreen> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    ThemeProvider theme = Provider.of<ThemeProvider>(context);
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -76,12 +74,12 @@ class _FaqScreenState extends State<FaqScreen> {
                       width: size.width * 0.9,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(15),
-                        color: theme.checkTheme(
-                            Colors.white, Colors.grey.shade900, context),
+                        color: MediaQuery.of(context).platformBrightness == Brightness.light?
+                            Colors.white: Colors.grey.shade900,
                         boxShadow: [
                           BoxShadow(
-                            color: theme.checkTheme(
-                                Colors.grey, Colors.grey.shade900, context),
+                            color: MediaQuery.of(context).platformBrightness == Brightness.light?
+                                Colors.grey: Colors.grey.shade900,
                             blurRadius: 2.0,
                             spreadRadius: 0.0,
                             offset: Offset(

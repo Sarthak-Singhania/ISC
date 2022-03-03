@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:isc/constants.dart';
-import 'package:isc/provider/theme_provider.dart';
 import 'package:isc/routes.dart';
 import 'package:isc/components/roundedbutton.dart';
 import 'package:provider/provider.dart';
@@ -9,10 +8,9 @@ import 'package:provider/provider.dart';
 class WelcomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
       systemNavigationBarColor:
-          themeProvider.checkTheme(Color(0xFFF2F2F2), Colors.black, context),
+          MediaQuery.of(context).platformBrightness == Brightness.light?Color(0xFFF2F2F2): Colors.black
     ));
     Size size = MediaQuery.of(context).size;
     return Scaffold(

@@ -4,7 +4,6 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
-import 'package:isc/provider/theme_provider.dart';
 import 'package:isc/user-info.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
@@ -57,7 +56,6 @@ class AdminSlotCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    ThemeProvider theme = Provider.of<ThemeProvider>(context);
     return Container(
       margin: EdgeInsets.all(10),
       padding: EdgeInsets.only(left: 10, right: 10),
@@ -124,8 +122,8 @@ class AdminSlotCard extends StatelessWidget {
         ],
       ),
       decoration: BoxDecoration(
-        color: theme.checkTheme(
-            kPrimaryLightColor, Colors.purple.shade600, context),
+        color: MediaQuery.of(context).platformBrightness == Brightness.light?
+            kPrimaryLightColor: Colors.purple.shade600,
         borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(

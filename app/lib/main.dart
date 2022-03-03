@@ -2,10 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:isc/components/bottom_navi_bar.dart';
 import 'package:isc/constants.dart';
 import 'package:isc/provider/notification_provider.dart';
-import 'package:isc/provider/theme_provider.dart';
 import 'package:isc/routes.dart';
 import 'package:isc/screens/admin_detail_screen.dart';
 import 'package:isc/screens/booking_screen.dart';
@@ -31,7 +29,6 @@ Future<void> main() async {
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
   runApp(MultiProvider(
     providers: [
-      ChangeNotifierProvider(create:(_)=>ThemeProvider()),
       ChangeNotifierProvider(create:(_)=>NotificationProvider()),
     ],
     child: MyApp()));
@@ -74,7 +71,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'ISC',
@@ -88,7 +84,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           scaffoldBackgroundColor: Colors.black,
           appBarTheme: AppBarTheme(color: kPrimaryColor),
           brightness: Brightness.dark),
-      themeMode: themeProvider.themeMode,
+      themeMode: ThemeMode.system,
       initialRoute: AppRoutes.homeScreen,
       routes: {
         AppRoutes.homeScreen: (context) => WelcomeScreen(),

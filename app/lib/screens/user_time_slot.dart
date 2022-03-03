@@ -7,8 +7,6 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:isc/components/slot_card.dart';
 import 'package:http/http.dart' as http;
-import 'package:isc/provider/theme_provider.dart';
-import 'package:provider/provider.dart';
 import '../constants.dart';
 import '../user-info.dart';
 
@@ -194,7 +192,6 @@ class _UserTimeSlotState extends State<UserTimeSlot> {
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-    ThemeProvider theme = Provider.of<ThemeProvider>(context);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: kPrimaryColor,
@@ -268,8 +265,12 @@ class _UserTimeSlotState extends State<UserTimeSlot> {
                                                   .elementAt(index),
                                               isEnabled: daysAvailable.values
                                                   .elementAt(index),
-                                              func: () {
-                                                setState(() {});
+                                              func: ()async {
+                                               if (daySelected.length > 0) {
+                                        secondCircp = true;
+                                        setState(() {});
+                                        await getSlot();
+                                      } 
                                               },
                                               isDaySelected: isDaySelected,
                                               maxDaysAllowed: maxDaysAllowed,
@@ -279,35 +280,27 @@ class _UserTimeSlotState extends State<UserTimeSlot> {
                                     ),
                                   ),
                                   Spacer(),
-                                  GestureDetector(
-                                    onTap: () async {
-                                      if (daySelected.length > 0) {
-                                        secondCircp = true;
-                                        setState(() {});
-                                        await getSlot();
-                                      } else {
-                                        Fluttertoast.showToast(
-                                            msg:
-                                                "Please select atleast one day");
-                                      }
-                                    },
-                                    child: Container(
-                                      width: size.width * 0.5,
-                                      height: size.height * 0.05,
-                                      decoration: BoxDecoration(
-                                          color: kPrimaryColor,
-                                          borderRadius:
-                                              BorderRadius.circular(10)),
-                                      child: Center(
-                                        child: AutoSizeText(
-                                          'Show Results',
-                                          style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 20),
-                                        ),
-                                      ),
-                                    ),
-                                  )
+                                  // GestureDetector(
+                                  //   onTap: () async {
+                                      
+                                  //   },
+                                  //   child: Container(
+                                  //     width: size.width * 0.5,
+                                  //     height: size.height * 0.05,
+                                  //     decoration: BoxDecoration(
+                                  //         color: kPrimaryColor,
+                                  //         borderRadius:
+                                  //             BorderRadius.circular(10)),
+                                  //     child: Center(
+                                  //       child: AutoSizeText(
+                                  //         'Show Results',
+                                  //         style: TextStyle(
+                                  //             color: Colors.white,
+                                  //             fontSize: 20),
+                                  //       ),
+                                  //     ),
+                                  //   ),
+                                  // )
                                 ],
                               ),
                             ),
@@ -322,8 +315,8 @@ class _UserTimeSlotState extends State<UserTimeSlot> {
                                   return SlotCard(
                                     slotTime: slotAvailable[index],
                                     color: sport[slotAvailable[index]] > 0
-                                        ? theme.checkTheme(Colors.green,
-                                            Colors.green.shade600, context)
+                                        ? MediaQuery.of(context).platformBrightness == Brightness.light?Colors.green
+                                           : Colors.green.shade600
                                         : Colors.grey,
                                     isDisabled: true,
                                   );

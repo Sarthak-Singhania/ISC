@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
-import 'package:isc/provider/theme_provider.dart';
 import 'package:isc/routes.dart';
 import 'package:http/http.dart' as http;
 import 'package:isc/user-info.dart';
@@ -161,7 +160,6 @@ class _AdminEventCardState extends State<AdminEventCard> {
 
   @override
   Widget build(BuildContext context) {
-    dynamic theme = Provider.of<ThemeProvider>(context);
     return GestureDetector(
       onLongPress: () {},
       onTap: () {
@@ -181,8 +179,8 @@ class _AdminEventCardState extends State<AdminEventCard> {
           color: Colors.white,
           boxShadow: [
             BoxShadow(
-              color: theme.checkTheme(Colors.grey.withOpacity(0.5),
-                  Colors.purple.shade500, context),
+              color: MediaQuery.of(context).platformBrightness == Brightness.light?Colors.grey.withOpacity(0.5):
+                  Colors.purple.shade500,
               spreadRadius: 5,
               blurRadius: 7,
               offset: Offset(0, 5), // changes position of shadow
@@ -238,7 +236,7 @@ class _AdminEventCardState extends State<AdminEventCard> {
                     fontWeight: FontWeight.bold,
                     fontSize: 15,
                     color:
-                        theme.checkTheme(Colors.black, Colors.purple, context)),
+                        MediaQuery.of(context).platformBrightness == Brightness.light?Colors.black: Colors.purple),
               ),
             )
           ],
