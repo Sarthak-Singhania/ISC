@@ -1,19 +1,13 @@
-import 'dart:convert';
-
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:isc/routes.dart';
-
 import 'package:isc/user-info.dart';
-import 'package:provider/provider.dart';
-
 import 'package:transparent_image/transparent_image.dart';
 
-
 class EventCard extends StatefulWidget {
-  String title;
-  String uri;
-  List info;
+  final String title;
+  final String uri;
+  final List info;
   EventCard({required this.title, required this.uri, required this.info});
 
   @override
@@ -22,14 +16,11 @@ class EventCard extends StatefulWidget {
 
 class _EventCardState extends State<EventCard> {
   double opacity = 0.5;
-  String JWTtoken = '';
-  //String game = '';
   bool toggleValue = false;
-  late bool hasInternet;
   double spreadRadius = 5;
   bool value = true;
   double blurRadius = 7;
-  
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -46,8 +37,10 @@ class _EventCardState extends State<EventCard> {
           color: Colors.white,
           boxShadow: [
             BoxShadow(
-              color: MediaQuery.of(context).platformBrightness == Brightness.light?Colors.grey.withOpacity(0.5):
-                  Colors.purple.shade500 ,// purple 500
+              color:
+                  MediaQuery.of(context).platformBrightness == Brightness.light
+                      ? Colors.grey.withOpacity(0.5)
+                      : Colors.purple.shade500, // purple 500
               spreadRadius: 5,
               blurRadius: 7,
               offset: Offset(0, 5), // changes position of shadow
@@ -68,8 +61,10 @@ class _EventCardState extends State<EventCard> {
               style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 15,
-                  color:
-                      MediaQuery.of(context).platformBrightness == Brightness.light?Colors.black: Colors.purple),
+                  color: MediaQuery.of(context).platformBrightness ==
+                          Brightness.light
+                      ? Colors.black
+                      : Colors.purple),
             )
           ],
         ),

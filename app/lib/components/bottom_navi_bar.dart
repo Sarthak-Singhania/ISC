@@ -19,12 +19,12 @@ class _BottomNaviBarState extends State<BottomNaviBar> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(seconds: kSessionExpireTimeout), () async {
-      print("hgya");
-      await FirebaseAuth.instance.signOut();
-      Navigator.pushNamedAndRemoveUntil(
-          context, AppRoutes.homeScreen, (route) => false);
-    });
+    // Future.delayed(const Duration(seconds: kSessionExpireTimeout), () async {
+    //   print("hgya");
+    //   await FirebaseAuth.instance.signOut();
+    //   Navigator.pushNamedAndRemoveUntil(
+    //       context, AppRoutes.homeScreen, (route) => false);
+    // });
   }
 
   Future<bool?> showAlertDialog(){

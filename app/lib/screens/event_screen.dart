@@ -27,10 +27,9 @@ class EventScreen extends StatefulWidget {
 
 class _EventScreenState extends State<EventScreen> {
   bool isInternet = true;
-  late final jsonData;
-  bool circP = true;
-  late bool tapToRefresh = false;
+  var jsonData;
   int notificationListLength = 0;
+  late Future myFuture;
   @override
   void initState() {
     super.initState();
@@ -40,10 +39,36 @@ class _EventScreenState extends State<EventScreen> {
     //   Navigator.pushNamedAndRemoveUntil(
     //       context, AppRoutes.homeScreen, (route) => false);
     // });
-    getData();
+    myFuture = getData();
   }
 
-  void getData() async {
+  Future<bool?> showAlertDialog() {
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text('Do you want to exit?'),
+            actions: [
+              TextButton(
+                child: Text("CANCEL"),
+                onPressed: () {
+                  Navigator.pop(context, false);
+                },
+              ),
+              TextButton(
+                child: Text("YES"),
+                onPressed: () async {
+                  await FirebaseAuth.instance.signOut();
+                  Navigator.pop(context, true);
+                },
+              )
+            ],
+          );
+        });
+  }
+
+  Future<void> getData() async {
+    print("GEtData called");
     StudentInfo.emailId = FirebaseAuth.instance.currentUser!.email!;
     StudentInfo.jwtToken =
         await FirebaseAuth.instance.currentUser!.getIdToken();
@@ -82,227 +107,231 @@ class _EventScreenState extends State<EventScreen> {
           StudentInfo.getDataSport.add((jsonData[i]['game']));
         }
       }
-
-      circP = false;
-      tapToRefresh = false;
-      setState(() {});
     } catch (e) {
-      circP = false;
-      tapToRefresh = true;
-      setState(() {});
       print(e);
+      return Future.error(e.toString());
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    //getData();
     Size size = MediaQuery.of(context).size;
     GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
-    return tapToRefresh
-        ? GestureDetector(
-            onTap: () async {
-              if (!(await InternetConnectionChecker().hasConnection)) {
-                Fluttertoast.showToast(
-                    msg: "Please check your internet connection");
-              } else {
-                circP = true;
-                tapToRefresh = false;
-                setState(() {});
-                getData();
-              }
-            },
-            child: Scaffold(
-              body: Container(
-                  child: Center(
-                      child: AutoSizeText(
-                "Tap To Refresh",
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ))),
-            ),
-          )
-        : Scaffold(
-            key: _scaffoldState,
-            drawer: Drawer(
-              child: ListView(
-                children: [
-                  !StudentInfo.isAdmin
-                      ? DrawerTile(
-                          func: () {
-                            Navigator.pushNamed(
-                                context, AppRoutes.bookingsScreen);
-                            //     .then((value) async {
-                            //   print('booki called');
-                            //   setState(() {});
-                            // });
-                          },
-                          icon: Icons.my_library_books_sharp,
-                          title: 'Bookings')
-                      : Container(),
-                  DrawerTile(
+    return WillPopScope(
+      onWillPop: () async {
+        final shouldPop = await showAlertDialog();
+        return shouldPop ?? false;
+      },
+      child: Scaffold(
+        key: _scaffoldState,
+        drawer: Drawer(
+          child: ListView(
+            children: [
+              !StudentInfo.isAdmin
+                  ? DrawerTile(
                       func: () {
-                        Navigator.pushNamed(context, AppRoutes.faqscreen);
+                        Navigator.pushNamed(context, AppRoutes.bookingsScreen);
                       },
-                      icon: Icons.question_answer,
-                      title: 'FAQs'),
-                  StudentInfo.isAdmin
-                      ? DrawerTile(
-                          func: () {
-                            Navigator.pushNamed(context, AppRoutes.datascreen);
-                          },
-                          icon: Icons.info_outline,
-                          title: 'Data')
-                      : Container(),
-                  DrawerTile(
-                      func: () async {
-                        bool hasInternet =
-                            await InternetConnectionChecker().hasConnection;
-                        if (hasInternet) {
-                          print("signed out");
-                          await FirebaseAuth.instance.signOut();
-                          Navigator.pushNamedAndRemoveUntil(
-                              context, AppRoutes.homeScreen, (route) => false);
-                        } else {
-                          Fluttertoast.showToast(
-                              msg: "Please check your internet connection");
-                        }
+                      icon: Icons.my_library_books_sharp,
+                      title: 'Bookings')
+                  : Container(),
+              DrawerTile(
+                  func: () {
+                    Navigator.pushNamed(context, AppRoutes.faqscreen);
+                  },
+                  icon: Icons.question_answer,
+                  title: 'FAQs'),
+              StudentInfo.isAdmin
+                  ? DrawerTile(
+                      func: () {
+                        Navigator.pushNamed(context, AppRoutes.datascreen);
                       },
-                      title: 'Log Out',
-                      icon: Icons.login_outlined),
-                ],
-              ),
-            ),
-            body: SingleChildScrollView(
-              child: Stack(
+                      icon: Icons.info_outline,
+                      title: 'Data')
+                  : Container(),
+              DrawerTile(
+                  func: () async {
+                    bool hasInternet =
+                        await InternetConnectionChecker().hasConnection;
+                    if (hasInternet) {
+                      print("signed out");
+                      await FirebaseAuth.instance.signOut();
+                      Navigator.pushNamedAndRemoveUntil(
+                          context, AppRoutes.homeScreen, (route) => false);
+                    } else {
+                      Fluttertoast.showToast(
+                          msg: "Please check your internet connection");
+                    }
+                  },
+                  title: 'Log Out',
+                  icon: Icons.login_outlined),
+            ],
+          ),
+        ),
+        body: FutureBuilder(
+          future: myFuture,
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return GestureDetector(
+                onTap: () async {
+                  if (!(await InternetConnectionChecker().hasConnection)) {
+                    Fluttertoast.showToast(
+                        msg: "Please check your internet connection");
+                  } else {
+                    myFuture = getData();
+                    setState(() {});
+                  }
+                },
+                child: Scaffold(
+                  body: Container(
+                      child: Center(
+                          child: AutoSizeText(
+                    "Tap To Refresh",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ))),
+                ),
+              );
+            } else {
+              return Stack(
                 children: [
                   Container(
-                    decoration: BoxDecoration(color: Colors.purple[600]),
+                    decoration: BoxDecoration(
+                        color: Colors.purple[600],
+                        borderRadius: BorderRadius.only(
+                            bottomLeft: Radius.circular(10),
+                            bottomRight: Radius.circular(10))),
                     width: size.width,
                     height: size.height * 0.35,
                   ),
                   SafeArea(
-                    child: Column(
-                      children: [
-                        SizedBox(
-                          height: size.height * 0.02,
-                        ),
-                        Container(
-                            child: Row(
-                          children: [
-                            IconButton(
-                              icon: Icon(
-                                Icons.menu,
-                                color: Colors.white,
-                                size: size.width * 0.07,
-                              ),
-                              onPressed: () {
-                                _scaffoldState.currentState!.openDrawer();
-                              },
-                            ),
-                            Spacer(
-                              flex: 1,
-                            ),
-                            AutoSizeText(
-                              'SELECT YOUR SPORT',
-                              style: TextStyle(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          SizedBox(
+                            height: size.height * 0.02,
+                          ),
+                          Container(
+                              child: Row(
+                            children: [
+                              IconButton(
+                                icon: Icon(
+                                  Icons.menu,
                                   color: Colors.white,
-                                  fontSize: 25,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                            Spacer(
-                              flex: 1,
-                            ),
-                            !StudentInfo.isAdmin
-                                ? Container(
-                                    child: Stack(
-                                      children: [
-                                        Center(
-                                          child: IconButton(
-                                            color: Colors.white,
-                                            onPressed: () {
-                                              Navigator.pushNamed(
-                                                      context,
-                                                      AppRoutes
-                                                          .notificationScreen);
-                                              //     .then((value) async {
-                                              //   print('notifi called');
-                                              //   setState(() {});
-                                              // });
-                                            },
-                                            icon: Icon(
-                                              Icons.notifications,
-                                              size: size.width * 0.07,
+                                  size: size.width * 0.07,
+                                ),
+                                onPressed: () {
+                                  _scaffoldState.currentState!.openDrawer();
+                                },
+                              ),
+                              Spacer(
+                                flex: 1,
+                              ),
+                              AutoSizeText(
+                                'SELECT YOUR SPORT',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 25,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                              Spacer(
+                                flex: 1,
+                              ),
+                              !StudentInfo.isAdmin
+                                  ? GestureDetector(
+                                      onTap: () {
+                                        Navigator.pushNamed(context,
+                                            AppRoutes.notificationScreen);
+                                      },
+                                      child: Container(
+                                        child: Stack(
+                                          children: [
+                                            Center(
+                                              child: Icon(
+                                                Icons.notifications,
+                                                size: size.width * 0.07,
+                                                color: Colors.white,
+                                              ),
                                             ),
-                                          ),
+                                            context
+                                                        .watch<
+                                                            NotificationProvider>()
+                                                        .count >
+                                                    0
+                                                ? Positioned(
+                                                    top: 5,
+                                                    right: 8,
+                                                    child: Container(
+                                                      width: 20,
+                                                      height: 20,
+                                                      decoration: BoxDecoration(
+                                                          shape:
+                                                              BoxShape.circle,
+                                                          color: Colors.red),
+                                                      child: Center(
+                                                        child: AutoSizeText(
+                                                          '${context.watch<NotificationProvider>().count}',
+                                                          style: TextStyle(
+                                                              color:
+                                                                  Colors.white,
+                                                              fontSize: 10),
+                                                        ),
+                                                      ),
+                                                    ))
+                                                : Container()
+                                          ],
                                         ),
-                                        context
-                                                    .watch<
-                                                        NotificationProvider>()
-                                                    .count >
-                                                0
-                                            ? Positioned(
-                                                top: 5,
-                                                right: 8,
-                                                child: Container(
-                                                  width: 20,
-                                                  height: 20,
-                                                  decoration: BoxDecoration(
-                                                      shape: BoxShape.circle,
-                                                      color: Colors.red),
-                                                  child: Center(
-                                                    child: AutoSizeText(
-                                                      '${context.watch<NotificationProvider>().count}',
-                                                      style: TextStyle(
-                                                          color: Colors.white,
-                                                          fontSize: 10),
-                                                    ),
-                                                  ),
-                                                ))
-                                            : Container()
-                                      ],
-                                    ),
-                                  )
-                                : Spacer()
-                          ],
-                        )),
-                        SizedBox(
-                          height: size.height * 0.06,
-                        ),
-                        GridView.builder(
-                          physics: ScrollPhysics(),
-                          shrinkWrap: true,
-                          gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
-                                  childAspectRatio:
-                                      StudentInfo.isAdmin ? 0.79 : 1,
-                                  crossAxisCount: 2),
-                          itemCount: circP ? 8 : jsonData.length,
-                          itemBuilder: (context, index) {
-                            return circP
-                                ? ShimmerCard()
-                                : StudentInfo.isAdmin
-                                    ? AdminEventCard(
-                                        title: jsonData[index]['game'],
-                                        uri: jsonData[index]['url'],
-                                        isEnabled: jsonData[index]['isEnabled'],
-                                      )
-                                    : EventCard(
-                                        title: jsonData[index]['game'],
-                                        uri: jsonData[index]['url'],
-                                        info: jsonData[index]['info']);
-                          },
-                        )
-                      ],
+                                      ),
+                                    )
+                                  : Spacer()
+                            ],
+                          )),
+                          SizedBox(
+                            height: size.height * 0.06,
+                          ),
+                          GridView.builder(
+                            physics: ScrollPhysics(),
+                            shrinkWrap: true,
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                                    childAspectRatio:
+                                        StudentInfo.isAdmin ? 0.79 : 1,
+                                    crossAxisCount: 2),
+                            itemCount: snapshot.connectionState ==
+                                    ConnectionState.waiting
+                                ? 8
+                                : jsonData.length,
+                            itemBuilder: (context, index) {
+                              return snapshot.connectionState ==
+                                      ConnectionState.waiting
+                                  ? ShimmerCard()
+                                  : StudentInfo.isAdmin
+                                      ? AdminEventCard(
+                                          title: jsonData[index]['game'],
+                                          uri: jsonData[index]['url'],
+                                          isEnabled: jsonData[index]
+                                              ['isEnabled'],
+                                        )
+                                      : EventCard(
+                                          title: jsonData[index]['game'],
+                                          uri: jsonData[index]['url'],
+                                          info: jsonData[index]['info']);
+                            },
+                          )
+                        ],
+                      ),
                     ),
                   )
                 ],
-              ),
-            ),
-            // bottomNavigationBar: BottomNaviBar('event'),
-          );
+              );
+            }
+          },
+        ),
+        // bottomNavigationBar: BottomNaviBar('event'),
+      ),
+    );
   }
 }
 

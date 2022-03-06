@@ -7,6 +7,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:isc/components/student_detail.dart';
 import 'package:isc/constants.dart';
+import 'package:isc/status_enum.dart';
 import 'package:isc/user-info.dart';
 import 'package:http/http.dart' as http;
 
@@ -45,34 +46,28 @@ class _DetailScreenState extends State<DetailScreen> {
   var length = List<int>.filled(StudentInfo.dayChoosen.length, 1);
   var slotsRemaining = List<int>.filled(StudentInfo.dayChoosen.length, 0);
   var downArrow = List<bool>.filled(StudentInfo.dayChoosen.length, true);
-  var isError = List.generate(
-      StudentInfo.dayChoosen.length, (i) => List.generate(8, (j) => false),
-      growable: false);
   var errorMessage = List.generate(
       StudentInfo.dayChoosen.length, (i) => List.generate(8, (j) => ""),
       growable: false);
-  var isConfirm = List.generate(
-      StudentInfo.dayChoosen.length, (i) => List.generate(8, (j) => false),
+  List<List<BookingStatus>> bookingStatus = List.generate(
+      StudentInfo.dayChoosen.length,
+      (i) => List.generate(8, (j) => BookingStatus.None),
       growable: false);
   DateTime? todayDate;
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     todayDate = DateTime.now();
     getData();
   }
 
   Future<void> postData() async {
-    isError = List.generate(
-      StudentInfo.dayChoosen.length, (i) => List.generate(8, (j) => false),
-      growable: false);
-      isConfirm = List.generate(
-      StudentInfo.dayChoosen.length, (i) => List.generate(8, (j) => false),
-      growable: false);
-     errorMessage = List.generate(
-      StudentInfo.dayChoosen.length, (i) => List.generate(8, (j) => ""),
-      growable: false);
+    bookingStatus = List.generate(StudentInfo.dayChoosen.length,
+        (i) => List.generate(8, (j) => BookingStatus.None),
+        growable: false);
+    errorMessage = List.generate(
+        StudentInfo.dayChoosen.length, (i) => List.generate(8, (j) => ""),
+        growable: false);
     for (var i = 0; i < length.length; i++) {
       for (var j = 0; j < length[i] * 2; j++) {
         print(_controller[i][j].text);
@@ -145,21 +140,27 @@ class _DetailScreenState extends State<DetailScreen> {
                   break;
                 }
               }
-              isError[x][y] = true;
-              isError[x][y + 1] = true;
+              bookingStatus[x][y] = BookingStatus.Error;
+              bookingStatus[x][y + 1] = BookingStatus.Error;
               errorMessage[x][y] = errorM;
             }
           }
         }
       } else {
         for (var dateIndex in jsonData['message'].keys) {
-          for (var i = 0;
-              i < _controller[int.parse(dateIndex)].length;
-              i += 2) {
-            isConfirm[int.parse(dateIndex)][i] = true;
-            isConfirm[int.parse(dateIndex)][i + 1] = true;
-            errorMessage[int.parse(dateIndex)][i] =
-                jsonData['message'][dateIndex];
+          for (var j = 0;
+              j < _controller[int.parse(dateIndex)].length;
+              j += 2) {
+            var i = int.parse(dateIndex);
+            if (jsonData['message'][dateIndex] == 'All slots have finished') {
+              bookingStatus[i][j] = BookingStatus.Error;
+              bookingStatus[i][j + 1] = BookingStatus.Error;
+              errorMessage[i][j] = jsonData['message'][dateIndex];
+            } else {
+              bookingStatus[i][j] = BookingStatus.Confirm;
+              bookingStatus[i][j + 1] = BookingStatus.Confirm;
+              errorMessage[i][j] = jsonData['message'][dateIndex];
+            }
           }
         }
       }
@@ -346,8 +347,8 @@ class _DetailScreenState extends State<DetailScreen> {
                                               title: sNames[j],
                                               controller: _controller[i][j],
                                               index: j,
-                                              isError: isError[i][j],
-                                              isConfirm: isConfirm[i][j],
+                                              bookingStatus: bookingStatus[i]
+                                                  [j],
                                               errorMessage: errorMessage[i][j],
                                             );
                                           })

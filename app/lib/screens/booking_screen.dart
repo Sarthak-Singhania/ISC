@@ -17,13 +17,13 @@ class BookingScreen extends StatefulWidget {
 
 class _BookingScreenState extends State<BookingScreen> {
   dynamic bookingList = [];
-  bool circP = true;
+
   bool emptyList = false;
-  bool tapToRefresh = false;
+  late Future myFuture;
   @override
   void initState() {
     super.initState();
-    getData();
+    myFuture = getData();
   }
 
   Future<void> getData() async {
@@ -34,26 +34,17 @@ class _BookingScreenState extends State<BookingScreen> {
       var response = await http.get(
           Uri.parse(kIpAddress + '/get_bookings/$currEmail'),
           headers: {"x-access-token": JWTtoken});
-      print("new ${response.statusCode}");
       var jsonData = await jsonDecode(response.body);
       print(jsonData);
       bookingList = jsonData["message"];
       if (bookingList.length == 0) {
-        circP = false;
         emptyList = true;
-        setState(() {});
       } else {
-        print('yeh');
-        print(bookingList[0]);
-        circP = false;
-        tapToRefresh = false;
-        setState(() {});
+        emptyList = false;
       }
     } catch (e) {
-      circP = false;
-      tapToRefresh = true;
-      setState(() {});
       print(e);
+      return Future.error(e.toString());
     }
   }
 
@@ -61,26 +52,22 @@ class _BookingScreenState extends State<BookingScreen> {
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     return Scaffold(
-      appBar: AppBar(
-        title: Text('BOOKINGS'),
-        centerTitle: true,
-      ),
-      body: circP
-          ? Center(
-              child: CircularProgressIndicator(
-              color: Colors.blue,
-            ))
-          : tapToRefresh
-              ? GestureDetector(
+        appBar: AppBar(
+          title: Text('BOOKINGS'),
+          centerTitle: true,
+        ),
+        body: FutureBuilder(
+            future: myFuture,
+            builder: (context, snapshot) {
+              if (snapshot.hasError) {
+                return GestureDetector(
                   onTap: () async {
                     if (!(await InternetConnectionChecker().hasConnection)) {
                       Fluttertoast.showToast(
                           msg: "Please check your internet connection");
                     } else {
-                      circP = true;
-                      tapToRefresh = false;
+                      myFuture = getData();
                       setState(() {});
-                      getData();
                     }
                   },
                   child: Container(
@@ -92,8 +79,14 @@ class _BookingScreenState extends State<BookingScreen> {
                       fontWeight: FontWeight.bold,
                     ),
                   ))),
-                )
-              : RefreshIndicator(
+                );
+              } else if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(
+                    child: CircularProgressIndicator(
+                  color: Colors.purple,
+                ));
+              } else {
+                return RefreshIndicator(
                   displacement: 100,
                   onRefresh: getData,
                   child: ListView(children: [
@@ -129,7 +122,8 @@ class _BookingScreenState extends State<BookingScreen> {
                               }),
                     ]),
                   ]),
-                ),
-    );
+                );
+              }
+            }));
   }
 }
