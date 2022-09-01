@@ -25,7 +25,7 @@ limiter = Limiter(
 )
 
 app.config['CORS_HEADERS'] = 'Content-Type'
-app.config['MYSQL_HOST'] = '68.183.244.199'
+app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'u724843278_ISC'
 app.config['MYSQL_PASSWORD'] = 'ISCdatabase@1234'
 app.config['MYSQL_DB'] = 'u724843278_ISC'
@@ -49,7 +49,7 @@ def token_required(f):
                 firebase_admin.initialize_app(cred)
                 data=auth.verify_id_token(token)
         except:
-            return make_response({'message': 'token in invalid'}), 403
+            return make_response({'message': 'token is invalid'}), 403
         return f(*args, **kwargs)
 
     return decorated

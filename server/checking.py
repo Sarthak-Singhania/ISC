@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 import mysql.connector as sql
-db=sql.connect(host='68.183.244.199',user='u724843278_ISC',password='ISCdatabase@1234',database='u724843278_ISC')
+db=sql.connect(host='localhost',user='u724843278_ISC',password='ISCdatabase@1234',database='u724843278_ISC')
 cur=db.cursor(dictionary=True)
 
 def checking(check,sports_name,slot,x):
