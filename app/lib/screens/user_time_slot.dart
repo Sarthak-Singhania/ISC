@@ -138,8 +138,8 @@ class _UserTimeSlotState extends State<UserTimeSlot> {
         if (daysAvailable.values.elementAt(i)) {
           String day = daysAvailable.keys.elementAt(i);
           if (weekdayToday == StudentInfo.resetWeekday &&
-              timeNow.hour >= StudentInfo.resetHour &&
-              timeNow.minute >= StudentInfo.resetMinute) {
+              (timeNow.hour == StudentInfo.resetHour &&
+              timeNow.minute >= StudentInfo.resetMinute)||(timeNow.hour > StudentInfo.resetHour )) {
             daysAvailable[day] = true;
           } else if (weekdays.indexOf(day) < weekdayToday - 1) {
             daysAvailable[day] = false;

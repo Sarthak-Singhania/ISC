@@ -10,9 +10,6 @@ import 'package:isc/constants.dart';
 import 'package:isc/components/slot_card.dart';
 import 'package:http/http.dart' as http;
 import 'package:isc/user-info.dart';
-import 'package:provider/provider.dart';
-// import 'package:switcher/core/switcher_size.dart';
-// import 'package:switcher/switcher.dart';
 
 class TimeSlot extends StatefulWidget {
   TimeSlot();
@@ -24,11 +21,10 @@ class TimeSlot extends StatefulWidget {
 class _TimeSlotState extends State<TimeSlot> {
   bool isDisabled = true;
   int calendarRange = 0;
-  bool isLoading = false;
-  bool circP = true;
   bool isDateChoosen = false;
   String gameChoosen = " ";
   Response? oldResponse;
+ Future? myFuture;
   bool _decideWhichDayToEnable(DateTime day) {
     if ((day.isAfter(DateTime.now().subtract(Duration(days: 1))) &&
         day.isBefore(DateTime.now().add(Duration(days: 7 - calendarRange))))) {
@@ -42,7 +38,7 @@ class _TimeSlotState extends State<TimeSlot> {
   final slotAvailable = [];
   Map<String, dynamic> sport = {};
   Map<String, dynamic> jsonData = {};
-  bool tapToRefresh = false;
+  //bool tapToRefresh = false;
   Response? response;
   final weekDays = [
     'Monday',
@@ -58,7 +54,7 @@ class _TimeSlotState extends State<TimeSlot> {
   void initState() {
     super.initState();
     gameChoosen = StudentInfo.gameChoosen;
-    getData();
+    myFuture = getData();
   }
 
   Future<void> showConfirmationDialog(isSlotAvailable) {
@@ -190,17 +186,11 @@ class _TimeSlotState extends State<TimeSlot> {
             "admin-header": "yes"
           });
       jsonData = await jsonDecode(response!.body);
-      tapToRefresh = false;
       print(jsonData);
-      circP = false;
-      setState(() {});
     } catch (e) {
-      circP = false;
-      tapToRefresh = true;
-      setState(() {});
       print(e);
+      return Future.error(e.toString());
     }
-    // oldResponse = response;
   }
 
   Future<void> getSlot(String day) async {
@@ -254,128 +244,137 @@ class _TimeSlotState extends State<TimeSlot> {
                 color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
           ),
         ),
-        body: circP
-            ? Center(
-                child: CircularProgressIndicator(
-                color: Colors.blue,
-              ))
-            : tapToRefresh
-                ? GestureDetector(
-                    onTap: () async {
-                      circP = true;
-                      tapToRefresh = false;
-                      setState(() {});
-                      await getData();
-                    },
-                    child: Container(
-                        child: Center(
-                            child: AutoSizeText(
-                      "Tap To Refresh",
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ))),
-                  )
-                : Column(
-                    children: [
-                      Row(
-                        children: [
-                          Spacer(),
-                          GestureDetector(
-                            onTap: () {
-                              selectDate(context);
-                            },
-                            child: Container(
-                              alignment: Alignment.center,
-                              height: size.height * 0.05,
-                              width: size.width * 0.4,
-                              margin: EdgeInsets.only(top: 5),
-                              padding: EdgeInsets.all(15),
-                              decoration: BoxDecoration(
-                                color: kPrimaryLightColor,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
+        body: FutureBuilder(
+          future: myFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    return GestureDetector(
+                      onTap: () {
+                        myFuture = getData();
+                        setState(() {});
+                      },
+                      child: Container(
+                          child: Center(
                               child: AutoSizeText(
-                                selectedDate == null
-                                    ? "CHOOSE YOUR DATE"
-                                    : '${selectedDate!.day}-${selectedDate!.month}-${selectedDate!.year}',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.purple,
-                                    fontSize: 15),
-                              ),
-                            ),
-                          ),
-                          Spacer(flex: 4),
-                          GestureDetector(
-                            onTap: () async {
-                              if (isDateChoosen) {
-                                if (isDisabled) {
-                                  await disbaleSlot();
-                                } else {
-                                  await enableSlot();
-                                  isDisabled = true;
-                                }
-                                await getData();
-                                print("latest");
-                                await getSlot(
-                                    weekDays[selectedDate!.weekday - 1]);
-                              }
-                            },
-                            child: Container(
-                              alignment: Alignment.center,
-                              width: size.width * 0.4,
-                              height: size.height * 0.05,
-                              margin: EdgeInsets.only(top: 5),
-                              padding: EdgeInsets.all(15),
-                              decoration: BoxDecoration(
-                                color: kPrimaryLightColor,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: isDisabled
-                                  ? AutoSizeText(
-                                      'Disable',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.red,
-                                          fontSize: 15),
-                                    )
-                                  : AutoSizeText(
-                                      'Enable',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.green,
-                                          fontSize: 15),
-                                    ),
-                            ),
-                          ),
-                          Spacer(),
-                        ],
-                      ),
-                      SizedBox(
-                        height: size.height * 0.05,
-                      ),
-                      Expanded(
-                        child: Container(
-                          width: size.width * 0.8,
-                          child: ListView.builder(
-                              physics: ScrollPhysics(),
-                              shrinkWrap: true,
-                              itemCount: slotAvailable.length,
-                              itemBuilder: (context, index) {
-                                return SlotCard(
-                                  slotTime: slotAvailable[index],
-                                  color: sport[slotAvailable[index]] > 0
-                                     ? MediaQuery.of(context).platformBrightness == Brightness.light?Colors.green:
-                                          Colors.green.shade600
-                                      : Colors.grey,
-                                  isDisabled: isDisabled,
-                                );
-                              }),
+                        "Tap To Refresh",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
                         ),
-                      )
-                    ],
-                  ));
+                      ))),
+                    );
+                  } else if (snapshot.connectionState ==
+                      ConnectionState.waiting) {
+                    return Center(
+                child: CircularProgressIndicator(
+                color: Colors.purple,
+              ));
+                  } else {
+                    return Column(
+                  children: [
+                    Row(
+                      children: [
+                        Spacer(),
+                        GestureDetector(
+                          onTap: () {
+                            selectDate(context);
+                          },
+                          child: Container(
+                            alignment: Alignment.center,
+                            height: size.height * 0.05,
+                            width: size.width * 0.4,
+                            margin: EdgeInsets.only(top: 5),
+                            padding: EdgeInsets.all(15),
+                            decoration: BoxDecoration(
+                              color: kPrimaryLightColor,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: AutoSizeText(
+                              selectedDate == null
+                                  ? "CHOOSE YOUR DATE"
+                                  : '${selectedDate!.day}-${selectedDate!.month}-${selectedDate!.year}',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.purple,
+                                  fontSize: 15),
+                            ),
+                          ),
+                        ),
+                        Spacer(flex: 4),
+                        GestureDetector(
+                          onTap: () async {
+                            if (isDateChoosen) {
+                              if (isDisabled) {
+                                await disbaleSlot();
+                              } else {
+                                await enableSlot();
+                                isDisabled = true;
+                              }
+                              await getData();
+                              print("latest");
+                              await getSlot(
+                                  weekDays[selectedDate!.weekday - 1]);
+                            }
+                          },
+                          child: Container(
+                            alignment: Alignment.center,
+                            width: size.width * 0.4,
+                            height: size.height * 0.05,
+                            margin: EdgeInsets.only(top: 5),
+                            padding: EdgeInsets.all(15),
+                            decoration: BoxDecoration(
+                              color: kPrimaryLightColor,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: isDisabled
+                                ? AutoSizeText(
+                                    'Disable',
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.red,
+                                        fontSize: 15),
+                                  )
+                                : AutoSizeText(
+                                    'Enable',
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.green,
+                                        fontSize: 15),
+                                  ),
+                          ),
+                        ),
+                        Spacer(),
+                      ],
+                    ),
+                    SizedBox(
+                      height: size.height * 0.05,
+                    ),
+                    Expanded(
+                      child: Container(
+                        width: size.width * 0.8,
+                        child: ListView.builder(
+                            physics: ScrollPhysics(),
+                            shrinkWrap: true,
+                            itemCount: slotAvailable.length,
+                            itemBuilder: (context, index) {
+                              return SlotCard(
+                                slotTime: slotAvailable[index],
+                                color: sport[slotAvailable[index]] > 0
+                                    ? MediaQuery.of(context)
+                                                .platformBrightness ==
+                                            Brightness.light
+                                        ? Colors.green
+                                        : Colors.green.shade600
+                                    : Colors.grey,
+                                isDisabled: isDisabled,
+                              );
+                            }),
+                      ),
+                    )
+                  ],
+                );
+                  }
+                },
+              ));
   }
 }
