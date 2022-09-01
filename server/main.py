@@ -81,7 +81,7 @@ def max_num():
 
 
 @app.get('/slots')
-@token_required
+# @token_required
 def slots():
     cursor = mysql.connection.cursor(cur.DictCursor)
     game = request.args.get('game').title().replace(' ', '_')
