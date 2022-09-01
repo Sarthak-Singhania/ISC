@@ -13,7 +13,7 @@ class AppRoutes {
   static const bookingsScreen = 'booking_screen';
   static const ticketScreen = 'ticket_screen';
   static const notificationScreen = 'notification_screen';
-  static const bottomNavigationScreen = 'bottom_navi_bar';
+ // static const bottomNavigationScreen = 'bottom_navi_bar';
   static const faqscreen = 'faq_page';
   static const datascreen = 'data_screen';
 }

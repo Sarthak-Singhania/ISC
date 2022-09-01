@@ -5,8 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:internet_connection_checker/internet_connection_checker.dart';
-import 'package:isc/provider/theme_provider.dart';
-import 'package:provider/provider.dart';
 
 import '../constants.dart';
 import '../user-info.dart';
@@ -138,7 +136,6 @@ class _DataScreenState extends State<DataScreen> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    //ThemeProvider theme = Provider.of<ThemeProvider>(context);
     return Scaffold(
         body: SafeArea(
       child: circP

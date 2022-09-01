@@ -284,111 +284,110 @@ class _AdminSlotScreenState extends State<AdminSlotScreen> {
                             physics: AlwaysScrollableScrollPhysics(),
                             children: [
                               SizedBox(height: size.height * 0.03),
-                              emptyList == true
-                                  ? Column(
-                                      children: [
-                                        SizedBox(
-                                          height: size.height * 0.4,
-                                        ),
-                                        AutoSizeText(
-                                          'No bookings',
-                                          style: TextStyle(fontSize: 20),
-                                        ),
-                                      ],
-                                    )
-                                  : Row(
-                                      children: [
-                                        Spacer(),
-                                        Container(
-                                          width: size.width * 0.25,
-                                          height: size.width * 0.15,
-                                          child: TextFormField(
-                                              controller: slotNumberController,
-                                              textInputAction:
-                                                  TextInputAction.done,
-                                              onFieldSubmitted: (value) async {
-                                                print(value);
-                                                await changeSlot();
-                                              },
-                                              decoration: InputDecoration(
-                                                focusedBorder:
-                                                    OutlineInputBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(15),
-                                                  borderSide: BorderSide(
-                                                      color: Colors.purple,
-                                                      width: 1.5),
-                                                ),
-                                                enabledBorder:
-                                                    OutlineInputBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(10),
-                                                  borderSide: BorderSide(
-                                                      color: Colors.purple,
-                                                      width: 1.5),
-                                                ),
-                                                contentPadding: EdgeInsets.only(
-                                                    left:
-                                                        20), // add padding to adjust text
-                                                suffixIcon: Icon(
-                                                  Icons.edit,
-                                                  color: Colors.black,
-                                                ),
-                                              )),
-                                        ),
-                                        Spacer(
-                                          flex: 5,
-                                        ),
-                                        FlutterSwitch(
-                                          width: 70.0,
-                                          height: 35.0,
-                                          activeColor: Colors.red,
-                                          inactiveColor: Colors.green,
-                                          activeIcon: Icon(
-                                            Icons.lock_outlined,
-                                            size: 30,
-                                            color: Colors.red,
+                              Row(
+                                children: [
+                                  Spacer(),
+                                  Container(
+                                    width: size.width * 0.25,
+                                    height: size.width * 0.15,
+                                    child: TextFormField(
+                                        controller: slotNumberController,
+                                        textInputAction: TextInputAction.done,
+                                        onFieldSubmitted: (value) async {
+                                          print(value);
+                                          await changeSlot();
+                                        },
+                                        decoration: InputDecoration(
+                                          focusedBorder: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(15),
+                                            borderSide: BorderSide(
+                                                color: Colors.purple,
+                                                width: 1.5),
                                           ),
-                                          inactiveIcon: Icon(
-                                            Icons.lock_outlined,
-                                            size: 30,
-                                            color: Colors.green,
+                                          enabledBorder: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                            borderSide: BorderSide(
+                                                color: Colors.purple,
+                                                width: 1.5),
                                           ),
-                                          toggleSize: 25.0,
-                                          value: toggleValue,
-                                          borderRadius: 30.0,
-                                          padding: 5.0,
-                                          showOnOff: false,
-                                          onToggle: (state) async {
-                                            if (state) {
-                                              await disbaleSlot();
-                                              getData();
-                                            } else {
-                                              await enableSlot();
-                                              getData();
-                                            }
-                                            setState(() {});
-                                          },
-                                        ),
-                                        Spacer(),
-                                      ],
+                                          contentPadding: EdgeInsets.only(
+                                              left:
+                                                  20), // add padding to adjust text
+                                          suffixIcon: Icon(
+                                            Icons.edit,
+                                            color: Colors.black,
+                                          ),
+                                        )),
+                                  ),
+                                  Spacer(
+                                    flex: 5,
+                                  ),
+                                  FlutterSwitch(
+                                    width: 70.0,
+                                    height: 35.0,
+                                    activeColor: Colors.red,
+                                    inactiveColor: Colors.green,
+                                    activeIcon: Icon(
+                                      Icons.lock_outlined,
+                                      size: 30,
+                                      color: Colors.red,
                                     ),
+                                    inactiveIcon: Icon(
+                                      Icons.lock_outlined,
+                                      size: 30,
+                                      color: Colors.green,
+                                    ),
+                                    toggleSize: 25.0,
+                                    value: toggleValue,
+                                    borderRadius: 30.0,
+                                    padding: 5.0,
+                                    showOnOff: false,
+                                    onToggle: (state) async {
+                                      if (state) {
+                                        await disbaleSlot();
+                                        getData();
+                                      } else {
+                                        await enableSlot();
+                                        getData();
+                                      }
+                                      setState(() {});
+                                    },
+                                  ),
+                                  Spacer(),
+                                ],
+                              ),
                               SizedBox(height: size.height * 0.03),
                               Expanded(
-                                child: ListView.builder(
-                                    physics: NeverScrollableScrollPhysics(),
-                                    shrinkWrap: true,
-                                    itemCount: pendingList.length,
-                                    itemBuilder: (context, index) {
-                                      return AdminSlotCard(
-                                        size: size,
-                                        bookingId: pendingList[index]
-                                            ['Booking_ID'],
-                                        studentName: pendingList[index]
-                                            ['Student_Name'],
-                                        snuId: pendingList[index]['SNU_ID'],
-                                      );
-                                    }),
+                                child: emptyList == true
+                                    ? Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          SizedBox(
+                                            height: size.width * 0.3,
+                                          ),
+                                          AutoSizeText(
+                                            'No bookings',
+                                            style: TextStyle(fontSize: 20),
+                                          ),
+                                        ],
+                                      )
+                                    : ListView.builder(
+                                        physics: NeverScrollableScrollPhysics(),
+                                        shrinkWrap: true,
+                                        itemCount: pendingList.length,
+                                        itemBuilder: (context, index) {
+                                          return AdminSlotCard(
+                                            size: size,
+                                            bookingId: pendingList[index]
+                                                ['Booking_ID'],
+                                            studentName: pendingList[index]
+                                                ['Student_Name'],
+                                            snuId: pendingList[index]['SNU_ID'],
+                                          );
+                                        }),
                               ),
                             ],
                           ),

@@ -9,8 +9,8 @@ import 'package:isc/user-info.dart';
 class SlotCard extends StatelessWidget {
   String slotTime;
   Color? color;
-
-  SlotCard({required this.slotTime, required this.color});
+   bool? isDisabled;
+  SlotCard({required this.slotTime, required this.color,required this.isDisabled});
 
   //static int maxSlot = 0;
 
@@ -21,7 +21,11 @@ class SlotCard extends StatelessWidget {
       onTap: () {
         StudentInfo.slotChoosen = slotTime;
         if (StudentInfo.isAdmin) {
-          Navigator.pushReplacementNamed(context, AppRoutes.adminDetail);
+          if (isDisabled!) {
+            Navigator.pushReplacementNamed(context, AppRoutes.adminDetail);
+          } else {
+            Fluttertoast.showToast(msg: "This slot is currently disabled");
+          }
         } else {
           if (color == Colors.grey) {
             Fluttertoast.showToast(msg: "This slot is not available.");

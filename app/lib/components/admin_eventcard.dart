@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
-import 'package:isc/provider/theme_provider.dart';
 import 'package:isc/routes.dart';
 import 'package:http/http.dart' as http;
 import 'package:isc/user-info.dart';
@@ -102,29 +101,28 @@ class _AdminEventCardState extends State<AdminEventCard> {
   }
 
   void disbaleSlot() async {
-   try{ final slotResponse = await http.get(
-        Uri.parse(
-            kIpAddress + "/booking-count?category=game&game=" + widget.title),
-        headers: {"x-access-token": StudentInfo.jwtToken});
+    try {
+      final slotResponse = await http.get(
+          Uri.parse(
+              kIpAddress + "/booking-count?category=game&game=" + widget.title),
+          headers: {"x-access-token": StudentInfo.jwtToken});
 
-    final responseJsonData = jsonDecode(slotResponse.body);
-    String slotsAvailable = responseJsonData['message'];
-    bool isSlotAvailable = false;
-    print("Sport ke slot = $slotsAvailable");
-    if (slotsAvailable != '0') {
-      isSlotAvailable = true;
+      final responseJsonData = jsonDecode(slotResponse.body);
+      String slotsAvailable = responseJsonData['message'];
+      bool isSlotAvailable = false;
+      print("Sport ke slot = $slotsAvailable");
+      if (slotsAvailable != '0') {
+        isSlotAvailable = true;
+      }
+      await showConfirmationDialog(isSlotAvailable);
+    } catch (e) {
+      if (!(await InternetConnectionChecker().hasConnection)) {
+        Fluttertoast.showToast(msg: "Please check you internet connection");
+      } else {
+        Fluttertoast.showToast(msg: "Please try again.");
+      }
+      print(e);
     }
-    await showConfirmationDialog(isSlotAvailable);}
-    catch (e) {
-                    if (!(await InternetConnectionChecker().hasConnection)) {
-                      Fluttertoast.showToast(
-                          msg: "Please check you internet connection");
-                    } else {
-                      Fluttertoast.showToast(msg: "Please try again.");
-                    }
-                    print(e);
-                  }
-    
   }
 
   void enableSlot() async {
@@ -162,12 +160,15 @@ class _AdminEventCardState extends State<AdminEventCard> {
 
   @override
   Widget build(BuildContext context) {
-    dynamic theme = Provider.of<ThemeProvider>(context);
     return GestureDetector(
       onLongPress: () {},
       onTap: () {
         StudentInfo.gameChoosen = widget.title;
-        Navigator.pushNamed(context, AppRoutes.adminTime);
+        if (!toggleValue) {
+          Navigator.pushNamed(context, AppRoutes.adminTime);
+        } else {
+          Fluttertoast.showToast(msg: "This sport is disabled.");
+        }
       },
       child: Container(
         height: MediaQuery.of(context).size.height * 0.7,
@@ -178,8 +179,8 @@ class _AdminEventCardState extends State<AdminEventCard> {
           color: Colors.white,
           boxShadow: [
             BoxShadow(
-              color: theme.checkTheme(Colors.grey.withOpacity(0.5),
-                  Colors.purple.shade500, context),
+              color: MediaQuery.of(context).platformBrightness == Brightness.light?Colors.grey.withOpacity(0.5):
+                  Colors.purple.shade500,
               spreadRadius: 5,
               blurRadius: 7,
               offset: Offset(0, 5), // changes position of shadow
@@ -235,7 +236,7 @@ class _AdminEventCardState extends State<AdminEventCard> {
                     fontWeight: FontWeight.bold,
                     fontSize: 15,
                     color:
-                        theme.checkTheme(Colors.black, Colors.purple, context)),
+                        MediaQuery.of(context).platformBrightness == Brightness.light?Colors.black: Colors.purple),
               ),
             )
           ],

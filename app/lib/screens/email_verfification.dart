@@ -42,7 +42,7 @@ class _EmailVerificationState extends State<EmailVerification> {
         timer.cancel();
         Fluttertoast.showToast(msg: "Registered Successfully");
         Navigator.pushNamedAndRemoveUntil(
-            context, AppRoutes.bottomNavigationScreen, (route) => false);
+            context, AppRoutes.eventScreen, (route) => false);
       }
     } else {
       Fluttertoast.showToast(msg: "Please check your internet connection");

@@ -1,8 +1,6 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
-import 'package:isc/provider/theme_provider.dart';
 import 'package:isc/routes.dart';
-import 'package:provider/provider.dart';
 
 import '../constants.dart';
 
@@ -14,7 +12,6 @@ class NotificationCard extends StatelessWidget {
   final bookingId;
   @override
   Widget build(BuildContext context) {
-    ThemeProvider theme = Provider.of<ThemeProvider>(context);
     Size size = MediaQuery.of(context).size;
     return GestureDetector(
       onTap: () async {
@@ -30,12 +27,12 @@ class NotificationCard extends StatelessWidget {
           '$username has invited you to play $game',
           style: TextStyle(
             fontSize: 15,
-            color: theme.checkTheme(kPrimaryColor, Colors.white, context),
+            color:MediaQuery.of(context).platformBrightness == Brightness.light?kPrimaryColor: Colors.white,
           ),
         )),
         decoration: BoxDecoration(
-          color: theme.checkTheme(
-              kPrimaryLightColor, Colors.purple.shade600, context),
+          color: MediaQuery.of(context).platformBrightness == Brightness.light?
+              kPrimaryLightColor: Colors.purple.shade600,
           borderRadius: BorderRadius.circular(10),
           boxShadow: [
             BoxShadow(

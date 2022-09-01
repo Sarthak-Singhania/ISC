@@ -4,15 +4,14 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
-import 'dart:ui';
 import 'package:flutter_custom_clippers/flutter_custom_clippers.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:isc/constants.dart';
-import 'package:isc/provider/theme_provider.dart';
+import 'package:isc/provider/notification_provider.dart';
 import 'package:isc/routes.dart';
 import 'package:isc/user-info.dart';
 import 'package:provider/provider.dart';
-import 'package:transparent_image/transparent_image.dart';
+
 
 class TicketScreen extends StatefulWidget {
   TicketScreen({this.bookingId});
@@ -84,13 +83,15 @@ class _TicketScreenState extends State<TicketScreen> {
         },
         body: body,
       );
-      print("hello");
       var acceptResponseBody = jsonDecode(acceptResponse.body);
       secondCircP = false;
-      Fluttertoast.showToast(msg: acceptResponseBody["message"]);
+      Fluttertoast.showToast(
+          msg: acceptResponseBody["message"], toastLength: Toast.LENGTH_LONG);
       setState(() {});
-      await getData();
       Navigator.pushReplacementNamed(context, AppRoutes.bookingsScreen);
+      await context.read<NotificationProvider>().getNotification();
+      // Navigator.pushNamedAndRemoveUntil(
+      //     context, AppRoutes.eventScreen, (route) => false);
     } catch (e) {
       secondCircP = false;
       bool hasInternet = await InternetConnectionChecker().hasConnection;
@@ -108,7 +109,7 @@ class _TicketScreenState extends State<TicketScreen> {
     var body =
         jsonEncode({"snu_id": currEmail, "booking_id": widget.bookingId});
     try {
-      final acceptResponse = await http.post(
+      final cancelResponse = await http.post(
         Uri.parse(kIpAddress + '/cancel'),
         headers: {
           'Content-Type': 'application/json',
@@ -119,12 +120,13 @@ class _TicketScreenState extends State<TicketScreen> {
         },
         body: body,
       );
-      final jsonData=jsonDecode(acceptResponse.body);
+      final cancelJsonData = jsonDecode(cancelResponse.body);
       secondCircP = false;
-      Fluttertoast.showToast(msg: jsonData['message'],toastLength:Toast.LENGTH_LONG);
+      Fluttertoast.showToast(
+          msg: cancelJsonData['message'], toastLength: Toast.LENGTH_LONG);
 
-      Navigator.pushNamedAndRemoveUntil(
-          context, AppRoutes.bottomNavigationScreen, (route) => false);
+ Navigator.pushReplacementNamed(context, AppRoutes.bookingsScreen);
+      await context.read<NotificationProvider>().getNotification();
     } catch (e) {
       secondCircP = false;
       bool hasInternet = await InternetConnectionChecker().hasConnection;
@@ -142,7 +144,7 @@ class _TicketScreenState extends State<TicketScreen> {
     var body =
         jsonEncode({"snu_id": currEmail, "booking_id": widget.bookingId});
     try {
-      final acceptResponse = await http.post(
+      final rejectResponse = await http.post(
         Uri.parse(kIpAddress + '/reject'),
         headers: {
           'Content-Type': 'application/json',
@@ -154,21 +156,26 @@ class _TicketScreenState extends State<TicketScreen> {
         body: body,
       );
 
-      print(acceptResponse.body);
+      final rejectJsonData = jsonDecode(rejectResponse.body);
       secondCircP = false;
-      Fluttertoast.showToast(msg: "BOOKING REQUEST REJECTED");
-      Navigator.pushNamedAndRemoveUntil(
-          context, AppRoutes.bottomNavigationScreen, (route) => false);
+      Fluttertoast.showToast(
+          msg: rejectJsonData['message'], toastLength: Toast.LENGTH_LONG);
+     Navigator.pushReplacementNamed(context, AppRoutes.bookingsScreen);
+      await context.read<NotificationProvider>().getNotification();
     } catch (e) {
       secondCircP = false;
+      setState(() {});
       bool hasInternet = await InternetConnectionChecker().hasConnection;
       if (!hasInternet) {
         Fluttertoast.showToast(msg: "Please check your internet connection");
       } else {
-        Fluttertoast.showToast(msg: "Something went wrong.Please retry.");
+      Fluttertoast.showToast(
+          msg: 'Invitation has been rejected', toastLength: Toast.LENGTH_LONG);
+      Navigator.pushReplacementNamed(context, AppRoutes.bookingsScreen);
+      await context.read<NotificationProvider>().getNotification();
+        //Fluttertoast.showToast(msg: "Something went wrong.Please retry.");
       }
       print(e);
-      setState(() {});
     }
   }
 
@@ -372,7 +379,6 @@ class _TicketScreenState extends State<TicketScreen> {
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-    ThemeProvider theme = Provider.of<ThemeProvider>(context);
 
     return circP
         ? Scaffold(
@@ -427,7 +433,7 @@ class _TicketScreenState extends State<TicketScreen> {
                               TextStyle(color: Color(0xffFF6109), fontSize: 25),
                         ),
                   backgroundColor:
-                      theme.checkTheme(Colors.white, Colors.black, context),
+                      MediaQuery.of(context).platformBrightness == Brightness.light?Colors.white: Colors.black,
                 ),
                 body: Stack(
                   children: [
@@ -487,10 +493,10 @@ class _TicketScreenState extends State<TicketScreen> {
                                     )),
                                     decoration: BoxDecoration(
                                         border: Border.all(
-                                            color: theme.checkTheme(
-                                                Colors.black,
+                                            color: MediaQuery.of(context).platformBrightness == Brightness.light?
+                                                Colors.black:
                                                 Colors.white,
-                                                context),
+                                                
                                             width: 1),
                                         borderRadius: BorderRadius.only(
                                             topLeft: Radius.circular(15))),
@@ -505,10 +511,9 @@ class _TicketScreenState extends State<TicketScreen> {
                                     width: size.width * 0.7,
                                     decoration: BoxDecoration(
                                         border: Border.all(
-                                            color: theme.checkTheme(
-                                                Colors.black,
+                                            color: MediaQuery.of(context).platformBrightness == Brightness.light?
+                                                Colors.black:
                                                 Colors.white,
-                                                context),
                                             width: 1),
                                         borderRadius: BorderRadius.only(
                                             topRight: Radius.circular(15))),
@@ -537,10 +542,9 @@ class _TicketScreenState extends State<TicketScreen> {
                                     width: size.width * 0.2,
                                     decoration: BoxDecoration(
                                         border: Border.all(
-                                            color: theme.checkTheme(
-                                                Colors.black,
+                                            color: MediaQuery.of(context).platformBrightness == Brightness.light?
+                                                Colors.black:
                                                 Colors.white,
-                                                context),
                                             width: 1),
                                         borderRadius: BorderRadius.only(
                                             bottomLeft: Radius.circular(15))),
@@ -564,10 +568,9 @@ class _TicketScreenState extends State<TicketScreen> {
                                     width: size.width * 0.7,
                                     decoration: BoxDecoration(
                                         border: Border.all(
-                                            color: theme.checkTheme(
-                                                Colors.black,
+                                            color:MediaQuery.of(context).platformBrightness == Brightness.light?
+                                                Colors.black:
                                                 Colors.white,
-                                                context),
                                             width: 1),
                                         borderRadius: BorderRadius.only(
                                             bottomRight: Radius.circular(15))),
