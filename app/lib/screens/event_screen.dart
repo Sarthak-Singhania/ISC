@@ -1,7 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
-
-//import 'package:firebase_auth/firebase_auth.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -33,12 +30,6 @@ class _EventScreenState extends State<EventScreen> {
   @override
   void initState() {
     super.initState();
-    // Future.delayed(const Duration(seconds: kSessionExpireTimeout), () async {
-    //   print("hgya");
-    //   await FirebaseAuth.instance.signOut();
-    //   Navigator.pushNamedAndRemoveUntil(
-    //       context, AppRoutes.homeScreen, (route) => false);
-    // });
     myFuture = getData();
   }
 
@@ -141,14 +132,6 @@ class _EventScreenState extends State<EventScreen> {
                   },
                   icon: Icons.question_answer,
                   title: 'FAQs'),
-              StudentInfo.isAdmin
-                  ? DrawerTile(
-                      func: () {
-                        Navigator.pushNamed(context, AppRoutes.datascreen);
-                      },
-                      icon: Icons.info_outline,
-                      title: 'Data')
-                  : Container(),
               DrawerTile(
                   func: () async {
                     bool hasInternet =
@@ -248,11 +231,15 @@ class _EventScreenState extends State<EventScreen> {
                                       child: Container(
                                         child: Stack(
                                           children: [
-                                            Center(
-                                              child: Icon(
-                                                Icons.notifications,
-                                                size: size.width * 0.07,
-                                                color: Colors.white,
+                                            Padding(
+                                              padding:
+                                                  const EdgeInsets.all(5.0),
+                                              child: Center(
+                                                child: Icon(
+                                                  Icons.notifications,
+                                                  size: size.width * 0.07,
+                                                  color: Colors.white,
+                                                ),
                                               ),
                                             ),
                                             context
@@ -261,8 +248,8 @@ class _EventScreenState extends State<EventScreen> {
                                                         .count >
                                                     0
                                                 ? Positioned(
-                                                    top: 5,
-                                                    right: 8,
+                                                    top: 0,
+                                                    right: 2,
                                                     child: Container(
                                                       width: 20,
                                                       height: 20,
@@ -289,7 +276,7 @@ class _EventScreenState extends State<EventScreen> {
                             ],
                           )),
                           SizedBox(
-                            height: size.height * 0.06,
+                            height: size.height * 0.04,
                           ),
                           GridView.builder(
                             physics: ScrollPhysics(),

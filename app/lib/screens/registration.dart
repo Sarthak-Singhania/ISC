@@ -22,7 +22,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   final nameController = new TextEditingController();
   final passwordController = new TextEditingController();
   final confirmPasswordController = new TextEditingController();
-  late Future myFuture;
+ Future? myFuture;
 
   Future<void> signUp(String email, String password, String name) async {
     if (_formKey.currentState!.validate()) {

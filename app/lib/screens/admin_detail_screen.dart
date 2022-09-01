@@ -20,18 +20,16 @@ class AdminSlotScreen extends StatefulWidget {
 class _AdminSlotScreenState extends State<AdminSlotScreen> {
   dynamic pendingList = [];
   bool emptyList = false;
-  bool circP = true;
   late bool toggleValue;
   late var slotData;
   late bool hasInternet;
-  bool tapToRefresh = false;
-
+  late Future myFuture;
   late TextEditingController slotNumberController;
 
   @override
   void initState() {
     super.initState();
-    getData();
+      myFuture = getData();
   }
 
   Future<void> changeSlot() async {
@@ -217,20 +215,13 @@ class _AdminSlotScreenState extends State<AdminSlotScreen> {
       pendingList = jsonData["message"];
       toggleValue = !jsonData["isEnabled"];
       if (pendingList.length == 0) {
-        circP = false;
         emptyList = true;
-        tapToRefresh = false;
-        setState(() {});
       } else {
-        circP = false;
-        tapToRefresh = false;
-        setState(() {});
+        emptyList = false;
       }
     } catch (e) {
-      circP = false;
-      tapToRefresh = true;
-      setState(() {});
       print(e);
+      return Future.error(e.toString());
     }
   }
 
@@ -247,38 +238,35 @@ class _AdminSlotScreenState extends State<AdminSlotScreen> {
             centerTitle: true,
             title: Text('BOOKINGS'),
           ),
-          body: SafeArea(
-            child: Center(
-              child: circP
-                  ? Center(
-                      child: CircularProgressIndicator(
-                      color: Colors.blue,
-                    ))
-                  : tapToRefresh
-                      ? GestureDetector(
-                          onTap: () async {
-                            if (!(await InternetConnectionChecker()
-                                .hasConnection)) {
-                              Fluttertoast.showToast(
-                                  msg: "Please check your internet connection");
-                            } else {
-                              circP = true;
-                              tapToRefresh = false;
-                              setState(() {});
-                              getData();
-                            }
-                          },
-                          child: Container(
-                              child: Center(
-                                  child: AutoSizeText(
-                            "Tap To Refresh",
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ))),
-                        )
-                      : RefreshIndicator(
+          body: Center(
+            child: FutureBuilder(
+                      future:myFuture,
+                      builder:(context,snapshot){
+                       if(snapshot.hasError){
+                          return GestureDetector(
+                      onTap: () {
+                        myFuture = getData();
+                        setState(() {});
+                      },
+                      child: Container(
+                          child: Center(
+                              child: AutoSizeText(
+                        "Tap To Refresh",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ))),
+                    );
+                       }
+                       else if(snapshot.connectionState==ConnectionState.waiting){
+                          return Center(
+                child: CircularProgressIndicator(
+                color: Colors.purple,
+              ));
+                       }
+                        else{
+                          return  RefreshIndicator(
                           onRefresh: getData,
                           child: ListView(
                             physics: AlwaysScrollableScrollPhysics(),
@@ -302,15 +290,13 @@ class _AdminSlotScreenState extends State<AdminSlotScreen> {
                                             borderRadius:
                                                 BorderRadius.circular(15),
                                             borderSide: BorderSide(
-                                                color: Colors.purple,
-                                                width: 1.5),
+                                                color: Colors.purple, width: 1.5),
                                           ),
                                           enabledBorder: OutlineInputBorder(
                                             borderRadius:
                                                 BorderRadius.circular(10),
                                             borderSide: BorderSide(
-                                                color: Colors.purple,
-                                                width: 1.5),
+                                                color: Colors.purple, width: 1.5),
                                           ),
                                           contentPadding: EdgeInsets.only(
                                               left:
@@ -391,8 +377,10 @@ class _AdminSlotScreenState extends State<AdminSlotScreen> {
                               ),
                             ],
                           ),
-                        ),
-            ),
+                        );
+                        }
+                      }
+                    ),
           )),
     );
   }

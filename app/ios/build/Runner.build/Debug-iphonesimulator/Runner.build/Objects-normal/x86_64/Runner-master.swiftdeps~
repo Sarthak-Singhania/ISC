@@ -1,0 +1,6 @@
+version: "Apple Swift version 5.5.2 (swiftlang-1300.0.47.5 clang-1300.0.29.30)"
+options: "2e99b50637641d36e250a47942538f0d885bb4dfa2aa14e4babc25f728dc4d74"
+build_start_time: [1652626387, 394299030]
+build_end_time: [1652626387, 655117988]
+inputs:
+  "/Users/tm217/Desktop/ISC/app/ios/Runner/AppDelegate.swift": !private [1611603814, 0]
