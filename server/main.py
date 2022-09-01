@@ -19,7 +19,8 @@ cors = CORS(app)
 limiter = Limiter(
     application,
     key_func=util.get_remote_address,
-    default_limits=["200 per day", "50 per hour"]
+    default_limits=["200 per day", "50 per hour"],
+    storage_uri="memory://"
 )
 
 app.config['CORS_HEADERS'] = 'Content-Type'
