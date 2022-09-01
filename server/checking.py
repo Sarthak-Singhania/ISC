@@ -3,7 +3,7 @@ import mysql.connector as sql
 db=sql.connect(host='68.183.244.199',user='u724843278_ISC',password='ISCdatabase@1234',database='u724843278_ISC')
 cur=db.cursor(dictionary=True)
 
-def checking(check,sports_name,slot):
+def checking(check,sports_name,slot,x):
     if datetime.now().strftime('%A')=='Sunday' and datetime.strptime(datetime.now().strftime('%I:%M%p'),'%I:%M%p')>datetime.strptime('09:30pm','%I:%M%p'):
         start=(datetime.now()).strftime('%Y-%m-%d')
         end=(datetime.now()+timedelta(days=7)).strftime('%Y-%m-%d')

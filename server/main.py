@@ -137,7 +137,7 @@ def book():
     sports_name = x['sports_name'].title().replace(' ', '_')
     slot = x['slot']
     message={}
-    check_all=checking.checking(x['Check'],sports_name,slot)
+    check_all=checking.checking(x['Check'],sports_name,slot,x)
     if len(check_all)==0:
         cnt=0
         for i in x['Bookings']:
