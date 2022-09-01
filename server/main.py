@@ -52,6 +52,10 @@ def token_required(f):
 
     return decorated
 
+@app.get('/')
+def home():
+    return make_response({'meesage':'welcome'}),200
+
 
 @app.get('/games')
 def games():
