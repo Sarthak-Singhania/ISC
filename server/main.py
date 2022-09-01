@@ -25,7 +25,7 @@ limiter = Limiter(
 )
 
 app.config['CORS_HEADERS'] = 'Content-Type'
-app.config['MYSQL_HOST'] = 'localhost'
+app.config['MYSQL_HOST'] = '68.183.244.199'
 app.config['MYSQL_USER'] = 'u724843278_ISC'
 app.config['MYSQL_PASSWORD'] = 'ISCdatabase@1234'
 app.config['MYSQL_DB'] = 'u724843278_ISC'
@@ -81,7 +81,7 @@ def max_num():
 
 
 @app.get('/slots')
-@token_required
+#@token_required
 def slots():
     cursor = mysql.connection.cursor(cur.DictCursor)
     game = request.args.get('game').title().replace(' ', '_')
@@ -130,7 +130,7 @@ def slots():
 
 @app.post('/book')
 @cross_origin()
-@token_required
+#@token_required
 def book():
     x=request.get_json()
     cursor = mysql.connection.cursor(cur.DictCursor)
@@ -173,7 +173,7 @@ def book():
 
 @app.route('/get_bookings/<snu_id>', defaults={'booking_id': None})
 @app.route('/get_bookings/<snu_id>/<booking_id>',methods=['GET'])
-@token_required
+#@token_required
 def get_bookings(snu_id, booking_id):
     cursor = mysql.connection.cursor(cur.DictCursor)
     date = datetime.now().strftime('%Y-%m-%d')
@@ -210,7 +210,7 @@ def get_bookings(snu_id, booking_id):
 
 @app.post('/confirm')
 @cross_origin()
-@token_required
+#@token_required
 def confirm():
     x = request.get_json()
     snu_id = x['snu_id']
@@ -249,7 +249,7 @@ def confirm():
 
 @app.post('/reject')
 @cross_origin()
-@token_required
+#@token_required
 def reject():
     x = request.get_json()
     snu_id = x['snu_id']
@@ -264,7 +264,7 @@ def reject():
 
 @app.post('/cancel')
 @cross_origin()
-@token_required
+#@token_required
 def cancel():
     x = request.get_json()
     snu_id = x['snu_id']
@@ -290,7 +290,7 @@ def cancel():
 
 
 @app.get('/pending/<snu_id>')
-@token_required
+#@token_required
 def pending(snu_id):
     cursor = mysql.connection.cursor(cur.DictCursor)
     date = datetime.today().strftime('%Y-%m-%d')
@@ -305,7 +305,7 @@ def pending(snu_id):
 
 
 @app.get('/admin-bookings/<game>/<date>/<slot>')
-@token_required
+#@token_required
 def admin_bookings(game, date, slot):
     if request.headers['admin-header'].title()=='Yes':
         cursor = mysql.connection.cursor(cur.DictCursor)
@@ -325,7 +325,7 @@ def admin_bookings(game, date, slot):
 
 
 @app.post('/stop')
-@token_required
+#@token_required
 def stop():
     x=request.get_json()
     cursor = mysql.connection.cursor(cur.DictCursor)
@@ -371,7 +371,7 @@ def stop():
 
 
 @app.post('/unstop')
-@token_required
+#@token_required
 def unstop():
     x=request.get_json()
     cursor = mysql.connection.cursor(cur.DictCursor)
@@ -414,7 +414,7 @@ def unstop():
 
 
 @app.get('/booking-count')
-@token_required
+#@token_required
 def booking_count():
     cursor = mysql.connection.cursor(cur.DictCursor)
     if request.args.get('category').lower()=='game':
@@ -436,7 +436,7 @@ def booking_count():
 
 
 @app.post('/present')
-@token_required
+#@token_required
 def present():
     cursor=mysql.connection.cursor(cur.DictCursor)
     x=request.get_json()
@@ -449,7 +449,7 @@ def present():
 
 
 @app.post('/absent')
-@token_required
+#@token_required
 def absent():
     cursor=mysql.connection.cursor(cur.DictCursor)
     x=request.get_json()
@@ -463,7 +463,7 @@ def absent():
 
 
 @app.route('/slot-capacity-change',methods=['GET','POST'])
-@token_required
+#@token_required
 def slot_capacity_change():
     cursor=mysql.connection.cursor(cur.DictCursor)
     if request.headers['admin-header'].title()=='Yes':
@@ -496,7 +496,7 @@ def slot_capacity_change():
 
 
 @app.route('/team-training',methods=['POST','GET'])
-@token_required
+#@token_required
 def team_training():
     cursor=mysql.connection.cursor(cur.DictCursor)
     if request.method=='POST':
@@ -518,7 +518,7 @@ def time():
 
 
 @app.get('/faq')
-@token_required
+#@token_required
 def faq():
     cursor=mysql.connection.cursor(cur.DictCursor)
     cursor.execute("select `Question`, `Answer` from faq")
@@ -527,7 +527,7 @@ def faq():
 
 
 @app.post('/download-data')
-@token_required
+#@token_required
 def download_data():
     cursor=mysql.connection.cursor(cur.DictCursor)
     if request.headers['admin-header'].title()=='Yes':
@@ -547,4 +547,4 @@ def download_data():
         return make_response({'message': 'You cannot access since you are not an admin'}), 403
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=8080,debug=True)
+    app.run(host='0.0.0.0', port=8080)

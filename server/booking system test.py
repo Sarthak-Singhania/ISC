@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from mysql.connector import OperationalError
 import secrets
 import string
-db=sql.connect(host='localhost',user='u724843278_ISC',password='ISCdatabase@1234',database='u724843278_ISC')
+db=sql.connect(host='68.183.244.199',user='u724843278_ISC',password='ISCdatabase@1234',database='u724843278_ISC')
 cur=db.cursor(dictionary=True)
 x={"sports_name":"Football","slot":"6:00pm-8:00pm","Bookings":{"2022-2-24":{"Tushar Mishra":"tm217@snu.edu.in","Sarthak Singhania":"ss878@snu.edu.in"}},"Check":{"tm217@snu.edu.in":["2022-2-24"],"ss878@snu.edu.in":["2022-2-24"]}}
 
