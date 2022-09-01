@@ -11,6 +11,7 @@ import pandas as pd
 import firebase_admin
 import secrets
 import string
+import checking
 #import isc_email
 
 application = app = Flask(__name__)
@@ -136,61 +137,7 @@ def book():
     sports_name = x['sports_name'].title().replace(' ', '_')
     slot = x['slot']
     message={}
-    def checking(check):
-        if datetime.now().strftime('%A')=='Sunday' and datetime.strptime(datetime.now().strftime('%I:%M%p'),'%I:%M%p')>datetime.strptime('09:30pm','%I:%M%p'):
-            start=(datetime.now()).strftime('%Y-%m-%d')
-            end=(datetime.now()+timedelta(days=7)).strftime('%Y-%m-%d')
-        else:
-            start_day=datetime.today()-timedelta(days=datetime.today().weekday())
-            start=(start_day).strftime('%Y-%m-%d')
-            end=(start_day+timedelta(days=6)).strftime('%Y-%m-%d')
-        errors={}
-        for i in check:
-            date=datetime.date(datetime.now())
-            cursor.execute(f"select `Date` from `bookings` where `SNU_ID`='{i}' and `Date`>='{date}' and `Game`='{sports_name}' and `Cancelled`='0' group by `Date`")
-            dates=[ll['Date'].strftime('%Y-%m-%d') for ll in cursor.fetchall()]
-            booked_dates=[ll for ll in check[i] if datetime.strptime(ll, '%Y-%m-%d').strftime('%Y-%m-%d') in dates]
-            cursor.execute(f"select exists(select * from `blacklist` where `SNU_ID`='{i}') as blacklist")
-            blacklist=bool(cursor.fetchone()['blacklist'])
-            cursor.execute(f"SELECT count(*) AS 'num',`games`.`Max_Days` FROM `bookings` JOIN `games` ON `bookings`.`Game`=`games`.`Sports_Name` where `bookings`.`Date`>='{start}' and `bookings`.`Date`<='{end}' and `bookings`.`SNU_ID`='{i}' and `bookings`.`Game`='{sports_name}' and `bookings`.`Cancelled`='0'")
-            Booking_Num=cursor.fetchone()
-            if Booking_Num['Max_Days'] is None:
-                cursor.execute(f"select * from `games` where `Sports_Name`='{sports_name}'")
-                Booking_Num['Max_Days']=int(cursor.fetchone()['Max_Days'])
-            print(booked_dates)
-            for j in check[i]:
-                day=datetime.strptime(j,'%Y-%m-%d').strftime('%A')
-                cursor.execute(f"select `{day}` from `{sports_name}` where `Slots`='{slot}'")
-                slots_left=cursor.fetchone()[day]
-                if slots_left<len(x['Bookings'][j]):
-                    flag='finished'
-                    if flag not in errors:
-                        errors[flag]={i:[]}
-                    if i not in errors[flag]:
-                        errors[flag][i]=[]
-                    errors[flag][i].append(j)
-            if booked_dates:
-                flag='duplicate'
-                if flag not in errors:
-                    errors[flag]={}
-                errors[flag][i]=booked_dates
-                # print(flag)
-            elif blacklist:
-                flag='blacklist'
-                if flag not in errors:
-                    errors[flag]={}
-                errors[flag][i]=check[i]
-                # print(flag)
-            elif (len(check[i])+Booking_Num['num'])>Booking_Num['Max_Days']:
-                flag='exceeded'
-                if flag not in errors:
-                    errors[flag]={}
-                errors[flag][i]=check[i][len(check[i])-Booking_Num['num']:]
-                # print(flag)
-            else:
-                pass
-        return errors
-    check_all=checking(x['Check'])
+    check_all=checking.checking(x['Check'],sports_name,slot)
     if len(check_all)==0:
         cnt=0
         for i in x['Bookings']:
@@ -600,4 +547,4 @@ def download_data():
         return make_response({'message': 'You cannot access since you are not an admin'}), 403
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=8080)
+    app.run(host='0.0.0.0', port=8080,debug=True)
