@@ -11,6 +11,7 @@ import pandas as pd
 import firebase_admin
 import secrets
 import string
+import checking
 #import isc_email
 
 application = app = Flask(__name__)
@@ -19,11 +20,12 @@ cors = CORS(app)
 limiter = Limiter(
     application,
     key_func=util.get_remote_address,
-    default_limits=["200 per day", "50 per hour"]
+    default_limits=["200 per day", "50 per hour"],
+    storage_uri="memory://"
 )
 
 app.config['CORS_HEADERS'] = 'Content-Type'
-app.config['MYSQL_HOST'] = '185.210.145.1'
+app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'u724843278_ISC'
 app.config['MYSQL_PASSWORD'] = 'ISCdatabase@1234'
 app.config['MYSQL_DB'] = 'u724843278_ISC'
@@ -47,10 +49,14 @@ def token_required(f):
                 firebase_admin.initialize_app(cred)
                 data=auth.verify_id_token(token)
         except:
-            return make_response({'message': 'token in invalid'}), 403
+            return make_response({'message': 'token is invalid'}), 403
         return f(*args, **kwargs)
 
     return decorated
+
+@app.get('/')
+def home():
+    return make_response({'meesage':'welcome'}),200
 
 
 @app.get('/games')
@@ -75,7 +81,7 @@ def max_num():
 
 
 @app.get('/slots')
-@token_required
+# @token_required
 def slots():
     cursor = mysql.connection.cursor(cur.DictCursor)
     game = request.args.get('game').title().replace(' ', '_')
@@ -120,62 +126,18 @@ def slots():
         else: make_response({'message':'invalid args'}),403
     else:
         make_response({'message':'invalid args'}),403
-        
 
 
 @app.post('/book')
 @cross_origin()
-@token_required
+#@token_required
 def book():
     x=request.get_json()
     cursor = mysql.connection.cursor(cur.DictCursor)
     sports_name = x['sports_name'].title().replace(' ', '_')
     slot = x['slot']
     message={}
-    def checking(check):
-        if datetime.now().strftime('%A')=='Sunday' and datetime.strptime(datetime.now().strftime('%I:%M%p'),'%I:%M%p')>datetime.strptime('09:30pm','%I:%M%p'):
-            start=(datetime.now()).strftime('%Y-%m-%d')
-            end=(datetime.now()+timedelta(days=7)).strftime('%Y-%m-%d')
-        else:
-            start_day=datetime.today()-timedelta(days=datetime.today().weekday())
-            start=(start_day).strftime('%Y-%m-%d')
-            end=(start_day+timedelta(days=6)).strftime('%Y-%m-%d')
-        errors={}
-        check=x['Check']
-        for i in check:
-            date=datetime.date(datetime.now())
-            cursor.execute(f"select `Date` from `bookings` where `SNU_ID`='{i}' and `Date`>='{date}' and `Game`='{sports_name}' and `Cancelled`='0' group by `Date`")
-            dates=[str(ll['Date']) for ll in cursor.fetchall()]
-            booked_dates=[ll for ll in check[i] if ll in dates]
-            cursor.execute(f"select exists(select * from `blacklist` where `SNU_ID`='{i}') as blacklist")
-            blacklist=bool(cursor.fetchone()['blacklist'])
-            cursor.execute(f"SELECT count(*) AS 'num',`games`.`Max_Days` FROM `bookings` JOIN `games` ON `bookings`.`Game`=`games`.`Sports_Name` where `bookings`.`Date`>='{start}' and `bookings`.`Date`<='{end}' and `bookings`.`SNU_ID`='{i}' and `bookings`.`Game`='{sports_name}' and `bookings`.`Cancelled`='0'")
-            Booking_Num=cursor.fetchone()
-            if Booking_Num['Max_Days'] is None:
-                cursor.execute(f"select * from `games` where `Sports_Name`='{sports_name}'")
-                Booking_Num['Max_Days']=int(cursor.fetchone()['Max_Days'])
-            if booked_dates:
-                flag='duplicate'
-                if flag not in errors:
-                    errors[flag]={}
-                errors[flag][i]=booked_dates
-                # print(flag)
-            elif blacklist:
-                flag='blacklist'
-                if flag not in errors:
-                    errors[flag]={}
-                errors[flag][i]=check[i]
-                # print(flag)
-            elif (len(check[i])+Booking_Num['num'])>Booking_Num['Max_Days']:
-                flag='exceeded'
-                if flag not in errors:
-                    errors[flag]={}
-                errors[flag][i]=check[i][len(check[i])-Booking_Num['num']:]
-                # print(flag)
-            else:
-                pass
-        return errors
-    check_all=checking(x['Check'])
+    check_all=checking.checking(x['Check'],sports_name,slot,x)
     if len(check_all)==0:
         cnt=0
         for i in x['Bookings']:
@@ -190,9 +152,7 @@ def book():
                 try:
                     if cnt2 == 0:
                         cursor.execute(f"update `{sports_name}` set `{day}`=`{day}`-1 where `Slots`='{slot}'")
-                        if cnt not in message:
-                            message[cnt]={cnt2:[]}
-                        message[cnt][cnt2].append(booking_id)
+                        message[cnt]=booking_id
                         confirmed = 1
                         mysql.connection.commit()
                         # isc_email.email(str(x['Bookings'][i][j]),f"{sports_name} at ISC for {slot} slot",'Confirmed',str(j))
@@ -204,9 +164,7 @@ def book():
                     mysql.connection.commit()
                     cnt2 += 1
                 except OperationalError:
-                    if cnt not in message:
-                        message[cnt]={cnt2:[]}
-                    message[cnt][cnt2].append('All slots have finished')
+                    message[cnt]='All slots have finished'
             cnt+=1
         return make_response({'message':message})
     else:
@@ -215,7 +173,7 @@ def book():
 
 @app.route('/get_bookings/<snu_id>', defaults={'booking_id': None})
 @app.route('/get_bookings/<snu_id>/<booking_id>',methods=['GET'])
-@token_required
+#@token_required
 def get_bookings(snu_id, booking_id):
     cursor = mysql.connection.cursor(cur.DictCursor)
     date = datetime.now().strftime('%Y-%m-%d')
@@ -252,7 +210,7 @@ def get_bookings(snu_id, booking_id):
 
 @app.post('/confirm')
 @cross_origin()
-@token_required
+#@token_required
 def confirm():
     x = request.get_json()
     snu_id = x['snu_id']
@@ -264,7 +222,7 @@ def confirm():
     slot = det['Slot']
     day = det['Date'].strftime('%A')
     date=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    cursor.execute(f"select exists(select * from `bookings` where `SNU_ID`='{snu_id}' and `Date`='{det['Date']}' and `Cancelled`='0') as duplicate")
+    cursor.execute(f"select exists(select * from `bookings` where `SNU_ID`='{snu_id}' and `Date`='{det['Date']}' and `Cancelled`='0' and `Booking_ID`!='{booking_id}') as duplicate")
     duplicate=bool(cursor.fetchone()['duplicate'])
     cursor.execute(f"select exists(select * from `blacklist` where `SNU_ID`='{snu_id}') as blacklist")
     blacklist=bool(cursor.fetchone()['blacklist'])
@@ -291,7 +249,7 @@ def confirm():
 
 @app.post('/reject')
 @cross_origin()
-@token_required
+#@token_required
 def reject():
     x = request.get_json()
     snu_id = x['snu_id']
@@ -306,7 +264,7 @@ def reject():
 
 @app.post('/cancel')
 @cross_origin()
-@token_required
+#@token_required
 def cancel():
     x = request.get_json()
     snu_id = x['snu_id']
@@ -332,7 +290,7 @@ def cancel():
 
 
 @app.get('/pending/<snu_id>')
-@token_required
+#@token_required
 def pending(snu_id):
     cursor = mysql.connection.cursor(cur.DictCursor)
     date = datetime.today().strftime('%Y-%m-%d')
@@ -347,7 +305,7 @@ def pending(snu_id):
 
 
 @app.get('/admin-bookings/<game>/<date>/<slot>')
-@token_required
+#@token_required
 def admin_bookings(game, date, slot):
     if request.headers['admin-header'].title()=='Yes':
         cursor = mysql.connection.cursor(cur.DictCursor)
@@ -367,7 +325,7 @@ def admin_bookings(game, date, slot):
 
 
 @app.post('/stop')
-@token_required
+#@token_required
 def stop():
     x=request.get_json()
     cursor = mysql.connection.cursor(cur.DictCursor)
@@ -413,7 +371,7 @@ def stop():
 
 
 @app.post('/unstop')
-@token_required
+#@token_required
 def unstop():
     x=request.get_json()
     cursor = mysql.connection.cursor(cur.DictCursor)
@@ -456,7 +414,7 @@ def unstop():
 
 
 @app.get('/booking-count')
-@token_required
+#@token_required
 def booking_count():
     cursor = mysql.connection.cursor(cur.DictCursor)
     if request.args.get('category').lower()=='game':
@@ -478,7 +436,7 @@ def booking_count():
 
 
 @app.post('/present')
-@token_required
+#@token_required
 def present():
     cursor=mysql.connection.cursor(cur.DictCursor)
     x=request.get_json()
@@ -491,7 +449,7 @@ def present():
 
 
 @app.post('/absent')
-@token_required
+#@token_required
 def absent():
     cursor=mysql.connection.cursor(cur.DictCursor)
     x=request.get_json()
@@ -505,7 +463,7 @@ def absent():
 
 
 @app.route('/slot-capacity-change',methods=['GET','POST'])
-@token_required
+#@token_required
 def slot_capacity_change():
     cursor=mysql.connection.cursor(cur.DictCursor)
     if request.headers['admin-header'].title()=='Yes':
@@ -538,7 +496,7 @@ def slot_capacity_change():
 
 
 @app.route('/team-training',methods=['POST','GET'])
-@token_required
+#@token_required
 def team_training():
     cursor=mysql.connection.cursor(cur.DictCursor)
     if request.method=='POST':
@@ -560,7 +518,7 @@ def time():
 
 
 @app.get('/faq')
-@token_required
+#@token_required
 def faq():
     cursor=mysql.connection.cursor(cur.DictCursor)
     cursor.execute("select `Question`, `Answer` from faq")
@@ -569,7 +527,7 @@ def faq():
 
 
 @app.post('/download-data')
-@token_required
+#@token_required
 def download_data():
     cursor=mysql.connection.cursor(cur.DictCursor)
     if request.headers['admin-header'].title()=='Yes':
@@ -589,4 +547,4 @@ def download_data():
         return make_response({'message': 'You cannot access since you are not an admin'}), 403
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=8080, debug=True)
+    app.run(host='0.0.0.0', port=8080)
