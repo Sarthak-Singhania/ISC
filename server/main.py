@@ -23,7 +23,7 @@ limiter = Limiter(
 )
 
 app.config['CORS_HEADERS'] = 'Content-Type'
-app.config['MYSQL_HOST'] = '185.210.145.1'
+app.config['MYSQL_HOST'] = 'localhost:3306'
 app.config['MYSQL_USER'] = 'u724843278_ISC'
 app.config['MYSQL_PASSWORD'] = 'ISCdatabase@1234'
 app.config['MYSQL_DB'] = 'u724843278_ISC'
@@ -120,7 +120,6 @@ def slots():
         else: make_response({'message':'invalid args'}),403
     else:
         make_response({'message':'invalid args'}),403
-        
 
 
 @app.post('/book')
@@ -141,12 +140,11 @@ def book():
             start=(start_day).strftime('%Y-%m-%d')
             end=(start_day+timedelta(days=6)).strftime('%Y-%m-%d')
         errors={}
-        check=x['Check']
         for i in check:
             date=datetime.date(datetime.now())
             cursor.execute(f"select `Date` from `bookings` where `SNU_ID`='{i}' and `Date`>='{date}' and `Game`='{sports_name}' and `Cancelled`='0' group by `Date`")
-            dates=[str(ll['Date']) for ll in cursor.fetchall()]
-            booked_dates=[ll for ll in check[i] if ll in dates]
+            dates=[ll['Date'].strftime('%Y-%m-%d') for ll in cursor.fetchall()]
+            booked_dates=[ll for ll in check[i] if datetime.strptime(ll, '%Y-%m-%d').strftime('%Y-%m-%d') in dates]
             cursor.execute(f"select exists(select * from `blacklist` where `SNU_ID`='{i}') as blacklist")
             blacklist=bool(cursor.fetchone()['blacklist'])
             cursor.execute(f"SELECT count(*) AS 'num',`games`.`Max_Days` FROM `bookings` JOIN `games` ON `bookings`.`Game`=`games`.`Sports_Name` where `bookings`.`Date`>='{start}' and `bookings`.`Date`<='{end}' and `bookings`.`SNU_ID`='{i}' and `bookings`.`Game`='{sports_name}' and `bookings`.`Cancelled`='0'")
@@ -154,6 +152,18 @@ def book():
             if Booking_Num['Max_Days'] is None:
                 cursor.execute(f"select * from `games` where `Sports_Name`='{sports_name}'")
                 Booking_Num['Max_Days']=int(cursor.fetchone()['Max_Days'])
+            print(booked_dates)
+            for j in check[i]:
+                day=datetime.strptime(j,'%Y-%m-%d').strftime('%A')
+                cursor.execute(f"select `{day}` from `{sports_name}` where `Slots`='{slot}'")
+                slots_left=cursor.fetchone()[day]
+                if slots_left<len(x['Bookings'][j]):
+                    flag='finished'
+                    if flag not in errors:
+                        errors[flag]={i:[]}
+                    if i not in errors[flag]:
+                        errors[flag][i]=[]
+                    errors[flag][i].append(j)
             if booked_dates:
                 flag='duplicate'
                 if flag not in errors:
@@ -190,9 +200,7 @@ def book():
                 try:
                     if cnt2 == 0:
                         cursor.execute(f"update `{sports_name}` set `{day}`=`{day}`-1 where `Slots`='{slot}'")
-                        if cnt not in message:
-                            message[cnt]={cnt2:[]}
-                        message[cnt][cnt2].append(booking_id)
+                        message[cnt]=booking_id
                         confirmed = 1
                         mysql.connection.commit()
                         # isc_email.email(str(x['Bookings'][i][j]),f"{sports_name} at ISC for {slot} slot",'Confirmed',str(j))
@@ -204,9 +212,7 @@ def book():
                     mysql.connection.commit()
                     cnt2 += 1
                 except OperationalError:
-                    if cnt not in message:
-                        message[cnt]={cnt2:[]}
-                    message[cnt][cnt2].append('All slots have finished')
+                    message[cnt]='All slots have finished'
             cnt+=1
         return make_response({'message':message})
     else:
@@ -264,7 +270,7 @@ def confirm():
     slot = det['Slot']
     day = det['Date'].strftime('%A')
     date=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    cursor.execute(f"select exists(select * from `bookings` where `SNU_ID`='{snu_id}' and `Date`='{det['Date']}' and `Cancelled`='0') as duplicate")
+    cursor.execute(f"select exists(select * from `bookings` where `SNU_ID`='{snu_id}' and `Date`='{det['Date']}' and `Cancelled`='0' and `Booking_ID`!='{booking_id}') as duplicate")
     duplicate=bool(cursor.fetchone()['duplicate'])
     cursor.execute(f"select exists(select * from `blacklist` where `SNU_ID`='{snu_id}') as blacklist")
     blacklist=bool(cursor.fetchone()['blacklist'])
