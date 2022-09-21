@@ -4,3 +4,4 @@ server/cred_singhania.json
 *.iml
 *.iml
 .idea/ISC.iml
+*.json
