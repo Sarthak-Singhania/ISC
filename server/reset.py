@@ -1,5 +1,5 @@
 import mysql.connector as sql
-db=sql.connect(host='localhost',user='u724843278_ISC',password='ISCdatabase@1234',database='u724843278_ISC')
+db=sql.connect(host='185.210.145.1',user='u724843278_ISC',password='ISCdatabase@1234',database='u724843278_ISC')
 cur=db.cursor(dictionary=True)
 cur.execute('select `Sports_Name`,`Capacity` from `games`')
 games={i['Sports_Name'].title().replace(' ','_'):i['Capacity'] for i in cur.fetchall()}

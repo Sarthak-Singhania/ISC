@@ -25,7 +25,7 @@ limiter = Limiter(
 )
 
 app.config['CORS_HEADERS'] = 'Content-Type'
-app.config['MYSQL_HOST'] = 'localhost'
+app.config['MYSQL_HOST'] = '185.210.145.1'
 app.config['MYSQL_USER'] = 'u724843278_ISC'
 app.config['MYSQL_PASSWORD'] = 'ISCdatabase@1234'
 app.config['MYSQL_DB'] = 'u724843278_ISC'
