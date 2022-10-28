@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:ui';
-
+import 'package:intl/intl.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -73,14 +73,6 @@ void showInfo(BuildContext context) {
 }
 
 class _UserTimeSlotState extends State<UserTimeSlot> {
-  final timeSlots = [
-    '1:00-3:00',
-    '2:00-3:00',
-    '2:00-3:00',
-    '2:00-3:00',
-    '2:00-3:00',
-    '2:00-3:00'
-  ];
   var daysAvailable = {}; //API
   late int weekdayToday;
   var isDaySelected = {
@@ -117,8 +109,6 @@ class _UserTimeSlotState extends State<UserTimeSlot> {
 
   Future<void> getData() async {
     DateTime timeNow = DateTime.now();
-    print(
-        " hour is ${timeNow.hour} and minute is ${timeNow.minute} and weekday is ${timeNow.weekday}");
 
     try {
       final response = await http.get(
@@ -131,22 +121,22 @@ class _UserTimeSlotState extends State<UserTimeSlot> {
             "admin-header": "no"
           });
       final jsonData = await jsonDecode(response.body);
-      print(jsonData);
       daysAvailable = jsonData["isEnabled"];
       maxDaysAllowed = jsonData["max_days"];
       for (var i = 0; i < daysAvailable.length; i++) {
         if (daysAvailable.values.elementAt(i)) {
           String day = daysAvailable.keys.elementAt(i);
           if (weekdayToday == StudentInfo.resetWeekday &&
-              (timeNow.hour == StudentInfo.resetHour &&
-              timeNow.minute >= StudentInfo.resetMinute)||(timeNow.hour > StudentInfo.resetHour )) {
+                  (timeNow.hour == StudentInfo.resetHour &&
+                      timeNow.minute >= StudentInfo.resetMinute) ||
+              (timeNow.hour > StudentInfo.resetHour)) {
             daysAvailable[day] = true;
           } else if (weekdays.indexOf(day) < weekdayToday - 1) {
             daysAvailable[day] = false;
           }
         }
       }
-            circP = false;
+      circP = false;
       tapToRefresh = false;
       setState(() {});
     } catch (e) {
@@ -159,6 +149,7 @@ class _UserTimeSlotState extends State<UserTimeSlot> {
   }
 
   Future<void> getSlot() async {
+    DateTime timeNow = DateTime.now();
     slotAvailable.clear();
     StudentInfo.dayChoosen = daySelected;
     try {
@@ -174,7 +165,23 @@ class _UserTimeSlotState extends State<UserTimeSlot> {
           });
       final jsonData = await jsonDecode(response.body);
       sport = jsonData[StudentInfo.gameChoosen][daySelected[0]];
+      print("sport");
+      print(sport);
       StudentInfo.gameData = jsonData[StudentInfo.gameChoosen];
+
+      String currentAmPm = DateFormat('hh:mm a').format(DateTime.now());
+      print(currentAmPm + "Current meridina");
+      // sport[slotAvailable[index]] > 0
+      sport.forEach((k, v) {
+        if (int.parse(k[0]) < timeNow.hour && currentAmPm.contains('pm')) {
+          sport[k] = 0;
+        } else if (int.parse(k[0]) < timeNow.hour &&
+            currentAmPm.contains('AM') &&
+            k.contains('am')) {
+          sport[k] = 0;
+        }
+      });
+
       sport.forEach((k, v) {
         slotAvailable.add(k);
       });
@@ -265,12 +272,12 @@ class _UserTimeSlotState extends State<UserTimeSlot> {
                                                   .elementAt(index),
                                               isEnabled: daysAvailable.values
                                                   .elementAt(index),
-                                              func: ()async {
-                                               if (daySelected.length > 0) {
-                                        secondCircp = true;
-                                        setState(() {});
-                                        await getSlot();
-                                      } 
+                                              func: () async {
+                                                if (daySelected.length > 0) {
+                                                  secondCircp = true;
+                                                  setState(() {});
+                                                  await getSlot();
+                                                }
                                               },
                                               isDaySelected: isDaySelected,
                                               maxDaysAllowed: maxDaysAllowed,
@@ -282,7 +289,7 @@ class _UserTimeSlotState extends State<UserTimeSlot> {
                                   Spacer(),
                                   // GestureDetector(
                                   //   onTap: () async {
-                                      
+
                                   //   },
                                   //   child: Container(
                                   //     width: size.width * 0.5,
@@ -315,8 +322,11 @@ class _UserTimeSlotState extends State<UserTimeSlot> {
                                   return SlotCard(
                                     slotTime: slotAvailable[index],
                                     color: sport[slotAvailable[index]] > 0
-                                        ? MediaQuery.of(context).platformBrightness == Brightness.light?Colors.green
-                                           : Colors.green.shade600
+                                        ? MediaQuery.of(context)
+                                                    .platformBrightness ==
+                                                Brightness.light
+                                            ? Colors.green
+                                            : Colors.green.shade600
                                         : Colors.grey,
                                     isDisabled: true,
                                   );

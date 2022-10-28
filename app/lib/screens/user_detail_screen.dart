@@ -9,7 +9,6 @@ import 'package:isc/constants.dart';
 import 'package:isc/status_enum.dart';
 import 'package:isc/user-info.dart';
 import 'package:http/http.dart' as http;
-
 import '../routes.dart';
 
 class DetailScreen extends StatefulWidget {
@@ -60,7 +59,7 @@ class _DetailScreenState extends State<DetailScreen> {
     myFuture1 = getData();
   }
 
-  Future<void> postData() async {
+  Future postData() async {
     bookingStatus = List.generate(StudentInfo.dayChoosen.length,
         (i) => List.generate(8, (j) => BookingStatus.None),
         growable: false);
@@ -393,7 +392,7 @@ class _DetailScreenState extends State<DetailScreen> {
                             onTap: () async {
                               FocusManager.instance.primaryFocus?.unfocus();
                               if (_formKey.currentState!.validate()) {
-                                myFuture2 = postData();
+                                myFuture2 = await postData();
                                 setState(() {});
                               }
                             },

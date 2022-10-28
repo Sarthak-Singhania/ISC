@@ -77,7 +77,6 @@ class _EventScreenState extends State<EventScreen> {
     } else {
       adminheader = 'no';
     }
-    print(adminheader);
     try {
       var response = await http.get(Uri.parse(kIpAddress + '/games'), headers: {
         "x-access-token": StudentInfo.jwtToken,

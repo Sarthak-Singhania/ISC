@@ -22,7 +22,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   final nameController = new TextEditingController();
   final passwordController = new TextEditingController();
   final confirmPasswordController = new TextEditingController();
- Future? myFuture;
+  Future? myFuture;
 
   Future<void> signUp(String email, String password, String name) async {
     if (_formKey.currentState!.validate()) {
@@ -258,10 +258,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           onPressed: () async {
                             if (await InternetConnectionChecker()
                                 .hasConnection) {
-                              myFuture= signUp(emailController.text,
+                              myFuture = signUp(emailController.text,
                                   passwordController.text, nameController.text);
-                                  setState(() {
-                                  });
+                              setState(() {});
                             } else {
                               Fluttertoast.showToast(
                                   msg: "Please check your internet connection");

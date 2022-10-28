@@ -2,7 +2,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:isc/routes.dart';
-import 'package:isc/screens/admin_detail_screen.dart';
+//import 'package:isc/screens/admin_detail_screen.dart';
 import 'package:isc/screens/user_detail_screen.dart';
 import 'package:isc/user-info.dart';
 
