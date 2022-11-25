@@ -503,7 +503,7 @@ def present():
 
 @app.post('/present-qr')
 # @token_required
-def present():
+def present_qr():
     cursor = mysql.connection.cursor(cur.DictCursor)
     x = request.get_json()
     cursor.execute(
