@@ -1,7 +1,5 @@
 import 'dart:convert';
-
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -9,10 +7,7 @@ import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:isc/routes.dart';
 import 'package:http/http.dart' as http;
 import 'package:isc/user-info.dart';
-import 'package:provider/provider.dart';
-
 import 'package:transparent_image/transparent_image.dart';
-
 import '../constants.dart';
 
 class AdminEventCard extends StatefulWidget {

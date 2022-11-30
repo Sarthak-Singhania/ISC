@@ -1,12 +1,11 @@
 import 'dart:convert';
-
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
+import 'package:isc/screens/admin_qr_scanner.dart';
 import 'package:isc/user-info.dart';
 import 'package:http/http.dart' as http;
-import 'package:provider/provider.dart';
 import '../constants.dart';
 
 class AdminSlotCard extends StatelessWidget {
@@ -23,11 +22,19 @@ class AdminSlotCard extends StatelessWidget {
   final snuId;
   final bookingId;
 
-  Future<void> attendance(String attendance) async {
+  Future<void> attendance(String attendance, BuildContext context) async {
+    var bookingId;
+    if (attendance == 'present') {
+      bookingId = await Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const AdminQRScanner()),
+      );
+      Fluttertoast.showToast(msg: "Booking id :$bookingId");
+    }
     var body = jsonEncode({
       "name": studentName,
       "snu_id": snuId,
-      "booking_id": bookingId,
+      "booking_id": attendance == 'present' ? bookingId : this.bookingId,
     });
 
     try {
@@ -77,7 +84,7 @@ class AdminSlotCard extends StatelessWidget {
                   bool hasInternet =
                       await InternetConnectionChecker().hasConnection;
                   if (hasInternet) {
-                    attendance("present");
+                    await attendance("present", context);
                     Fluttertoast.showToast(
                         msg: "Student has been marked present ");
                   } else {
@@ -104,7 +111,7 @@ class AdminSlotCard extends StatelessWidget {
                   bool hasInternet =
                       await InternetConnectionChecker().hasConnection;
                   if (hasInternet) {
-                    attendance("absent");
+                    attendance("absent", context);
                     Fluttertoast.showToast(
                         msg: "Student has been marked absent");
                   } else {
@@ -122,8 +129,9 @@ class AdminSlotCard extends StatelessWidget {
         ],
       ),
       decoration: BoxDecoration(
-        color: MediaQuery.of(context).platformBrightness == Brightness.light?
-            kPrimaryLightColor: Colors.purple.shade600,
+        color: MediaQuery.of(context).platformBrightness == Brightness.light
+            ? kPrimaryLightColor
+            : Colors.purple.shade600,
         borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(

@@ -1,9 +1,9 @@
 from datetime import datetime, timedelta
-import mysql.connector as sql
-db=sql.connect(host='localhost',user='u724843278_ISC',password='ISCdatabase@1234',database='u724843278_ISC')
-cur=db.cursor(dictionary=True)
+# import mysql.connector as sql
+# db=sql.connect(host='185.210.145.1',user='u724843278_ISC',password='ISCdatabase@1234',database='u724843278_ISC')
+# cur=db.cursor(dictionary=True)
 
-def checking(check,sports_name,slot,x):
+def checking(check,sports_name,slot,x,cur):
     if datetime.now().strftime('%A')=='Sunday' and datetime.strptime(datetime.now().strftime('%I:%M%p'),'%I:%M%p')>datetime.strptime('09:30pm','%I:%M%p'):
         start=(datetime.now()).strftime('%Y-%m-%d')
         end=(datetime.now()+timedelta(days=7)).strftime('%Y-%m-%d')
@@ -56,5 +56,4 @@ def checking(check,sports_name,slot,x):
             # print(flag)
         else:
             pass
-    cur.close()
     return errors

@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -9,9 +8,9 @@ import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:isc/constants.dart';
 import 'package:isc/provider/notification_provider.dart';
 import 'package:isc/routes.dart';
+import 'package:isc/screens/qr_code_screen.dart';
 import 'package:isc/user-info.dart';
 import 'package:provider/provider.dart';
-
 
 class TicketScreen extends StatefulWidget {
   TicketScreen({this.bookingId});
@@ -125,7 +124,7 @@ class _TicketScreenState extends State<TicketScreen> {
       Fluttertoast.showToast(
           msg: cancelJsonData['message'], toastLength: Toast.LENGTH_LONG);
 
- Navigator.pushReplacementNamed(context, AppRoutes.bookingsScreen);
+      Navigator.pushReplacementNamed(context, AppRoutes.bookingsScreen);
       await context.read<NotificationProvider>().getNotification();
     } catch (e) {
       secondCircP = false;
@@ -160,7 +159,7 @@ class _TicketScreenState extends State<TicketScreen> {
       secondCircP = false;
       Fluttertoast.showToast(
           msg: rejectJsonData['message'], toastLength: Toast.LENGTH_LONG);
-     Navigator.pushReplacementNamed(context, AppRoutes.bookingsScreen);
+      Navigator.pushReplacementNamed(context, AppRoutes.bookingsScreen);
       await context.read<NotificationProvider>().getNotification();
     } catch (e) {
       secondCircP = false;
@@ -169,10 +168,11 @@ class _TicketScreenState extends State<TicketScreen> {
       if (!hasInternet) {
         Fluttertoast.showToast(msg: "Please check your internet connection");
       } else {
-      Fluttertoast.showToast(
-          msg: 'Invitation has been rejected', toastLength: Toast.LENGTH_LONG);
-      Navigator.pushReplacementNamed(context, AppRoutes.bookingsScreen);
-      await context.read<NotificationProvider>().getNotification();
+        Fluttertoast.showToast(
+            msg: 'Invitation has been rejected',
+            toastLength: Toast.LENGTH_LONG);
+        Navigator.pushReplacementNamed(context, AppRoutes.bookingsScreen);
+        await context.read<NotificationProvider>().getNotification();
         //Fluttertoast.showToast(msg: "Something went wrong.Please retry.");
       }
       print(e);
@@ -432,8 +432,10 @@ class _TicketScreenState extends State<TicketScreen> {
                           style:
                               TextStyle(color: Color(0xffFF6109), fontSize: 25),
                         ),
-                  backgroundColor:
-                      MediaQuery.of(context).platformBrightness == Brightness.light?Colors.white: Colors.black,
+                  backgroundColor: MediaQuery.of(context).platformBrightness ==
+                          Brightness.light
+                      ? Colors.white
+                      : Colors.black,
                 ),
                 body: Stack(
                   children: [
@@ -446,10 +448,19 @@ class _TicketScreenState extends State<TicketScreen> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.start,
                               children: [
-                                AutoSizeText(
-                                  "Booking Id: ${widget.bookingId}",
-                                  style: TextStyle(
-                                      color: Colors.grey, fontSize: 18),
+                                GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => QRcode(
+                                                data: widget.bookingId)));
+                                  },
+                                  child: AutoSizeText(
+                                    "Booking Id: ${widget.bookingId}",
+                                    style: TextStyle(
+                                        color: Colors.grey, fontSize: 18),
+                                  ),
                                 ),
                                 Spacer(),
                                 AutoSizeText(
@@ -493,10 +504,11 @@ class _TicketScreenState extends State<TicketScreen> {
                                     )),
                                     decoration: BoxDecoration(
                                         border: Border.all(
-                                            color: MediaQuery.of(context).platformBrightness == Brightness.light?
-                                                Colors.black:
-                                                Colors.white,
-                                                
+                                            color: MediaQuery.of(context)
+                                                        .platformBrightness ==
+                                                    Brightness.light
+                                                ? Colors.black
+                                                : Colors.white,
                                             width: 1),
                                         borderRadius: BorderRadius.only(
                                             topLeft: Radius.circular(15))),
@@ -511,9 +523,11 @@ class _TicketScreenState extends State<TicketScreen> {
                                     width: size.width * 0.7,
                                     decoration: BoxDecoration(
                                         border: Border.all(
-                                            color: MediaQuery.of(context).platformBrightness == Brightness.light?
-                                                Colors.black:
-                                                Colors.white,
+                                            color: MediaQuery.of(context)
+                                                        .platformBrightness ==
+                                                    Brightness.light
+                                                ? Colors.black
+                                                : Colors.white,
                                             width: 1),
                                         borderRadius: BorderRadius.only(
                                             topRight: Radius.circular(15))),
@@ -542,9 +556,11 @@ class _TicketScreenState extends State<TicketScreen> {
                                     width: size.width * 0.2,
                                     decoration: BoxDecoration(
                                         border: Border.all(
-                                            color: MediaQuery.of(context).platformBrightness == Brightness.light?
-                                                Colors.black:
-                                                Colors.white,
+                                            color: MediaQuery.of(context)
+                                                        .platformBrightness ==
+                                                    Brightness.light
+                                                ? Colors.black
+                                                : Colors.white,
                                             width: 1),
                                         borderRadius: BorderRadius.only(
                                             bottomLeft: Radius.circular(15))),
@@ -568,9 +584,11 @@ class _TicketScreenState extends State<TicketScreen> {
                                     width: size.width * 0.7,
                                     decoration: BoxDecoration(
                                         border: Border.all(
-                                            color:MediaQuery.of(context).platformBrightness == Brightness.light?
-                                                Colors.black:
-                                                Colors.white,
+                                            color: MediaQuery.of(context)
+                                                        .platformBrightness ==
+                                                    Brightness.light
+                                                ? Colors.black
+                                                : Colors.white,
                                             width: 1),
                                         borderRadius: BorderRadius.only(
                                             bottomRight: Radius.circular(15))),
